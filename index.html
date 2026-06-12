@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tom Pearl: Poop Clicker</title>
+<style>
+  * { box-sizing: border-box; font-family: 'Comic Sans MS', 'Trebuchet MS', sans-serif; }
+  body {
+    margin: 0;
+    background: linear-gradient(135deg, #5a3825, #8a5a3c);
+    color: #fff;
+    display: flex;
+    min-height: 100vh;
+  }
+  #left {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+  }
+  #right {
+    flex: 1;
+    background: rgba(0,0,0,0.3);
+    padding: 15px;
+    overflow-y: auto;
+    max-height: 100vh;
+  }
+  h1 { margin: 5px 0; text-shadow: 2px 2px #000; }
+  #count {
+    font-size: 2.5em;
+    font-weight: bold;
+    text-shadow: 2px 2px #000;
+  }
+  #perSec { font-size: 1.1em; opacity: 0.85; margin-bottom: 10px; }
+  #tomImg {
+    width: 220px;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 8px solid #6b4423;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(0,0,0,0.6);
+    transition: transform 0.05s;
+    background: #4a2e1a center/cover no-repeat;
+    image-rendering: auto;
+  }
+  #tomImg:active { transform: scale(0.92); }
+  .floatup {
+    position: absolute;
+    font-weight: bold;
+    color: #ffec8b;
+    pointer-events: none;
+    animation: floatUp 1s forwards;
+    text-shadow: 1px 1px #000;
+    font-size: 1.3em;
+  }
+  @keyframes floatUp {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-60px); }
+  }
+  .section-title {
+    font-size: 1.3em;
+    margin: 10px 0 5px;
+    border-bottom: 2px solid #ffec8b;
+    padding-bottom: 4px;
+  }
+  .upgrade, .building {
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .upgrade:hover, .building:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: #ffec8b;
+  }
+  .disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .disabled:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.15);
+  }
+  .name { font-weight: bold; }
+  .desc { font-size: 0.8em; opacity: 0.8; }
+  .price { font-size: 0.9em; white-space: nowrap; margin-left: 10px; }
+  .owned {
+    background: #4a2e1a;
+    border-radius: 50%;
+    min-width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85em;
+    margin-left: 8px;
+  }
+  #saveBtns { margin-top: 15px; display: flex; gap: 8px; }
+  button.ctrl {
+    background: #8a5a3c;
+    border: 2px solid #ffec8b;
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  button.ctrl:hover { background: #a06e4d; }
+  #stats { font-size: 0.85em; opacity: 0.8; margin-top: 10px; }
+  #notice {
+    position: fixed;
+    top: 10px; right: 10px;
+    background: #2e7d32;
+    padding: 8px 16px;
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+  }
+  #notice.show { opacity: 1; }
+  #tabs { display: flex; margin-bottom: 8px; gap: 4px; }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .tab.active { background: #ffec8b; color: #5a3825; }
+  .tabContent { display: none; }
+  .tabContent.active { display: block; }
+</style>
+</head>
+<body>
+
+<div id="left">
+  <h1>💩 Tom Pearl: Poop Clicker 💩</h1>
+  <div id="count">0 Poops</div>
+  <div id="perSec">0 poops per second</div>
+  <img id="tomImg" src="tomp.jfif" alt="Tom Pearl" onerror="this.style.background='#4a2e1a'; this.alt='Tom Pearl (put image next to this file)';">
+  <div id="stats"></div>
+  <div id="saveBtns">
+    <button class="ctrl" onclick="saveGame()">💾 Save</button>
+    <button class="ctrl" onclick="exportSave()">📤 Export</button>
+    <button class="ctrl" onclick="importSave()">📥 Import</button>
+    <button class="ctrl" onclick="resetGame()">🔄 Reset</button>
+  </div>
+</div>
+
+<div id="right">
+  <div id="tabs">
+    <div class="tab active" data-tab="buildings" onclick="switchTab('buildings')">Producers</div>
+    <div class="tab" data-tab="upgrades" onclick="switchTab('upgrades')">Upgrades</div>
+  </div>
+
+  <div class="tabContent active" id="buildings"></div>
+  <div class="tabContent" id="upgrades"></div>
+</div>
+
+<div id="notice">Game Saved!</div>
+
+<script>
+/* ================= GAME DATA ================= */
+
+const buildingData = [
+  { id:'finger', name:'Pointer Finger', desc:'Tom uses his finger to scoop poop. +0.1/s', baseCost:15, baseCps:0.1, img:'👆' },
+  { id:'fly', name:'Trained Fly', desc:'A fly that finds fresh poop for Tom. +1/s', baseCost:100, baseCps:1, img:'🪰' },
+  { id:'dog', name:'Poop-Sniffing Dog', desc:'A loyal dog that digs up poop. +8/s', baseCost:1100, baseCps:8, img:'🐕' },
+  { id:'farm', name:'Poop Farm', desc:'A small farm dedicated to poop production. +47/s', baseCost:12000, baseCps:47, img:'🚜' },
+  { id:'factory', name:'Poop Factory', desc:'Mass-produces poop on assembly lines. +260/s', baseCost:130000, baseCps:260, img:'🏭' },
+  { id:'mine', name:'Poop Mine', desc:'Drills deep into the earth for ancient poop deposits. +1400/s', baseCost:1400000, baseCps:1400, img:'⛏️' },
+  { id:'lab', name:'Poop Laboratory', desc:'Scientists synthesize poop molecules. +7800/s', baseCost:20000000, baseCps:7800, img:'🧪' },
+  { id:'portal', name:'Poop Portal', desc:'A swirling rift that summons poop from another dimension. +44000/s', baseCost:330000000, baseCps:44000, img:'🌀' },
+  { id:'rocket', name:'Poop Rocket', desc:'Launches into orbit collecting space poop. +260000/s', baseCost:5100000000, baseCps:260000, img:'🚀' },
+  { id:'tomclone', name:'Tom Clone', desc:'A cloned Tom Pearl that eats and produces poop endlessly. +1600000/s', baseCost:75000000000, baseCps:1600000, img:'👥' },
+  { id:'blackhole', name:'Poop Black Hole', desc:'A black hole made entirely of compressed poop. +10000000/s', baseCost:1000000000000, baseCps:10000000, img:'🕳️' },
+  { id:'universe', name:'Pocket Universe', desc:'An entire universe where the laws of physics produce only poop. +65000000/s', baseCost:14000000000000, baseCps:65000000, img:'🌌' },
+];
+
+const upgradeData = [
+  // Click upgrades
+  { id:'click1', name:'Bigger Hands', desc:'Toms clicks are worth +1 poop.', cost:100, type:'click', value:1, req:null },
+  { id:'click2', name:'Reinforced Gloves', desc:'Toms clicks are worth +5 more poop.', cost:1000, type:'click', value:5, req:null },
+  { id:'click3', name:'Mechanical Fingers', desc:'Doubles click power.', cost:10000, type:'clickMult', value:2, req:null },
+  { id:'click4', name:'Golden Scoop', desc:'Toms clicks are worth +50 more poop.', cost:100000, type:'click', value:50, req:null },
+  { id:'click5', name:'Diamond-Tipped Fingers', desc:'Doubles click power again.', cost:5000000, type:'clickMult', value:2, req:null },
+  { id:'click6', name:'Quantum Fingers', desc:'Click power equals 5% of your CPS, added to clicks.', cost:500000000, type:'clickFromCps', value:0.05, req:null },
+
+  // Finger upgrades
+  { id:'finger1', name:'Stronger Fingers', desc:'Pointer Fingers are twice as efficient.', cost:100, type:'building', target:'finger', mult:2, req:{id:'finger', amt:1} },
+  { id:'finger2', name:'Carpal Tunnel Cream', desc:'Pointer Fingers are twice as efficient.', cost:500, type:'building', target:'finger', mult:2, req:{id:'finger', amt:5} },
+  { id:'finger3', name:'Ten Fingers', desc:'Pointer Fingers are twice as efficient.', cost:10000, type:'building', target:'finger', mult:2, req:{id:'finger', amt:25} },
+
+  // Fly upgrades
+  { id:'fly1', name:'Bigger Flies', desc:'Trained Flies are twice as efficient.', cost:600, type:'building', target:'fly', mult:2, req:{id:'fly', amt:1} },
+  { id:'fly2', name:'Fly Swarm Training', desc:'Trained Flies are twice as efficient.', cost:3000, type:'building', target:'fly', mult:2, req:{id:'fly', amt:5} },
+  { id:'fly3', name:'Fly GPS Collars', desc:'Trained Flies are twice as efficient.', cost:60000, type:'building', target:'fly', mult:2, req:{id:'fly', amt:25} },
+
+  // Dog upgrades
+  { id:'dog1', name:'Bigger Noses', desc:'Poop-Sniffing Dogs are twice as efficient.', cost:6000, type:'building', target:'dog', mult:2, req:{id:'dog', amt:1} },
+  { id:'dog2', name:'Doggy Treats', desc:'Poop-Sniffing Dogs are twice as efficient.', cost:30000, type:'building', target:'dog', mult:2, req:{id:'dog', amt:5} },
+  { id:'dog3', name:'Pack Leader Training', desc:'Poop-Sniffing Dogs are twice as efficient.', cost:600000, type:'building', target:'dog', mult:2, req:{id:'dog', amt:25} },
+
+  // Farm upgrades
+  { id:'farm1', name:'Fertilizer', desc:'Poop Farms are twice as efficient.', cost:65000, type:'building', target:'farm', mult:2, req:{id:'farm', amt:1} },
+  { id:'farm2', name:'Crop Rotation', desc:'Poop Farms are twice as efficient.', cost:320000, type:'building', target:'farm', mult:2, req:{id:'farm', amt:5} },
+  { id:'farm3', name:'Mega Silos', desc:'Poop Farms are twice as efficient.', cost:6500000, type:'building', target:'farm', mult:2, req:{id:'farm', amt:25} },
+
+  // Factory upgrades
+  { id:'factory1', name:'Assembly Optimization', desc:'Poop Factories are twice as efficient.', cost:700000, type:'building', target:'factory', mult:2, req:{id:'factory', amt:1} },
+  { id:'factory2', name:'Night Shifts', desc:'Poop Factories are twice as efficient.', cost:3500000, type:'building', target:'factory', mult:2, req:{id:'factory', amt:5} },
+  { id:'factory3', name:'Robotic Arms', desc:'Poop Factories are twice as efficient.', cost:70000000, type:'building', target:'factory', mult:2, req:{id:'factory', amt:25} },
+
+  // Mine upgrades
+  { id:'mine1', name:'Diamond Drills', desc:'Poop Mines are twice as efficient.', cost:8000000, type:'building', target:'mine', mult:2, req:{id:'mine', amt:1} },
+  { id:'mine2', name:'Deeper Shafts', desc:'Poop Mines are twice as efficient.', cost:40000000, type:'building', target:'mine', mult:2, req:{id:'mine', amt:5} },
+  { id:'mine3', name:'Lava-Proof Suits', desc:'Poop Mines are twice as efficient.', cost:800000000, type:'building', target:'mine', mult:2, req:{id:'mine', amt:25} },
+
+  // Lab upgrades
+  { id:'lab1', name:'Bunsen Burners', desc:'Poop Laboratories are twice as efficient.', cost:120000000, type:'building', target:'lab', mult:2, req:{id:'lab', amt:1} },
+  { id:'lab2', name:'PhD Researchers', desc:'Poop Laboratories are twice as efficient.', cost:600000000, type:'building', target:'lab', mult:2, req:{id:'lab', amt:5} },
+  { id:'lab3', name:'Particle Accelerator', desc:'Poop Laboratories are twice as efficient.', cost:12000000000, type:'building', target:'lab', mult:2, req:{id:'lab', amt:25} },
+
+  // Portal upgrades
+  { id:'portal1', name:'Wider Rift', desc:'Poop Portals are twice as efficient.', cost:2000000000, type:'building', target:'portal', mult:2, req:{id:'portal', amt:1} },
+  { id:'portal2', name:'Dimensional Stabilizers', desc:'Poop Portals are twice as efficient.', cost:10000000000, type:'building', target:'portal', mult:2, req:{id:'portal', amt:5} },
+  { id:'portal3', name:'Interdimensional Treaty', desc:'Poop Portals are twice as efficient.', cost:200000000000, type:'building', target:'portal', mult:2, req:{id:'portal', amt:25} },
+
+  // Rocket upgrades
+  { id:'rocket1', name:'Bigger Boosters', desc:'Poop Rockets are twice as efficient.', cost:30000000000, type:'building', target:'rocket', mult:2, req:{id:'rocket', amt:1} },
+  { id:'rocket2', name:'Orbital Collection Nets', desc:'Poop Rockets are twice as efficient.', cost:150000000000, type:'building', target:'rocket', mult:2, req:{id:'rocket', amt:5} },
+  { id:'rocket3', name:'Space Station Hub', desc:'Poop Rockets are twice as efficient.', cost:3000000000000, type:'building', target:'rocket', mult:2, req:{id:'rocket', amt:25} },
+
+  // Clone upgrades
+  { id:'clone1', name:'Clone Stabilization', desc:'Tom Clones are twice as efficient.', cost:450000000000, type:'building', target:'tomclone', mult:2, req:{id:'tomclone', amt:1} },
+  { id:'clone2', name:'Clone Army', desc:'Tom Clones are twice as efficient.', cost:2250000000000, type:'building', target:'tomclone', mult:2, req:{id:'tomclone', amt:5} },
+  { id:'clone3', name:'Genetic Perfection', desc:'Tom Clones are twice as efficient.', cost:45000000000000, type:'building', target:'tomclone', mult:2, req:{id:'tomclone', amt:25} },
+
+  // Black hole upgrades
+  { id:'bh1', name:'Event Horizon Tuning', desc:'Poop Black Holes are twice as efficient.', cost:6000000000000, type:'building', target:'blackhole', mult:2, req:{id:'blackhole', amt:1} },
+  { id:'bh2', name:'Hawking Radiation Capture', desc:'Poop Black Holes are twice as efficient.', cost:30000000000000, type:'building', target:'blackhole', mult:2, req:{id:'blackhole', amt:5} },
+
+  // Universe upgrades
+  { id:'uni1', name:'New Physics', desc:'Pocket Universes are twice as efficient.', cost:84000000000000, type:'building', target:'universe', mult:2, req:{id:'universe', amt:1} },
+  { id:'uni2', name:'Cosmic Constants Tweaked', desc:'Pocket Universes are twice as efficient.', cost:420000000000000, type:'building', target:'universe', mult:2, req:{id:'universe', amt:5} },
+
+  // Global multipliers
+  { id:'global1', name:'Toms Iron Stomach', desc:'All poop production +10%.', cost:50000, type:'globalMult', mult:1.10, req:null },
+  { id:'global2', name:'Toms Refined Palate', desc:'All poop production +10%.', cost:1000000, type:'globalMult', mult:1.10, req:null },
+  { id:'global3', name:'Toms Legendary Diet', desc:'All poop production +25%.', cost:100000000, type:'globalMult', mult:1.25, req:null },
+  { id:'global4', name:'Tom Pearl Statue', desc:'All poop production +25%.', cost:10000000000, type:'globalMult', mult:1.25, req:null },
+  { id:'global5', name:'Tom Pearl Religion', desc:'All poop production doubles.', cost:1000000000000, type:'globalMult', mult:2, req:null },
+  { id:'global6', name:'Tom Pearl Ascension', desc:'All poop production doubles again.', cost:100000000000000, type:'globalMult', mult:2, req:null },
+];
+
+const tomMilestones = [
+  { threshold: 0, img: 'tomp.jfif' },
+  { threshold: 100, img: 'tomp2.png' },
+  { threshold: 1000, img: 'tomp3.png' },
+  { threshold: 10000, img: 'tomp4.png' },
+  { threshold: 100000, img: 'tomp5.png' },
+  { threshold: 1000000, img: 'tomp6.png' },
+  { threshold: 10000000, img: 'tomp7.jfif' },
+  { threshold: 100000000, img: 'tomp8.jfif' },
+  { threshold: 100000000000, img: 'tomp9.jfif' },
+];
+
+function updateTomImage() {
+  let current = tomMilestones[0];
+  for (const m of tomMilestones) {
+    if (state.totalPoopsEarned >= m.threshold) current = m;
+  }
+  const imgEl = document.getElementById('tomImg');
+  if (imgEl.dataset.currentImg !== current.img) {
+    imgEl.dataset.currentImg = current.img;
+    imgEl.src = current.img;
+    imgEl.alt = 'Tom Pearl';
+  }
+}
+
+/* ================= GAME STATE ================= */
+
+let state = {
+  poops: 0,
+  totalPoopsEarned: 0,
+  totalClicks: 0,
+  clickValue: 1,
+  clickMultiplier: 1,
+  clickFromCpsRate: 0,
+  globalMultiplier: 1,
+  buildings: {},
+  buildingMultipliers: {},
+  upgradesBought: {},
+  lastSave: Date.now()
+};
+
+buildingData.forEach(b => {
+  state.buildings[b.id] = 0;
+  state.buildingMultipliers[b.id] = 1;
+});
+
+/* ================= SAVE / LOAD ================= */
+
+const SAVE_KEY = 'tomPearlPoopClickerSave';
+
+function saveGame() {
+  state.lastSave = Date.now();
+  localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+  showNotice('Game Saved!');
+}
+
+function loadGame() {
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (!raw) return;
+  try {
+    const loaded = JSON.parse(raw);
+    // merge to keep new fields if game updated
+    state = Object.assign(state, loaded);
+    buildingData.forEach(b => {
+      if (!(b.id in state.buildings)) state.buildings[b.id] = 0;
+      if (!(b.id in state.buildingMultipliers)) state.buildingMultipliers[b.id] = 1;
+    });
+    // offline progress
+    const now = Date.now();
+    const offlineSeconds = Math.max(0, (now - (state.lastSave || now)) / 1000);
+    if (offlineSeconds > 1) {
+      const cps = calcCps();
+      const earned = cps * Math.min(offlineSeconds, 60*60*24*3); // cap 3 days
+      if (earned > 0) {
+        state.poops += earned;
+        state.totalPoopsEarned += earned;
+        showNotice('Welcome back! Tom made ' + formatNumber(earned) + ' poops while you were away.', 4000);
+      }
+    }
+  } catch(e) {
+    console.error('Failed to load save', e);
+  }
+}
+
+function exportSave() {
+  state.lastSave = Date.now();
+  const data = btoa(JSON.stringify(state));
+  const ta = document.createElement('textarea');
+  ta.value = data;
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showNotice('Save copied to clipboard!');
+  } catch(e) {
+    prompt('Copy this save string:', data);
+  }
+  document.body.removeChild(ta);
+}
+
+function importSave() {
+  const data = prompt('Paste your save string:');
+  if (!data) return;
+  try {
+    const loaded = JSON.parse(atob(data));
+    state = Object.assign(state, loaded);
+    buildingData.forEach(b => {
+      if (!(b.id in state.buildings)) state.buildings[b.id] = 0;
+      if (!(b.id in state.buildingMultipliers)) state.buildingMultipliers[b.id] = 1;
+    });
+    saveGame();
+    renderAll();
+    showNotice('Save imported!');
+  } catch(e) {
+    alert('Invalid save string.');
+  }
+}
+
+function resetGame() {
+  if (!confirm('Are you sure you want to reset ALL progress? This cannot be undone.')) return;
+  localStorage.removeItem(SAVE_KEY);
+  location.reload();
+}
+
+function showNotice(text, duration=2000) {
+  const el = document.getElementById('notice');
+  el.textContent = text;
+  el.classList.add('show');
+  clearTimeout(el._timeout);
+  el._timeout = setTimeout(() => el.classList.remove('show'), duration);
+}
+
+/* ================= CALCULATIONS ================= */
+
+function formatNumber(num) {
+  if (num < 1000) return Math.floor(num).toString();
+  const units = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
+  let unitIndex = 0;
+  while (num >= 1000 && unitIndex < units.length - 1) {
+    num /= 1000;
+    unitIndex++;
+  }
+  return num.toFixed(2) + units[unitIndex];
+}
+
+function buildingCost(b) {
+  const owned = state.buildings[b.id];
+  return Math.ceil(b.baseCost * Math.pow(1.15, owned));
+}
+
+function buildingCps(b) {
+  return b.baseCps * state.buildings[b.id] * (state.buildingMultipliers[b.id] || 1);
+}
+
+function calcCps() {
+  let total = 0;
+  buildingData.forEach(b => {
+    total += buildingCps(b);
+  });
+  return total * state.globalMultiplier;
+}
+
+function calcClickValue() {
+  const cps = calcCps();
+  let val = (state.clickValue + cps * state.clickFromCpsRate) * state.clickMultiplier;
+  return val * state.globalMultiplier;
+}
+
+/* ================= ACTIONS ================= */
+
+function clickTom(e) {
+  const amount = calcClickValue();
+  state.poops += amount;
+  state.totalPoopsEarned += amount;
+  state.totalClicks++;
+
+  // floating number
+  const float = document.createElement('div');
+  float.className = 'floatup';
+  float.textContent = '+' + formatNumber(amount);
+  const rect = e.target.getBoundingClientRect();
+  float.style.left = (e.clientX - rect.left - 10) + 'px';
+  float.style.top = (e.clientY - rect.top - 10) + 'px';
+  e.target.parentElement.style.position = 'relative';
+  e.target.parentElement.appendChild(float);
+  setTimeout(() => float.remove(), 1000);
+
+  updateDisplay();
+}
+
+function buyBuilding(b) {
+  const cost = buildingCost(b);
+  if (state.poops >= cost) {
+    state.poops -= cost;
+    state.buildings[b.id]++;
+    renderBuildings();
+    renderUpgrades();
+    updateDisplay();
+  }
+}
+
+function buyUpgrade(u) {
+  if (state.upgradesBought[u.id]) return;
+  if (state.poops < u.cost) return;
+  if (u.req && state.buildings[u.req.id] < u.req.amt) return;
+
+  state.poops -= u.cost;
+  state.upgradesBought[u.id] = true;
+
+  switch(u.type) {
+    case 'click':
+      state.clickValue += u.value;
+      break;
+    case 'clickMult':
+      state.clickMultiplier *= u.value;
+      break;
+    case 'clickFromCps':
+      state.clickFromCpsRate += u.value;
+      break;
+    case 'building':
+      state.buildingMultipliers[u.target] = (state.buildingMultipliers[u.target] || 1) * u.mult;
+      break;
+    case 'globalMult':
+      state.globalMultiplier *= u.mult;
+      break;
+  }
+
+  renderBuildings();
+  renderUpgrades();
+  updateDisplay();
+}
+
+/* ================= RENDERING ================= */
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.tabContent').forEach(c => c.classList.toggle('active', c.id === tab));
+}
+
+function renderBuildings() {
+  const container = document.getElementById('buildings');
+  container.innerHTML = '';
+  buildingData.forEach(b => {
+    const cost = buildingCost(b);
+    const owned = state.buildings[b.id];
+    const cps = buildingCps(b);
+    const div = document.createElement('div');
+    div.className = 'building' + (state.poops < cost ? ' disabled' : '');
+    div.onclick = () => buyBuilding(b);
+    div.innerHTML = `
+      <div>
+        <div class="name">${b.img} ${b.name}</div>
+        <div class="desc">${b.desc}</div>
+        <div class="desc">Producing: ${formatNumber(cps * state.globalMultiplier)} /s total</div>
+      </div>
+      <div style="display:flex;align-items:center;">
+        <div class="price">${formatNumber(cost)}<br>poops</div>
+        <div class="owned">${owned}</div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function renderUpgrades() {
+  const container = document.getElementById('upgrades');
+  container.innerHTML = '';
+  let anyAvailable = false;
+  upgradeData.forEach(u => {
+    if (state.upgradesBought[u.id]) return;
+    if (u.req && state.buildings[u.req.id] < u.req.amt) return;
+    anyAvailable = true;
+    const div = document.createElement('div');
+    div.className = 'upgrade' + (state.poops < u.cost ? ' disabled' : '');
+    div.onclick = () => buyUpgrade(u);
+    div.innerHTML = `
+      <div>
+        <div class="name">${u.name}</div>
+        <div class="desc">${u.desc}</div>
+      </div>
+      <div class="price">${formatNumber(u.cost)}<br>poops</div>
+    `;
+    container.appendChild(div);
+  });
+  if (!anyAvailable) {
+    container.innerHTML = '<div class="desc" style="padding:10px;">No upgrades available yet. Keep collecting poop!</div>';
+  }
+}
+
+function updateDisplay() {
+  updateTomImage();
+  document.getElementById('count').textContent = formatNumber(state.poops) + ' Poops';
+  document.getElementById('perSec').textContent = formatNumber(calcCps()) + ' poops per second (click: +' + formatNumber(calcClickValue()) + ')';
+  document.getElementById('stats').textContent =
+    'Total poops collected: ' + formatNumber(state.totalPoopsEarned) +
+    ' | Total clicks: ' + formatNumber(state.totalClicks);
+
+  // refresh affordability classes without full re-render (cheap check)
+  document.querySelectorAll('.building').forEach((el, i) => {
+    const b = buildingData[i];
+    el.classList.toggle('disabled', state.poops < buildingCost(b));
+  });
+}
+
+function renderAll() {
+  renderBuildings();
+  renderUpgrades();
+  updateDisplay();
+}
+
+/* ================= GAME LOOP ================= */
+
+document.getElementById('tomImg').addEventListener('click', clickTom);
+
+loadGame();
+renderAll();
+
+setInterval(() => {
+  const cps = calcCps();
+  state.poops += cps / 10;
+  state.totalPoopsEarned += cps / 10;
+  updateDisplay();
+}, 100);
+
+// re-render upgrades/buildings periodically to refresh enabled/disabled & new unlocks
+setInterval(() => {
+  renderBuildings();
+  renderUpgrades();
+}, 1000);
+
+// autosave every 30 seconds
+setInterval(saveGame, 30000);
+
+// save on close
+window.addEventListener('beforeunload', saveGame);
+</script>
+
+</body>
+</html>
