@@ -12,6 +12,25 @@ body {
   flex-direction: column;
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background 2.5s ease-in-out;
+}
+body.area-backyard {
+  background: linear-gradient(135deg, #3a2010, #6a3a1c, #3a2010);
+}
+body.area-town {
+  background: linear-gradient(135deg, #2b1f3a, #5a3d6a, #7a4a3a);
+}
+body.area-industry {
+  background: linear-gradient(135deg, #1c1c1f, #3a3a40, #5a4a2a);
+}
+body.area-under {
+  background: linear-gradient(135deg, #1a0505, #4a0f0f, #6a1a0a);
+}
+body.area-space {
+  background: linear-gradient(135deg, #02040f, #0a1530, #160a35);
+}
+body.area-cosmic {
+  background: linear-gradient(135deg, #1a0030, #4a0a6a, #7a1a8a, #2a0a4a);
 }
 #ticker {
   background: rgba(0,0,0,0.5);
@@ -1022,6 +1041,19 @@ function currentArea() {
   return current;
 }
 
+let lastAppliedAreaId = null;
+function updateAreaBackground() {
+  const area = currentArea();
+  if (area.id === lastAppliedAreaId) return;
+  const isFirstApply = lastAppliedAreaId === null;
+  lastAppliedAreaId = area.id;
+  areaData.forEach(a => document.body.classList.remove('area-' + a.id));
+  document.body.classList.add('area-' + area.id);
+  if (!isFirstApply) {
+    showNotice('\ud83d\udeaa Entering ' + area.name + '!', 3500);
+  }
+}
+
 /* ============================================================
    SAVE / LOAD
 ============================================================ */
@@ -1752,6 +1784,7 @@ function showNotice(text, duration) {
 
 function updateDisplay() {
   updateTomImage();
+  updateAreaBackground();
   document.getElementById('areaLabel').textContent = currentArea().name;
   document.getElementById('count').textContent=formatNumber(state.poops)+' \ud83d\udca9';
   document.getElementById('perSec').textContent=formatNumber(calcCps())+' poops/sec';
