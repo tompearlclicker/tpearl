@@ -542,19 +542,19 @@ const buildingData = [
 const upgradeData = [
   // --- CLICK ---
   { id:'c1',  name:'Bigger Hands',           desc:'Click +1.',                          cost:75,           type:'click',       value:1    },
-  { id:'c2',  name:'Longer Nails',           desc:'Click +5.',                          cost:500,          type:'click',       value:5    },
-  { id:'c3',  name:'Reinforced Gloves',      desc:'Click +10.',                         cost:3000,         type:'click',       value:10   },
-  { id:'c4',  name:'Mechanical Fingers',     desc:'Click power x2.',                    cost:15000,        type:'clickMult',   value:2    },
-  { id:'c5',  name:'Golden Scoop',           desc:'Click +50.',                         cost:100000,       type:'click',       value:50   },
-  { id:'c6',  name:'Diamond Fingertips',     desc:'Click power x2.',                    cost:1500000,      type:'clickMult',   value:2    },
-  { id:'c7',  name:'Bionic Hand',            desc:'Click +500.',                        cost:20000000,     type:'click',       value:500  },
-  { id:'c8',  name:'Quantum Fingers',        desc:'+5% of CPS added to each click.',    cost:500000000,    type:'clickFromCps',value:0.05 },
-  { id:'c9',  name:'Poop Mittens',           desc:'Click power x3.',                    cost:8000000000,   type:'clickMult',   value:3    },
-  { id:'c10', name:'Godly Grip',             desc:'+10% of CPS added to each click.',   cost:150000000000, type:'clickFromCps',value:0.10 },
-  { id:'c11', name:'Infinite Arm',           desc:'Click power x5.',                    cost:5000000000000,type:'clickMult',   value:5    },
-  { id:'c12', name:'Tom\u2019s Sixth Finger',desc:'Click +5000.',                       cost:9e13,         type:'click',       value:5000 },
-  { id:'c13', name:'Cosmic Fingertip',       desc:'+15% of CPS added to each click.',   cost:6e15,         type:'clickFromCps',value:0.15 },
-  { id:'c14', name:'Hand of the Poop God',   desc:'Click power x10.',                   cost:4e17,         type:'clickMult',   value:10   },
+  { id:'c2',  name:'Longer Nails',           desc:'Click +5.',                          cost:600,          type:'click',       value:5    },
+  { id:'c3',  name:'Reinforced Gloves',      desc:'Click +10.',                         cost:4000,         type:'click',       value:10   },
+  { id:'c4',  name:'Mechanical Fingers',     desc:'Click power x1.5.',                  cost:25000,        type:'clickMult',   value:1.5  },
+  { id:'c5',  name:'Golden Scoop',           desc:'Click +50.',                         cost:150000,       type:'click',       value:50   },
+  { id:'c6',  name:'Diamond Fingertips',     desc:'Click power x1.5.',                  cost:3000000,      type:'clickMult',   value:1.5  },
+  { id:'c7',  name:'Bionic Hand',            desc:'Click +500.',                        cost:40000000,     type:'click',       value:500  },
+  { id:'c8',  name:'Quantum Fingers',        desc:'+2% of CPS added to each click.',    cost:1000000000,   type:'clickFromCps',value:0.02 },
+  { id:'c9',  name:'Poop Mittens',           desc:'Click power x1.5.',                  cost:20000000000,  type:'clickMult',   value:1.5  },
+  { id:'c10', name:'Godly Grip',             desc:'+3% of CPS added to each click.',    cost:400000000000, type:'clickFromCps',value:0.03 },
+  { id:'c11', name:'Infinite Arm',           desc:'Click power x2.',                    cost:1.2e13,       type:'clickMult',   value:2    },
+  { id:'c12', name:'Tom\u2019s Sixth Finger',desc:'Click +5000.',                       cost:2e14,         type:'click',       value:5000 },
+  { id:'c13', name:'Cosmic Fingertip',       desc:'+5% of CPS added to each click.',    cost:1.5e16,       type:'clickFromCps',value:0.05 },
+  { id:'c14', name:'Hand of the Poop God',   desc:'Click power x2.',                    cost:9e17,         type:'clickMult',   value:2    },
 
   // --- FINGER (5 buildings worth) ---
   { id:'f1', name:'Extra Finger',            desc:'Pointer Fingers x2.',  cost:200,    type:'building', target:'finger', mult:2, req:{id:'finger',amt:1}  },
@@ -832,6 +832,17 @@ const newsLines = [
 const changelogData = [
   {
     date: '2026-06-17',
+    title: 'Click Upgrade Nerf & Reset Button Fix',
+    changes: [
+      'Fixed a bug where clicking the Reset button would clear your save but instantly restore it, because the auto-save-on-close handler fired during the page reload and wrote your old progress right back',
+      'Nerfed click multiplier upgrades from x2/x2/x3/x5/x10 (x600 total) down to x1.5/x1.5/x1.5/x2/x2 (x13.5 total)',
+      'Nerfed "% of CPS added to click" upgrades from a combined 30% down to a combined 10%',
+      'Increased the cost of several click upgrades to match their reduced power',
+      'Clicking is now a useful supplement to your idle production instead of a way to trivialize it',
+    ]
+  },
+  {
+    date: '2026-06-17',
     title: 'Difficulty Overhaul, Golden Poop Minigame & The Infinity Event',
     changes: [
       'Increased producer cost scaling from x1.15 to x1.19 per purchase \u2014 the game now takes significantly longer',
@@ -841,6 +852,7 @@ const changelogData = [
       'Clicking a Golden Poop now opens a reflex minigame: catch 8 fleeting poops within 10 seconds',
       'Winning the minigame grants 2x production for a full 5 minutes (the buff timer is visible under your stats and survives a save/reload)',
       'Losing the minigame gives nothing \u2014 no more guaranteed free bonus just for clicking',
+      'Added the Infinity Overflow event: if your poop count ever overflows past safe limits, the screen erupts with "I HATE YOU" and "ALL HAIL JAN" messages, the screen shakes and flashes colors, and your current poops are reset to zero as punishment',
     ]
   },
   {
@@ -1108,9 +1120,13 @@ function importSave() {
   } catch(e){ alert('Invalid save string.'); }
 }
 
+let resetInProgress = false;
+
 function resetGame() {
   if (!confirm('Reset ALL progress? This cannot be undone.')) return;
-  localStorage.removeItem(SAVE_KEY); location.reload();
+  resetInProgress = true;
+  localStorage.removeItem(SAVE_KEY);
+  location.reload();
 }
 
 function doPrestige() {
@@ -1742,7 +1758,7 @@ setInterval(()=>{
 // autosave: every 30 sec
 setInterval(()=>saveGame(true), 30000);
 
-window.addEventListener('beforeunload', ()=>saveGame(true));
+window.addEventListener('beforeunload', ()=>{ if (!resetInProgress) saveGame(true); });
 
 </script>
 </body>
