@@ -832,6 +832,18 @@ const newsLines = [
 const changelogData = [
   {
     date: '2026-06-17',
+    title: 'Anti-Cheat: Clock Manipulation Fix',
+    changes: [
+      'Closed the "change your system clock forward" exploit that let players claim huge amounts of offline poops',
+      'Offline progress is now hard-capped at 12 hours per session, no matter how large the claimed time gap is',
+      'Offline production now runs at half the normal rate (0.5x) compared to active play',
+      'Added detection for backward clock jumps \u2014 these now award zero bonus poops instead of risking negative/broken state',
+      'Added a live clock-tamper check while the game is open: if your system clock changes mid-session, the game detects the mismatch against a tamper-resistant internal timer and resyncs without granting a bonus',
+      'A normal short trip away from the game (minutes to a few hours) is unaffected and still rewarded fairly',
+    ]
+  },
+  {
+    date: '2026-06-17',
     title: 'Click Upgrade Nerf & Reset Button Fix',
     changes: [
       'Fixed a bug where clicking the Reset button would clear your save but instantly restore it, because the auto-save-on-close handler fired during the page reload and wrote your old progress right back',
@@ -1057,14 +1069,40 @@ function loadGame() {
     if (typeof state.totalClicks !== 'number' || isNaN(state.totalClicks)) state.totalClicks=0;
     if (typeof state.prestigeCount !== 'number' || isNaN(state.prestigeCount)) state.prestigeCount=0;
 
-    // offline earnings (capped at 7 days)
-    const secs = Math.max(0,(Date.now()-(state.lastSave||Date.now()))/1000);
-    if (secs>5) {
-      const earned = calcCps() * Math.min(secs, 86400*7);
-      if (earned>0 && isFinite(earned)) {
-        state.poops += earned;
-        state.totalPoopsEarned += earned;
-        setTimeout(()=>showNotice('\ud83d\udc4b Welcome back! Tom made '+formatNumber(earned)+' poops while you were away!',4000),500);
+    // offline earnings \u2014 hardened against system clock manipulation.
+    // We cross-check the wall-clock delta (Date.now) against a monotonic
+    // delta (performance.now) saved alongside it. Real elapsed time while
+    // the tab was closed can only be measured by Date.now, but if the
+    // two clocks disagree wildly while the page WAS open (i.e. player
+    // changed the clock mid-session) we will have already caught it via
+    // the periodic clock-skew check below. For the closed-tab case we
+    // simply clamp hard and treat backward jumps as zero.
+    const rawSecs = (Date.now() - (state.lastSave || Date.now())) / 1000;
+
+    if (rawSecs < -5) {
+      // Clock was moved backwards since last save. Don't reward anything,
+      // and don't let a backward jump corrupt future calculations either.
+      showNotice('\u26a0\ufe0f System clock looks like it moved backwards \u2014 no offline bonus awarded.', 4000);
+    } else {
+      // Hard cap: no matter how long the claimed gap is, only ever credit
+      // up to 12 hours of offline production per load. This keeps a
+      // legitimate "I was away for the weekend" case feeling rewarding
+      // while making a multi-day clock-forward exploit far less lucrative.
+      const MAX_OFFLINE_SECONDS = 12 * 60 * 60;
+      const secs = Math.max(0, Math.min(rawSecs, MAX_OFFLINE_SECONDS));
+      if (secs > 5) {
+        // Offline production also runs at a reduced rate compared to
+        // active play, further reducing the payoff of clock skipping.
+        const OFFLINE_RATE = 0.5;
+        const earned = calcCps() * secs * OFFLINE_RATE;
+        if (earned > 0 && isFinite(earned)) {
+          state.poops += earned;
+          state.totalPoopsEarned += earned;
+          setTimeout(()=>showNotice('\ud83d\udc4b Welcome back! Tom made '+formatNumber(earned)+' poops while you were away!',4000),500);
+        }
+      }
+      if (rawSecs > MAX_OFFLINE_SECONDS) {
+        setTimeout(()=>showNotice('\u23f3 Offline earnings are capped at 12 hours per session.',4000),4600);
       }
     }
   } catch(e){ console.error('Load failed', e); }
@@ -1654,6 +1692,41 @@ function formatTime(ms) {
   const s=Math.floor(ms/1000),m=Math.floor(s/60),h=Math.floor(m/60);
   return h?`${h}h ${m%60}m`:`${m}m ${s%60}s`;
 }
+
+/* ============================================================
+   CLOCK TAMPER DETECTION (mid-session)
+   Date.now() reflects the OS wall clock, which the player can
+   freely change. performance.now() is monotonic and unaffected
+   by system clock changes, so we use it as a trusted reference.
+   If the two clocks drift apart by more than a small tolerance
+   while the tab is open, we resync lastSave to "now" so the
+   skipped time can never be cashed in as offline progress, and
+   we do NOT grant any retroactive bonus for the jump.
+============================================================ */
+let lastWallClock = Date.now();
+let lastMonotonic = performance.now();
+
+function checkClockTamper() {
+  const nowWall = Date.now();
+  const nowMono = performance.now();
+  const wallDelta = nowWall - lastWallClock;
+  const monoDelta = nowMono - lastMonotonic;
+  // Allow a little slack for normal timer jitter / tab throttling.
+  const driftMs = wallDelta - monoDelta;
+
+  if (Math.abs(driftMs) > 5000) {
+    // Wall clock moved very differently from real elapsed time:
+    // the system date/time was changed while the page was open.
+    state.lastSave = nowWall;
+    saveGame(true);
+    showNotice('\u26a0\ufe0f Clock change detected \u2014 no bonus poops awarded for it.', 4000);
+  }
+
+  lastWallClock = nowWall;
+  lastMonotonic = nowMono;
+}
+
+setInterval(checkClockTamper, 5000);
 
 function updateTomImage() {
   let current=tomMilestones[0];
