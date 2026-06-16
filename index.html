@@ -307,6 +307,98 @@ button.ctrl:hover { background: #8a5a2c; }
   cursor: pointer;
 }
 #janCloseBtn:hover { background: linear-gradient(135deg, #fff3b0, #ffd84d); }
+
+.rage-message {
+  position: fixed;
+  font-weight: bold;
+  color: #ff1a1a;
+  text-shadow: 2px 2px #000, 0 0 12px red;
+  z-index: 999999;
+  pointer-events: none;
+  animation: rageFlash 2.2s ease-out forwards;
+  font-family: 'Comic Sans MS', sans-serif;
+}
+@keyframes rageFlash {
+  0% { opacity: 0; transform: scale(0.5); }
+  15% { opacity: 1; transform: scale(1.1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: scale(0.9) translateY(-20px); }
+}
+body.rage-shake {
+  animation: rageBodyShake 0.15s linear infinite;
+}
+@keyframes rageBodyShake {
+  0% { transform: translate(0,0); filter: hue-rotate(0deg) invert(0); }
+  20% { transform: translate(-8px,5px); filter: hue-rotate(60deg); }
+  40% { transform: translate(8px,-5px); filter: hue-rotate(180deg) invert(0.2); }
+  60% { transform: translate(-6px,-6px); filter: hue-rotate(270deg); }
+  80% { transform: translate(6px,6px); filter: hue-rotate(330deg) invert(0.1); }
+  100% { transform: translate(0,0); filter: hue-rotate(360deg); }
+}
+
+#doubleProdLabel {
+  display: none;
+  font-size: 0.8em;
+  font-weight: bold;
+  background: linear-gradient(135deg, #ffb300, #ff7043);
+  border-radius: 6px;
+  padding: 4px 10px;
+  margin: 2px 0 4px;
+  animation: doubleProdPulse 1s ease-in-out infinite alternate;
+}
+@keyframes doubleProdPulse { from { opacity: 0.85; } to { opacity: 1; } }
+
+#minigameOverlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.75);
+  z-index: 99997;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+#minigameOverlay.show { display: flex; }
+#minigameBox {
+  background: linear-gradient(135deg, #3a2010, #5a3825);
+  border: 3px solid #ffec8b;
+  border-radius: 16px;
+  padding: 20px 24px;
+  max-width: 92vw;
+  width: 460px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(255,236,139,0.4);
+}
+#minigameTitle { font-size: 1.3em; font-weight: bold; margin-bottom: 4px; text-shadow: 1px 1px #000; }
+#minigameSub { font-size: 0.85em; opacity: 0.85; margin-bottom: 10px; }
+#minigameHud {
+  display: flex; justify-content: space-between;
+  font-size: 0.95em; margin-bottom: 10px;
+  background: rgba(0,0,0,0.3); border-radius: 6px; padding: 6px 12px;
+}
+#minigameField {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  background: rgba(0,0,0,0.35);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.minigame-target {
+  position: absolute;
+  font-size: 2em;
+  cursor: pointer;
+  animation: minigameTargetPop 0.25s ease-out, minigameTargetFade 2.2s linear forwards;
+  user-select: none;
+}
+@keyframes minigameTargetPop { from { transform: scale(0); } to { transform: scale(1); } }
+@keyframes minigameTargetFade { 0%,75% { opacity: 1; } 100% { opacity: 0; } }
+#minigameResult {
+  font-size: 1em;
+  font-weight: bold;
+  min-height: 1.4em;
+  display: none;
+}
 </style>
 </head>
 <body>
@@ -326,6 +418,7 @@ button.ctrl:hover { background: #8a5a2c; }
   </div>
   <div id="milestoneLabel"></div>
   <div id="multiplierBar">🌟 Global: <span id="globalMult">x1.00</span> &nbsp;|&nbsp; ⭐ Prestige: <span id="prestigeBonus">x1.00</span></div>
+  <div id="doubleProdLabel"></div>
   <div id="stats"></div>
   <div id="prestigeArea">
     <button id="prestigeBtn" onclick="doPrestige()">⚗️ PRESTIGE (gain x<span id="prestigeMult">?</span> bonus)</button>
@@ -371,7 +464,21 @@ button.ctrl:hover { background: #8a5a2c; }
   </div>
 </div>
 
+<div id="minigameOverlay">
+  <div id="minigameBox">
+    <div id="minigameTitle">✨ Golden Poop Challenge! ✨</div>
+    <div id="minigameSub">Click all the poops before time runs out!</div>
+    <div id="minigameHud">
+      <span>Caught: <b id="minigameProgress">0 / 8</b></span>
+      <span>Time: <b id="minigameTimer">10.0s</b></span>
+    </div>
+    <div id="minigameField"></div>
+    <div id="minigameResult"></div>
+  </div>
+</div>
+
 <script>
+
 /* ============================================================
    AREAS (themed groups of buildings, unlock progressively)
 ============================================================ */
@@ -607,15 +714,15 @@ const upgradeData = [
   { id:'g4', name:'Ascended Pantheon',       desc:'Poop Gods x5.',       cost:5e22, type:'building',  target:'god', mult:5, req:{id:'god',amt:50} },
 
   // --- GLOBAL MULTIPLIERS ---
-  { id:'gm1',  name:'Toms Iron Stomach',     desc:'All production +10%.', cost:40000,        type:'globalMult', mult:1.10 },
-  { id:'gm2',  name:'Toms Refined Palate',   desc:'All production +10%.', cost:800000,       type:'globalMult', mult:1.10 },
-  { id:'gm3',  name:'Toms Legendary Diet',   desc:'All production +25%.', cost:80000000,     type:'globalMult', mult:1.25 },
-  { id:'gm4',  name:'Tom Pearl Statue',      desc:'All production +25%.', cost:5000000000,   type:'globalMult', mult:1.25 },
-  { id:'gm5',  name:'Tom Pearl Religion',    desc:'All production x2.',   cost:500000000000, type:'globalMult', mult:2    },
-  { id:'gm6',  name:'Tom Pearl Ascension',   desc:'All production x2.',   cost:5e13,         type:'globalMult', mult:2    },
-  { id:'gm7',  name:'Tom Pearl Is God',      desc:'All production x3.',   cost:5e15,         type:'globalMult', mult:3    },
-  { id:'gm8',  name:'Universal Poop Law',    desc:'All production x5.',   cost:5e18,         type:'globalMult', mult:5    },
-  { id:'gm9',  name:'Poop Singularity',      desc:'All production x10.',  cost:5e21,         type:'globalMult', mult:10   },
+  { id:'gm1',  name:'Toms Iron Stomach',     desc:'All production +10%.', cost:60000,        type:'globalMult', mult:1.10 },
+  { id:'gm2',  name:'Toms Refined Palate',   desc:'All production +10%.', cost:1200000,      type:'globalMult', mult:1.10 },
+  { id:'gm3',  name:'Toms Legendary Diet',   desc:'All production +20%.', cost:150000000,    type:'globalMult', mult:1.20 },
+  { id:'gm4',  name:'Tom Pearl Statue',      desc:'All production +20%.', cost:12000000000,  type:'globalMult', mult:1.20 },
+  { id:'gm5',  name:'Tom Pearl Religion',    desc:'All production x2.',   cost:1.5e12,       type:'globalMult', mult:2    },
+  { id:'gm6',  name:'Tom Pearl Ascension',   desc:'All production x2.',   cost:2e14,         type:'globalMult', mult:2    },
+  { id:'gm7',  name:'Tom Pearl Is God',      desc:'All production x2.5.', cost:3e16,         type:'globalMult', mult:2.5  },
+  { id:'gm8',  name:'Universal Poop Law',    desc:'All production x3.',   cost:5e19,         type:'globalMult', mult:3    },
+  { id:'gm9',  name:'Poop Singularity',      desc:'All production x5.',   cost:8e22,         type:'globalMult', mult:5    },
 ];
 
 /* ============================================================
@@ -724,6 +831,20 @@ const newsLines = [
 ============================================================ */
 const changelogData = [
   {
+    date: '2026-06-17',
+    title: 'Difficulty Overhaul, Golden Poop Minigame & The Infinity Event',
+    changes: [
+      'Increased producer cost scaling from x1.15 to x1.19 per purchase \u2014 the game now takes significantly longer',
+      'Prestige now requires 5 trillion total poops (up from 1 trillion) and gives a smaller bonus per point, for a slower late-game curve',
+      'Increased the cost of every Global Multiplier upgrade and reduced some of their bonuses slightly',
+      'Golden Poops are now MUCH rarer: they spawn every 2\u20135 minutes instead of every 30\u2013120 seconds',
+      'Clicking a Golden Poop now opens a reflex minigame: catch 8 fleeting poops within 10 seconds',
+      'Winning the minigame grants 2x production for a full 5 minutes (the buff timer is visible under your stats and survives a save/reload)',
+      'Losing the minigame gives nothing \u2014 no more guaranteed free bonus just for clicking',
+      'Added the Infinity Overflow event: if your poop count ever overflows past safe limits, the screen erupts with "I HATE YOU" and "ALL HAIL JAN" messages, the screen shakes and flashes colors, and your current poops are reset to zero as punishment',
+    ]
+  },
+  {
     date: '2026-06-16',
     title: 'All Hail Jan',
     changes: [
@@ -804,6 +925,7 @@ let state = {
   achievementsUnlocked: {},
   goldenPoopsClicked: 0,
   gameBeaten: false,
+  doubleProdUntil: 0,
   lastSave: Date.now(),
 };
 
@@ -830,27 +952,37 @@ function formatNumber(num) {
 }
 
 function buildingCost(b) {
-  return Math.ceil(b.baseCost * Math.pow(1.15, state.buildings[b.id] || 0));
+  return Math.ceil(b.baseCost * Math.pow(1.19, state.buildings[b.id] || 0));
 }
 
 function buildingCps(b) {
   return b.baseCps * (state.buildings[b.id]||0) * (state.buildingMultipliers[b.id] || 1);
 }
 
-function calcCps() {
+function getTempBuffMultiplier() {
+  if (state.doubleProdUntil && Date.now() < state.doubleProdUntil) return 2;
+  return 1;
+}
+
+function calcRawCps() {
   let t=0;
   buildingData.forEach(b=>{ t+=buildingCps(b); });
   return t * state.globalMultiplier * state.prestigeMultiplier;
 }
 
+function calcCps() {
+  return calcRawCps() * getTempBuffMultiplier();
+}
+
 function calcClickValue() {
-  const cps = calcCps();
-  return (state.clickValue + cps * state.clickFromCpsRate) * state.clickMultiplier * state.globalMultiplier * state.prestigeMultiplier;
+  const rawCps = calcRawCps();
+  const base = (state.clickValue + rawCps * state.clickFromCpsRate) * state.clickMultiplier * state.globalMultiplier * state.prestigeMultiplier;
+  return base * getTempBuffMultiplier();
 }
 
 function prestigeGain() {
-  const gain = Math.floor(state.totalPoopsEarned / 1e12);
-  return gain > 0 ? 1 + gain * 0.1 : null;
+  const gain = Math.floor(state.totalPoopsEarned / 5e12);
+  return gain > 0 ? 1 + gain * 0.05 : null;
 }
 
 function isAreaUnlocked(areaId) {
@@ -904,6 +1036,7 @@ function loadGame() {
     if (typeof state.prestigeMultiplier !== 'number' || isNaN(state.prestigeMultiplier)) state.prestigeMultiplier=1;
     if (typeof state.goldenPoopsClicked !== 'number' || isNaN(state.goldenPoopsClicked)) state.goldenPoopsClicked=0;
     if (typeof state.gameBeaten !== 'boolean') state.gameBeaten=false;
+    if (typeof state.doubleProdUntil !== 'number' || isNaN(state.doubleProdUntil)) state.doubleProdUntil=0;
     if (typeof state.globalMultiplier !== 'number' || isNaN(state.globalMultiplier)) state.globalMultiplier=1;
     if (typeof state.clickMultiplier !== 'number' || isNaN(state.clickMultiplier)) state.clickMultiplier=1;
     if (typeof state.clickValue !== 'number' || isNaN(state.clickValue)) state.clickValue=1;
@@ -1020,6 +1153,7 @@ function clickTom(e) {
   setTimeout(()=>float.remove(),1000);
   updateDisplay();
   checkAchievements();
+  checkInfinityOverflow();
 }
 
 function buyBuilding(b) {
@@ -1067,18 +1201,21 @@ function buyUpgrade(u) {
 }
 
 /* ============================================================
-   GOLDEN POOP (simple, classic version)
+   GOLDEN POOP + MINIGAME
 ============================================================ */
 let goldenActive=false;
 let goldenTimeout=null;
+let doubleProdActive=false;
+let doubleProdInterval=null;
 
 function scheduleGoldenPoop() {
-  const delay=30000+Math.random()*90000; // 30-120 sec
+  // Much rarer now: 2 to 5 minutes between spawns
+  const delay = 120000 + Math.random() * 180000;
   setTimeout(spawnGoldenPoop, delay);
 }
 
 function spawnGoldenPoop() {
-  if (goldenActive) { scheduleGoldenPoop(); return; }
+  if (goldenActive || infinityEventRunning) { scheduleGoldenPoop(); return; }
   const el=document.getElementById('goldenPoop');
   const wrap=document.getElementById('tomWrap');
   const ww=wrap.offsetWidth || 200, wh=wrap.offsetHeight || 200;
@@ -1086,7 +1223,8 @@ function spawnGoldenPoop() {
   el.style.top=Math.max(0,Math.random()*(wh-40))+'px';
   el.style.display='block';
   goldenActive=true;
-  goldenTimeout=setTimeout(()=>{ el.style.display='none'; goldenActive=false; scheduleGoldenPoop(); },15000);
+  // disappears after 12 seconds if not clicked
+  goldenTimeout=setTimeout(()=>{ el.style.display='none'; goldenActive=false; scheduleGoldenPoop(); },12000);
 }
 
 function setupGoldenPoopHandler() {
@@ -1098,14 +1236,126 @@ function setupGoldenPoopHandler() {
     el.style.display='none';
     goldenActive=false;
     state.goldenPoopsClicked++;
-    const bonus = Math.max(calcCps()*60, state.poops*0.1);
-    state.poops+=bonus;
-    state.totalPoopsEarned+=bonus;
-    showNotice('\u2728 Golden Poop! +'+formatNumber(bonus)+' poops!',3000);
-    updateDisplay();
-    checkAchievements();
-    scheduleGoldenPoop();
+    openGoldenMinigame();
   });
+}
+
+/* --- Minigame: click 8 fleeting poop targets within the time limit --- */
+let minigameState = null;
+
+function openGoldenMinigame() {
+  const overlay = document.getElementById('minigameOverlay');
+  overlay.classList.add('show');
+  minigameState = {
+    targetsHit: 0,
+    targetsNeeded: 8,
+    timeLeft: 10,
+    active: true,
+    spawnTimer: null,
+    countdownTimer: null,
+  };
+  document.getElementById('minigameProgress').textContent = '0 / 8';
+  document.getElementById('minigameTimer').textContent = '10.0s';
+  document.getElementById('minigameField').innerHTML = '';
+  document.getElementById('minigameResult').textContent = '';
+  document.getElementById('minigameResult').style.display = 'none';
+
+  spawnMinigameTarget();
+  minigameState.spawnTimer = setInterval(spawnMinigameTarget, 900);
+  minigameState.countdownTimer = setInterval(() => {
+    if (!minigameState || !minigameState.active) return;
+    minigameState.timeLeft -= 0.1;
+    document.getElementById('minigameTimer').textContent = Math.max(0, minigameState.timeLeft).toFixed(1) + 's';
+    if (minigameState.timeLeft <= 0) endMinigame(false);
+  }, 100);
+}
+
+function spawnMinigameTarget() {
+  if (!minigameState || !minigameState.active) return;
+  const field = document.getElementById('minigameField');
+  if (!field) return;
+  const fw = field.offsetWidth || 400, fh = field.offsetHeight || 240;
+  const target = document.createElement('div');
+  target.className = 'minigame-target';
+  target.textContent = '\ud83d\udca9';
+  target.style.left = Math.max(0, Math.random() * (fw - 50)) + 'px';
+  target.style.top = Math.max(0, Math.random() * (fh - 50)) + 'px';
+  target.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!minigameState || !minigameState.active) return;
+    target.remove();
+    minigameState.targetsHit++;
+    document.getElementById('minigameProgress').textContent = minigameState.targetsHit + ' / ' + minigameState.targetsNeeded;
+    if (minigameState.targetsHit >= minigameState.targetsNeeded) endMinigame(true);
+  });
+  field.appendChild(target);
+  // each target only stays for a couple seconds before vanishing
+  setTimeout(() => { if (target.parentNode) target.remove(); }, 2200);
+}
+
+function endMinigame(won) {
+  if (!minigameState || !minigameState.active) return;
+  minigameState.active = false;
+  clearInterval(minigameState.spawnTimer);
+  clearInterval(minigameState.countdownTimer);
+  document.getElementById('minigameField').innerHTML = '';
+
+  const resultEl = document.getElementById('minigameResult');
+  resultEl.style.display = 'block';
+
+  if (won) {
+    resultEl.innerHTML = '\ud83c\udf89 You caught them all! <b>2x production for 5 minutes!</b>';
+    activateDoubleProduction();
+    const consolationBonus = Math.max(calcCps()*30, state.poops*0.05);
+    state.poops += consolationBonus;
+    state.totalPoopsEarned += consolationBonus;
+  } else {
+    resultEl.innerHTML = '\u23f0 Too slow! You caught ' + minigameState.targetsHit + ' / ' + minigameState.targetsNeeded + '. Better luck next time.';
+  }
+  updateDisplay();
+  checkAchievements();
+  checkInfinityOverflow();
+
+  setTimeout(() => {
+    document.getElementById('minigameOverlay').classList.remove('show');
+    scheduleGoldenPoop();
+  }, 2600);
+}
+
+function activateDoubleProduction() {
+  const now = Date.now();
+  // extend if already active, otherwise start fresh
+  const base = (state.doubleProdUntil && state.doubleProdUntil > now) ? state.doubleProdUntil : now;
+  state.doubleProdUntil = base + 300000;
+  doubleProdActive = true;
+  if (doubleProdInterval) clearInterval(doubleProdInterval);
+  doubleProdInterval = setInterval(refreshDoubleProdLabel, 1000);
+  refreshDoubleProdLabel();
+}
+
+function refreshDoubleProdLabel() {
+  const secondsLeft = state.doubleProdUntil ? Math.max(0, Math.round((state.doubleProdUntil - Date.now())/1000)) : 0;
+  updateDoubleProdLabel(secondsLeft);
+  if (secondsLeft <= 0) {
+    if (doubleProdActive) {
+      doubleProdActive = false;
+      showNotice('2x production buff ended.', 2500);
+      updateDisplay();
+    }
+    if (doubleProdInterval) { clearInterval(doubleProdInterval); doubleProdInterval = null; }
+  }
+}
+
+function updateDoubleProdLabel(secondsLeft) {
+  const el = document.getElementById('doubleProdLabel');
+  if (!el) return;
+  if (secondsLeft > 0) {
+    const m = Math.floor(secondsLeft/60), s=secondsLeft%60;
+    el.style.display = 'block';
+    el.textContent = '\u26a1 2x PRODUCTION: ' + m + ':' + (s<10?'0':'')+s;
+  } else {
+    el.style.display = 'none';
+  }
 }
 
 /* ============================================================
@@ -1168,6 +1418,57 @@ function closeJanCelebration() {
   if (overlay) overlay.classList.remove('show');
   if (janConfettiInterval) { clearInterval(janConfettiInterval); janConfettiInterval = null; }
   saveGame(true);
+}
+
+/* ============================================================
+   INFINITY OVERFLOW EVENT
+============================================================ */
+let infinityEventRunning = false;
+const rageMessages = ['I HATE YOU', 'ALL HAIL JAN', 'JAN WARNED YOU', 'TOO MUCH POOP', 'THIS IS JAN\u2019S DOING'];
+
+function checkInfinityOverflow() {
+  if (infinityEventRunning) return;
+  const broken = !isFinite(state.poops) || !isFinite(state.totalPoopsEarned) ||
+                 state.poops >= 1e300 || state.totalPoopsEarned >= 1e300;
+  if (broken) triggerInfinityOverflow();
+}
+
+function spawnRageMessage() {
+  const msg = document.createElement('div');
+  msg.className = 'rage-message';
+  msg.textContent = rageMessages[Math.floor(Math.random() * rageMessages.length)];
+  msg.style.left = (Math.random() * 80) + 'vw';
+  msg.style.top = (Math.random() * 80) + 'vh';
+  msg.style.fontSize = (1.2 + Math.random() * 2.2) + 'em';
+  msg.style.transform = 'rotate(' + (Math.random() * 60 - 30) + 'deg)';
+  document.body.appendChild(msg);
+  setTimeout(() => msg.remove(), 2200);
+}
+
+function triggerInfinityOverflow() {
+  infinityEventRunning = true;
+  document.body.classList.add('rage-shake');
+
+  let count = 0;
+  const spamInterval = setInterval(() => {
+    spawnRageMessage();
+    spawnRageMessage();
+    count++;
+    if (count >= 35) {
+      clearInterval(spamInterval);
+      document.body.classList.remove('rage-shake');
+      // The almighty reset
+      state.poops = 0;
+      state.totalPoopsEarned = 0;
+      infinityEventRunning = false;
+      updateDisplay();
+      renderAll();
+      saveGame(true);
+      showNotice('\ud83d\udca2 Jan punished your greed. Poops reset to zero.', 5000);
+    }
+  }, 120);
+
+  showNotice('\u26a0\ufe0f SOMETHING HAS GONE TERRIBLY WRONG \u26a0\ufe0f', 3000);
 }
 
 /* ============================================================
@@ -1380,7 +1681,7 @@ function updateDisplay() {
     document.getElementById('prestigeMult').textContent=pg.toFixed(2);
   } else {
     pbtn.style.display='none';
-    document.getElementById('prestigeCount').textContent=state.prestigeCount>0?'Prestiges: '+state.prestigeCount+' | Bonus: x'+state.prestigeMultiplier.toFixed(2):'Reach 1 trillion total poops to prestige!';
+    document.getElementById('prestigeCount').textContent=state.prestigeCount>0?'Prestiges: '+state.prestigeCount+' | Bonus: x'+state.prestigeMultiplier.toFixed(2):'Reach 5 trillion total poops to prestige!';
   }
 
   // refresh affordability without a full re-render
@@ -1409,6 +1710,11 @@ setupGoldenPoopHandler();
 
 loadGame();
 renderAll();
+if (state.doubleProdUntil && state.doubleProdUntil > Date.now()) {
+  doubleProdActive = true;
+  doubleProdInterval = setInterval(refreshDoubleProdLabel, 1000);
+  refreshDoubleProdLabel();
+}
 scheduleGoldenPoop();
 updateTicker();
 setInterval(updateTicker, 22000);
@@ -1422,6 +1728,7 @@ setInterval(()=>{
   }
   updateDisplay();
   checkAchievements();
+  checkInfinityOverflow();
 }, 100);
 
 // re-render panels: 1/sec (also catches newly-unlocked areas/buildings)
