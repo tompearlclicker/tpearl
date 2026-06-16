@@ -741,204 +741,64 @@ const goldenEffects = [
   {
     name: "POOP FRENZY",
     apply: () => {
-      state.clickMultiplier *= 1000;
-      nukeScreen('rgba(255,200,0,0.6)');
-      shakeScreen(2000);
-      showNotice("💥 POOP FRENZY!! 1000x CLICKS FOR 30 SEC!!! CLICK LIKE MAD!!!", 5000);
-      spawnPoopRain(30);
-      setTimeout(() => { state.clickMultiplier /= 1000; showNotice("Frenzy over 😢", 2000); }, 30000);
-    }
-  },
-  {
-    name: "POOP STORM",
-    apply: () => {
-      nukeScreen('rgba(0,150,255,0.4)');
-      spawnPoopRain(60);
-      showNotice("🌧️ POOP STORM!! 10x CPS RAINING FOR 30 SECONDS!!", 5000);
-      let ticks = 0;
-      const storm = setInterval(() => {
-        const rain = calcCps() * 10;
-        state.poops += rain; state.totalPoopsEarned += rain;
-        spawnPoopRain(3);
-        ticks++;
-        if (ticks >= 30) { clearInterval(storm); showNotice("Storm ended ☀️", 2000); }
-      }, 1000);
-    }
-  },
-  {
-    name: "24 HOURS INSTANTLY",
-    apply: () => {
-      const bonus = calcCps() * 86400;
-      state.poops += bonus; state.totalPoopsEarned += bonus;
-      nukeScreen('rgba(200,0,255,0.5)');
-      shakeScreen(3000);
-      spawnPoopRain(50);
-      showNotice("⏩ 24 HOURS OF CPS INSTANTLY!! +" + formatNumber(bonus) + " POOPS!!!", 6000);
-    }
-  },
-  {
-    name: "EVERYTHING x1000",
-    apply: () => {
-      state.globalMultiplier *= 1000;
-      nukeScreen('rgba(255,100,0,0.6)');
-      shakeScreen(4000);
-      spawnPoopRain(80);
-      showNotice("🔥🔥🔥 EVERYTHING x1000 FOR 2 MINUTES!!! YOUR PC MIGHT DIE!!!", 6000);
-      setTimeout(() => { state.globalMultiplier /= 1000; showNotice("x1000 ended 💀", 2000); }, 120000);
-    }
-  },
-  {
-    name: "POOP JACKPOT",
-    apply: () => {
-      const bonus = state.poops * 99;
-      state.poops += bonus; state.totalPoopsEarned += bonus;
-      nukeScreen('rgba(0,255,0,0.5)');
-      shakeScreen(2000);
-      spawnPoopRain(100);
-      showNotice("🎰🎰 JACKPOT!!! YOUR POOPS x100!!! +" + formatNumber(bonus) + "!!!", 6000);
-    }
-  },
-  {
-    name: "CLICK ARMAGEDDON",
-    apply: () => {
-      state.clickMultiplier *= 99999;
-      nukeScreen('rgba(255,0,0,0.7)');
-      shakeScreen(5000);
-      showNotice("☠️☠️ CLICK ARMAGEDDON!! 99,999x CLICKS FOR 10 SECONDS!! SPAAAAAM!!!!", 5000);
-      spawnPoopRain(40);
-      setTimeout(() => { state.clickMultiplier /= 99999; shakeScreen(500); showNotice("Armageddon over 💀💀", 2000); }, 10000);
-    }
-  },
-  {
-    name: "ALL UPGRADES FREE",
-    apply: () => {
-      const locked = upgradeData.filter(u => !state.upgradesBought[u.id]);
-      let count = 0;
-      locked.forEach(u => { applyUpgrade(u); count++; });
-      nukeScreen('rgba(0,255,255,0.5)');
-      spawnPoopRain(50);
-      shakeScreen(3000);
-      showNotice("🎁🎁🎁 " + count + " UPGRADES UNLOCKED FOR FREE!!!!! EVERY SINGLE ONE!!!!", 6000);
-    }
-  },
-  {
-    name: "POOP APOCALYPSE",
-    apply: () => {
-      const bonus = calcCps() * 86400 * 7;
-      state.poops += bonus; state.totalPoopsEarned += bonus;
-      nukeScreen('rgba(139,0,0,0.6)');
-      shakeScreen(6000);
-      spawnPoopRain(150);
-      showNotice("🌊💀 POOP APOCALYPSE!! ONE WEEK OF CPS!! +" + formatNumber(bonus) + "!!!! IS THIS LEGAL?!!", 7000);
-    }
-  },
-  {
-    name: "MULTIPLIER MADNESS",
-    apply: () => {
-      const r = 10 + Math.floor(Math.random() * 991);
-      state.globalMultiplier *= r;
-      nukeScreen('rgba(255,0,255,0.6)');
-      shakeScreen(3000);
-      spawnPoopRain(60);
-      showNotice("🌀🌀 RANDOM MULTIPLIER!! x" + r + " GLOBAL FOREVER!!! (yes, FOREVER)", 6000);
-    }
-  },
-  {
-    name: "TIME WARP",
-    apply: () => {
-      // simulate 1 hour of clicking at current CPS
-      const cps = calcCps();
-      const cv = calcClickValue();
-      const clickBonus = cv * 3600 * 10;
-      const cpsBonus = cps * 3600;
-      state.poops += clickBonus + cpsBonus;
-      state.totalPoopsEarned += clickBonus + cpsBonus;
-      state.totalClicks += 36000;
-      nukeScreen('rgba(0,100,255,0.7)');
-      shakeScreen(4000);
-      spawnPoopRain(70);
-      showNotice("⏰ TIME WARP!! 1 HOUR SIMULATED INSTANTLY!! +" + formatNumber(clickBonus+cpsBonus) + " POOPS!!", 6000);
-    }
-  },
-  {
-    name: "CLONE ARMY",
-    apply: () => {
-      buildingData.forEach(b => { state.buildings[b.id] = Math.max(state.buildings[b.id], state.buildings[b.id] * 2 + 10); });
-      nukeScreen('rgba(50,200,50,0.5)');
-      shakeScreen(3000);
-      spawnPoopRain(80);
-      showNotice("👥👥 CLONE ARMY!! ALL PRODUCERS DOUBLED + 10 FREE EACH!!!! TOM IS EVERYWHERE!!", 6000);
-    }
-  },
-  {
-    name: "POOP SINGULARITY",
-    apply: () => {
-      state.clickMultiplier *= 500;
-      state.globalMultiplier *= 500;
-      nukeScreen('rgba(255,255,0,0.8)');
-      shakeScreen(8000);
-      spawnPoopRain(200);
-      showNotice("💫💫💫 POOP SINGULARITY!!!! x500 EVERYTHING FOR 20 SECONDS!!! WHAT IS HAPPENING!!!!!", 7000);
+      state.clickMultiplier *= 5;
+      showNotice("💥 POOP FRENZY!! 5x clicks for 15 seconds!", 4000);
+
       setTimeout(() => {
-        state.clickMultiplier /= 500;
-        state.globalMultiplier /= 500;
-        nukeScreen('rgba(0,0,0,0.8)');
-        showNotice("Singularity collapsed... RIP 💀", 3000);
-      }, 20000);
-    }
-  },
-  {
-    name: "GOLDEN SHOWER",
-    apply: () => {
-      // spawn 5 more golden poops simultaneously
-      nukeScreen('rgba(255,215,0,0.6)');
-      spawnPoopRain(40);
-      showNotice("✨✨ GOLDEN SHOWER!! 5 GOLDEN POOPS SPAWNING AT ONCE!!! CLICK THEM ALL!!!", 5000);
-      for (let i = 0; i < 5; i++) {
-        setTimeout(() => {
-          const bonus = Math.max(calcCps() * 120, state.poops * 0.5);
-          state.poops += bonus; state.totalPoopsEarned += bonus;
-          state.goldenPoopsClicked++;
-          spawnPoopRain(20);
-          showNotice("✨ Auto-collected bonus golden poop! +" + formatNumber(bonus), 2000);
-        }, i * 1200);
-      }
-    }
-  },
-  {
-    name: "NEGATIVE POOP (jk lol)",
-    apply: () => {
-      nukeScreen('rgba(255,0,0,0.9)');
-      shakeScreen(2000);
-      showNotice("😱 OH NO YOUR POOPS ARE DISAPPEAR—jk lol here's a week of CPS", 4000);
-      setTimeout(() => {
-        const bonus = calcCps() * 86400 * 7;
-        state.poops += bonus; state.totalPoopsEarned += bonus;
-        nukeScreen('rgba(0,255,0,0.7)');
-        spawnPoopRain(100);
-        shakeScreen(3000);
-        showNotice("😂 PSYCH!! +" + formatNumber(bonus) + " POOPS!! GOT YOU!!!", 5000);
-      }, 2500);
-    }
-  },
-  {
-    name: "POOP GOD MODE",
-    apply: () => {
-      state.globalMultiplier *= 10000;
-      state.clickMultiplier *= 10000;
-      nukeScreen('rgba(255,215,0,0.9)');
-      shakeScreen(10000);
-      spawnPoopRain(300);
-      showNotice("🙏🙏🙏🙏 POOP GOD MODE!!! x10,000 EVERYTHING FOR 15 SEC!!!! TOM PEARL HAS ASCENDED!!!!!", 8000);
-      setTimeout(() => {
-        state.globalMultiplier /= 10000;
-        state.clickMultiplier /= 10000;
-        nukeScreen('rgba(0,0,0,0.9)');
-        shakeScreen(1000);
-        showNotice("God mode ended. Tom descends from heaven 😢", 3000);
+        state.clickMultiplier /= 5;
+        showNotice("Frenzy ended 😢", 2000);
       }, 15000);
     }
   },
+
+  {
+    name: "POOP STORM",
+    apply: () => {
+      const bonus = calcCps() * 30;
+      state.poops += bonus;
+      state.totalPoopsEarned += bonus;
+
+      showNotice("🌧️ Poop storm! +" + formatNumber(bonus) + " poops!", 4000);
+    }
+  },
+
+  {
+    name: "LUCKY BONUS",
+    apply: () => {
+      const bonus = Math.max(state.poops * 0.25, calcCps() * 60);
+
+      state.poops += bonus;
+      state.totalPoopsEarned += bonus;
+
+      showNotice("✨ Lucky golden poop! +" + formatNumber(bonus), 4000);
+    }
+  },
+
+  {
+    name: "TEMPORARY BOOST",
+    apply: () => {
+      state.globalMultiplier *= 3;
+
+      showNotice("🌟 Golden boost! 3x production for 30 seconds!",4000);
+
+      setTimeout(() => {
+        state.globalMultiplier /= 3;
+      },30000);
+    }
+  },
+
+  {
+    name: "CLICK POWER",
+    apply: () => {
+      state.clickValue *= 2;
+
+      showNotice("👆 Golden fingers! 2x click power for 60 seconds!",4000);
+
+      setTimeout(() => {
+        state.clickValue /= 2;
+      },60000);
+    }
+  }
 ];
 
 function scheduleGoldenPoop() {
