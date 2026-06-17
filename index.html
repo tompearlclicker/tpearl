@@ -583,14 +583,13 @@ body.rage-shake {
 ============================================================ */
 (function() {
   const screen = document.getElementById('loadingScreen');
-  // Remove it after the CSS animation completes (2s delay + 0.6s fade = 2.6s)
   setTimeout(function() {
     screen.classList.add('hidden');
   }, 2600);
 })();
 
 /* ============================================================
-   AREAS (themed groups of buildings, unlock progressively)
+   AREAS
 ============================================================ */
 const areaData = [
   { id:'backyard', name:'🏡 The Backyard',        unlockAt:0 },
@@ -666,7 +665,7 @@ const upgradeData = [
   { id:'c13', name:'Cosmic Fingertip',       desc:'+5% of CPS added to each click.',    cost:1.5e16,       type:'clickFromCps',value:0.05 },
   { id:'c14', name:'Hand of the Poop God',   desc:'Click power x2.',                    cost:9e17,         type:'clickMult',   value:2    },
 
-  // --- FINGER (5 buildings worth) ---
+  // --- FINGER ---
   { id:'f1', name:'Extra Finger',            desc:'Pointer Fingers x2.',  cost:200,    type:'building', target:'finger', mult:2, req:{id:'finger',amt:1}  },
   { id:'f2', name:'Carpal Tunnel Cream',     desc:'Pointer Fingers x2.',  cost:1000,   type:'building', target:'finger', mult:2, req:{id:'finger',amt:5}  },
   { id:'f3', name:'Ten Fingers',             desc:'Pointer Fingers x2.',  cost:18000,  type:'building', target:'finger', mult:2, req:{id:'finger',amt:10} },
@@ -896,7 +895,7 @@ const achievementData = [
 ];
 
 /* ============================================================
-   MILESTONES (image swaps)
+   MILESTONES
 ============================================================ */
 const tomMilestones = [
   { threshold:0,           img:'tomp.jfif',  label:'Max is hungry...' },
@@ -911,7 +910,7 @@ const tomMilestones = [
 ];
 
 /* ============================================================
-   NEWS TICKER LINES
+   NEWS TICKER
 ============================================================ */
 const newsLines = [
   "Local man Max Sheffield eating poop at record rates \u2014 doctors baffled",
@@ -940,6 +939,15 @@ const newsLines = [
    CHANGELOG
 ============================================================ */
 const changelogData = [
+  {
+    date: '2026-06-18',
+    title: 'Prestige Cap — Max x100',
+    changes: [
+      'Prestige multiplier is now hard-capped at x100 — no matter how many times you prestige, it will never exceed x100 total',
+      'The Prestige button is now hidden once the x100 cap is reached, with a message informing you that you have hit the maximum',
+      'Existing saves that already exceeded x100 will be clamped down to x100 on next load',
+    ]
+  },
   {
     date: '2026-06-18',
     title: 'Lochlan Hawkes Edition — Loading Screen & Rebrand',
@@ -1002,38 +1010,12 @@ const changelogData = [
     title: 'The Big Expansion Update',
     changes: [
       'Added 6 new themed Areas (Backyard, Pearl Town, Industrial District, Underworld, Outer Space, Cosmic Realm) that unlock progressively as you earn more poops',
-      'Added 10 new producers, bringing the total to 28 (Poop Garden, Poop Bakery, Poop Mall, Poop Stadium, Power Plant, Skyscraper, Crystal Cave, Earth Core Tap, Lunar Base, Orbital Station)',
+      'Added 10 new producers, bringing the total to 28',
       'Added dozens of new upgrades, bringing the total to over 120',
       'Added 12 new achievements, bringing the total to 47',
       'Added Shift-click "buy max" on producers',
       'Added this Update Log tab',
-      'Nerfed Golden Poops back to their original, simple version (60 sec of CPS or 10% of stash)',
       'Fixed save/load bugs where corrupted numeric fields could turn into NaN',
-      'Fixed export save fallback when clipboard access is unavailable',
-      'Fixed an issue where a single broken achievement check could prevent all others from being checked',
-    ]
-  },
-  {
-    date: '2026-06-16',
-    title: 'Golden Poop Overhaul (later reverted)',
-    changes: [
-      'Golden Poops temporarily became a multi-phase chase mini-game with screen shake, decoys, and stacked effects',
-      'This was reverted in the next update at user request for being too disruptive',
-    ]
-  },
-  {
-    date: '2026-06-16',
-    title: 'Milestone Images Update',
-    changes: [
-      'Max\'s image now changes automatically at 9 lifetime poop milestones (100, 1K, 10K, 100K, 1M, 10M, 100M, 100B)',
-      'Added a milestone label under Max describing his current state',
-    ]
-  },
-  {
-    date: '2026-06-16',
-    title: 'Bug Fix Update',
-    changes: [
-      'Fixed a critical syntax error from unescaped apostrophes that broke all clicking and tab switching',
     ]
   },
   {
@@ -1049,6 +1031,11 @@ const changelogData = [
     ]
   },
 ];
+
+/* ============================================================
+   PRESTIGE CAP
+============================================================ */
+const PRESTIGE_CAP = 100;
 
 /* ============================================================
    STATE
@@ -1124,7 +1111,10 @@ function calcClickValue() {
   return base * getTempBuffMultiplier();
 }
 
+// Returns the multiplier gain from a prestige, or null if ineligible
+// Also returns null if already at the cap
 function prestigeGain() {
+  if (state.prestigeMultiplier >= PRESTIGE_CAP) return null;
   const gain = Math.floor(state.totalPoopsEarned / 5e12);
   return gain > 0 ? 1 + gain * 0.05 : null;
 }
@@ -1190,6 +1180,11 @@ function loadGame() {
       if (typeof state.buildingMultipliers[b.id] !== 'number' || isNaN(state.buildingMultipliers[b.id])) state.buildingMultipliers[b.id]=1;
     });
     if (typeof state.prestigeMultiplier !== 'number' || isNaN(state.prestigeMultiplier)) state.prestigeMultiplier=1;
+    // Clamp any pre-existing saves that exceeded the cap
+    if (state.prestigeMultiplier > PRESTIGE_CAP) {
+      state.prestigeMultiplier = PRESTIGE_CAP;
+      showNotice('\u26a0\ufe0f Prestige multiplier clamped to the x100 cap.', 4000);
+    }
     if (typeof state.goldenPoopsClicked !== 'number' || isNaN(state.goldenPoopsClicked)) state.goldenPoopsClicked=0;
     if (typeof state.gameBeaten !== 'boolean') state.gameBeaten=false;
     if (typeof state.doubleProdUntil !== 'number' || isNaN(state.doubleProdUntil)) state.doubleProdUntil=0;
@@ -1271,6 +1266,8 @@ function importSave() {
       if(typeof state.buildings[b.id] !== 'number') state.buildings[b.id]=0;
       if(typeof state.buildingMultipliers[b.id] !== 'number') state.buildingMultipliers[b.id]=1;
     });
+    // Clamp on import too
+    if (state.prestigeMultiplier > PRESTIGE_CAP) state.prestigeMultiplier = PRESTIGE_CAP;
     saveGame(true); renderAll(); showNotice('\u2705 Save imported!');
   } catch(e){ alert('Invalid save string.'); }
 }
@@ -1287,7 +1284,12 @@ function resetGame() {
 function doPrestige() {
   const gain = prestigeGain();
   if (!gain) return;
-  if (!confirm('Prestige? You will lose all poops and producers, but gain a permanent x'+gain.toFixed(2)+' bonus on top of your current x'+state.prestigeMultiplier.toFixed(2)+'!')) return;
+
+  // Calculate what the new multiplier would be, clamped to cap
+  const newMult = Math.min(PRESTIGE_CAP, (state.prestigeMultiplier || 1) * gain);
+  const actualGain = newMult / (state.prestigeMultiplier || 1);
+
+  if (!confirm('Prestige? You will lose all poops and producers, but gain a permanent x' + actualGain.toFixed(2) + ' bonus (total: x' + newMult.toFixed(2) + ')' + (newMult >= PRESTIGE_CAP ? ' — THIS IS THE MAXIMUM!' : '') + '!')) return;
 
   state.poops=0;
   state.totalPoopsEarned=0;
@@ -1299,9 +1301,11 @@ function doPrestige() {
   buildingData.forEach(b=>{ state.buildings[b.id]=0; state.buildingMultipliers[b.id]=1; });
   state.upgradesBought={};
   state.prestigeCount=(state.prestigeCount||0)+1;
-  state.prestigeMultiplier=(state.prestigeMultiplier||1)*gain;
+  state.prestigeMultiplier = newMult;
+
   saveGame(true); renderAll();
-  showNotice('\u2697\ufe0f Prestige! You now have a x'+state.prestigeMultiplier.toFixed(2)+' permanent bonus!',4000);
+  const capMsg = state.prestigeMultiplier >= PRESTIGE_CAP ? ' \ud83d\udd12 MAX PRESTIGE REACHED!' : '';
+  showNotice('\u2697\ufe0f Prestige! You now have a x'+state.prestigeMultiplier.toFixed(2)+' permanent bonus!'+capMsg, 4000);
 }
 
 /* ============================================================
@@ -1765,7 +1769,7 @@ function renderStats() {
     ['Achievements', Object.keys(state.achievementsUnlocked).length+' / '+achievementData.length],
     ['Golden Poops Clicked', state.goldenPoopsClicked],
     ['Global Multiplier', 'x'+state.globalMultiplier.toFixed(2)],
-    ['Prestige Multiplier', 'x'+state.prestigeMultiplier.toFixed(2)],
+    ['Prestige Multiplier', 'x'+state.prestigeMultiplier.toFixed(2) + (state.prestigeMultiplier >= PRESTIGE_CAP ? ' (MAXED)' : '')],
     ['Prestige Count', state.prestigeCount],
     ['Current Area', currentArea().name],
     ['Session Time', formatTime(Date.now()-sessionStart)],
@@ -1802,7 +1806,7 @@ function formatTime(ms) {
 }
 
 /* ============================================================
-   CLOCK TAMPER DETECTION (mid-session)
+   CLOCK TAMPER DETECTION
 ============================================================ */
 let lastWallClock = Date.now();
 let lastMonotonic = performance.now();
@@ -1856,19 +1860,28 @@ function updateDisplay() {
   document.getElementById('perSec').textContent=formatNumber(calcCps())+' poops/sec';
   document.getElementById('clickVal').textContent='+'+formatNumber(calcClickValue())+' per click';
   document.getElementById('globalMult').textContent='x'+(state.globalMultiplier).toFixed(2);
-  document.getElementById('prestigeBonus').textContent='x'+(state.prestigeMultiplier).toFixed(2);
+  document.getElementById('prestigeBonus').textContent='x'+(state.prestigeMultiplier).toFixed(2)+(state.prestigeMultiplier >= PRESTIGE_CAP ? ' (MAX)' : '');
+
   document.getElementById('stats').innerHTML=
     'Total: '+formatNumber(state.totalPoopsEarned)+' \ud83d\udca9<br>'+
     'Clicks: '+formatNumber(state.totalClicks)+' | Prestige: '+state.prestigeCount;
 
   const pg=prestigeGain();
   const pbtn=document.getElementById('prestigeBtn');
-  if (pg && state.totalPoopsEarned>=1e12) {
+  const pcountEl=document.getElementById('prestigeCount');
+
+  if (state.prestigeMultiplier >= PRESTIGE_CAP) {
+    // Cap reached — hide button, show message
+    pbtn.style.display='none';
+    pcountEl.textContent='\ud83d\udd12 Max prestige reached! Bonus: x'+state.prestigeMultiplier.toFixed(2)+' | Prestiges: '+state.prestigeCount;
+  } else if (pg && state.totalPoopsEarned>=1e12) {
+    const newMult = Math.min(PRESTIGE_CAP, (state.prestigeMultiplier||1)*pg);
     pbtn.style.display='inline-block';
-    document.getElementById('prestigeMult').textContent=pg.toFixed(2);
+    document.getElementById('prestigeMult').textContent=newMult.toFixed(2);
+    pcountEl.textContent=state.prestigeCount>0?'Prestiges: '+state.prestigeCount+' | Bonus: x'+state.prestigeMultiplier.toFixed(2):'Reach 5 trillion total poops to prestige!';
   } else {
     pbtn.style.display='none';
-    document.getElementById('prestigeCount').textContent=state.prestigeCount>0?'Prestiges: '+state.prestigeCount+' | Bonus: x'+state.prestigeMultiplier.toFixed(2):'Reach 5 trillion total poops to prestige!';
+    pcountEl.textContent=state.prestigeCount>0?'Prestiges: '+state.prestigeCount+' | Bonus: x'+state.prestigeMultiplier.toFixed(2):'Reach 5 trillion total poops to prestige!';
   }
 
   document.querySelectorAll('#buildings .building[data-bid]').forEach(el=>{
