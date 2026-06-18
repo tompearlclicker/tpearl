@@ -1,432 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> 
+<head>
 <meta charset="UTF-8">
 <title>Tom Pearl: Poop Clicker</title>
 <link rel="icon" type="image/png" href="logo1.png">
 <style>
-* { box-sizing: border-box; font-family: 'Comic Sans MS', 'Trebuchet MS', sans-serif; margin:0; padding:0; }
-  html::-webkit-scrollbar { display: none; }
-html { scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth; }
-body {
-  background: linear-gradient(135deg, #3a2010, #6a3a1c, #3a2010);
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  overflow-x: hidden;
-  transition: background 2.5s ease-in-out;
-}
-body.area-backyard {
-  background: linear-gradient(135deg, #3a2010, #6a3a1c, #3a2010);
-}
-body.area-town {
-  background: linear-gradient(135deg, #2b1f3a, #5a3d6a, #7a4a3a);
-}
-body.area-industry {
-  background: linear-gradient(135deg, #1c1c1f, #3a3a40, #5a4a2a);
-}
-body.area-under {
-  background: linear-gradient(135deg, #1a0505, #4a0f0f, #6a1a0a);
-}
-body.area-space {
-  background: linear-gradient(135deg, #02040f, #0a1530, #160a35);
-}
-body.area-cosmic {
-  background: linear-gradient(135deg, #1a0030, #4a0a6a, #7a1a8a, #2a0a4a);
-}
-#ticker {
-  background: rgba(0,0,0,0.5);
-  padding: 5px 0;
-  overflow: hidden;
-  white-space: nowrap;
-  font-size: 0.85em;
-  border-bottom: 2px solid #ffec8b;
-  flex-shrink: 0;
-}
-#tickerInner {
-  display: inline-block;
-  padding-left: 100%;
-  animation: ticker 22s linear infinite;
-}
-@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-100%); } }
-#main { display: flex; flex: 1; min-height: 0; }
-#left {
-  flex: 1.15;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 16px 14px;
-  text-align: center;
-  border-right: 2px solid rgba(255,255,255,0.1);
-  overflow-y: auto;
-}
-#right {
-  flex: 1;
-  background: rgba(0,0,0,0.35);
-  display: flex;
-  flex-direction: column;
-  max-height: calc(100vh - 35px);
-}
-h1 { margin: 4px 0 2px; text-shadow: 3px 3px #000; font-size: 1.5em; }
-#areaLabel { font-size: 0.85em; opacity: 0.8; margin-bottom: 4px; color: #ffec8b; }
-#count { font-size: 2.4em; font-weight: bold; text-shadow: 2px 2px #000; margin: 2px 0; }
-#perSec { font-size: 0.95em; opacity: 0.9; margin-bottom: 2px; }
-#clickVal { font-size: 0.8em; opacity: 0.75; margin-bottom: 6px; }
-#tomWrap { position: relative; display: inline-block; margin: 4px 0; }
-#tomImg {
-  width: 200px; height: 200px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 7px solid #8a5a2c;
-  cursor: pointer;
-  box-shadow: 0 0 25px rgba(255,220,50,0.3), 0 0 10px rgba(0,0,0,0.8);
-  transition: transform 0.05s;
-  background: #3a2010;
-  display: block;
-  user-select: none;
-  -webkit-user-drag: none;
-}
-#tomImg:active { transform: scale(0.92); }
-#milestoneLabel { font-size: 0.78em; opacity: 0.7; margin-top: 4px; min-height: 1.2em; }
-.floatup {
-  position: absolute;
-  font-weight: bold;
-  color: #ffec8b;
-  pointer-events: none;
-  animation: floatUp 1s forwards;
-  text-shadow: 1px 1px #000;
-  font-size: 1.25em;
-  z-index: 10;
-  left: 50%;
-  top: 50%;
-}
-@keyframes floatUp { from { opacity:1; transform:translate(-50%,-50%); } to { opacity:0; transform:translate(-50%,-130%); } }
-#goldenPoop {
-  position: absolute;
-  font-size: 2.1em;
-  cursor: pointer;
-  animation: bobble 0.5s ease-in-out infinite alternate;
-  display: none;
-  z-index: 20;
-  filter: drop-shadow(0 0 8px gold);
-  user-select: none;
-}
-@keyframes bobble { from { transform: scale(1) rotate(-5deg); } to { transform: scale(1.15) rotate(5deg); } }
-#stats { font-size: 0.76em; opacity: 0.75; margin: 5px 0; line-height: 1.55; }
-#prestigeArea { margin: 6px 0; }
-#prestigeBtn {
-  background: linear-gradient(135deg, #7b1fa2, #4a148c);
-  border: 2px solid #ce93d8;
-  color: #fff;
-  padding: 7px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 0.95em;
-  display: none;
-}
-#prestigeBtn:hover { background: linear-gradient(135deg, #9c27b0, #6a1b9a); }
-#prestigeCount { font-size: 0.78em; opacity: 0.8; }
-#saveBtns { margin-top: 8px; display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
-button.ctrl {
-  background: #6a3a1c;
-  border: 2px solid #ffec8b;
-  color: #fff;
-  padding: 5px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 0.8em;
-}
-button.ctrl:hover { background: #8a5a2c; }
-#notice {
-  position: fixed; top: 45px; right: 10px;
-  background: #2e7d32; padding: 8px 16px;
-  border-radius: 6px; opacity: 0;
-  transition: opacity 0.4s; pointer-events: none;
-  z-index: 100; max-width: 300px; text-align: center;
-}
-#notice.show { opacity: 1; }
-#achievePopup {
-  position: fixed; bottom: 20px; right: 10px;
-  background: linear-gradient(135deg, #b8860b, #8b6914);
-  border: 2px solid #ffec8b;
-  padding: 10px 16px; border-radius: 8px;
-  opacity: 0; transition: opacity 0.5s;
-  pointer-events: none; z-index: 100;
-  max-width: 250px;
-}
-#achievePopup.show { opacity: 1; }
-#tabs { display: flex; gap: 3px; padding: 8px 8px 0; flex-wrap: wrap; }
-.tab {
-  flex: 1; min-width: 70px; text-align: center; padding: 7px 4px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 6px 6px 0 0;
-  cursor: pointer; font-weight: bold; font-size: 0.8em;
-}
-.tab.active { background: rgba(255,255,255,0.2); border-bottom: 2px solid #ffec8b; color: #ffec8b; }
-#tabBody { flex: 1; overflow-y: auto; padding: 8px; }
-.tabContent { display: none; }
-.tabContent.active { display: block; }
-.upgrade, .building {
-  background: rgba(255,255,255,0.07);
-  border: 2px solid rgba(255,255,255,0.12);
-  border-radius: 8px; padding: 7px 9px;
-  margin-bottom: 5px; cursor: pointer;
-  display: flex; justify-content: space-between;
-  align-items: center; transition: background 0.12s, border-color 0.12s;
-}
-.building:hover, .upgrade:hover { background: rgba(255,255,255,0.18); border-color: #ffec8b; }
-.disabled { opacity: 0.38; cursor: not-allowed; }
-.disabled:hover { background: rgba(255,255,255,0.07) !important; border-color: rgba(255,255,255,0.12) !important; }
-.locked-building { opacity: 0.3; filter: grayscale(0.6); cursor: not-allowed; }
-.name { font-weight: bold; font-size: 0.9em; }
-.desc { font-size: 0.73em; opacity: 0.78; margin-top: 1px; }
-.price { font-size: 0.82em; white-space: nowrap; margin-left: 8px; text-align: right; }
-.owned {
-  background: #4a2e10; border-radius: 50%;
-  min-width: 26px; height: 26px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.78em; margin-left: 6px; font-weight: bold;
-}
-.secLabel {
-  font-size: 0.76em; color: #ffec8b; margin: 8px 0 3px;
-  text-transform: uppercase; letter-spacing: 1px;
-  border-bottom: 1px solid rgba(255,236,139,0.3); padding-bottom: 2px;
-}
-.areaHeader {
-  font-size: 0.95em; font-weight: bold; margin: 12px 0 4px;
-  padding: 6px 8px; border-radius: 6px;
-  background: rgba(255,236,139,0.12);
-  border-left: 4px solid #ffec8b;
-}
-.achieve {
-  background: rgba(184,134,11,0.15);
-  border: 2px solid rgba(184,134,11,0.4);
-  border-radius: 8px; padding: 7px 10px; margin-bottom: 5px;
-  display: flex; align-items: center; gap: 10px;
-}
-.achieve.locked { opacity: 0.35; filter: grayscale(0.8); }
-.achieve-icon { font-size: 1.7em; }
-.achieve-name { font-weight: bold; font-size: 0.86em; }
-.achieve-desc { font-size: 0.73em; opacity: 0.8; }
-.stat-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.82em; }
-.stat-val { color: #ffec8b; font-weight: bold; }
-#multiplierBar { font-size: 0.76em; background: rgba(0,0,0,0.3); border-radius: 6px; padding: 5px 8px; margin: 5px 0; }
-.changelog-entry {
-  background: rgba(255,255,255,0.07);
-  border: 2px solid rgba(255,255,255,0.12);
-  border-left: 4px solid #ffec8b;
-  border-radius: 8px;
-  padding: 9px 12px;
-  margin-bottom: 8px;
-}
-.changelog-date {
-  font-size: 0.72em;
-  opacity: 0.7;
-  color: #ffec8b;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.changelog-title {
-  font-weight: bold;
-  font-size: 0.92em;
-  margin: 2px 0 5px;
-}
-.changelog-list {
-  font-size: 0.8em;
-  opacity: 0.85;
-  margin: 0;
-  padding-left: 18px;
-  line-height: 1.5;
-}
-.changelog-list li { margin-bottom: 2px; }
-
-#janOverlay {
-  position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  background: radial-gradient(circle at 50% 40%, #4a148c, #1a0033 80%);
-  z-index: 99999;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-#janOverlay.show { display: flex; }
-#janConfettiLayer {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  pointer-events: none;
-}
-.jan-confetti {
-  position: absolute;
-  top: -40px;
-  font-size: 1.8em;
-  animation: janFall linear forwards;
-  pointer-events: none;
-}
-@keyframes janFall {
-  from { transform: translateY(0) rotate(0deg); opacity: 1; }
-  to { transform: translateY(110vh) rotate(720deg); opacity: 0.9; }
-}
-#janContent {
-  position: relative;
-  text-align: center;
-  background: rgba(0,0,0,0.45);
-  border: 3px solid #ffec8b;
-  border-radius: 20px;
-  padding: 40px 50px;
-  max-width: 90vw;
-  box-shadow: 0 0 60px rgba(255,236,139,0.5);
-  animation: janPopIn 0.6s ease-out;
-}
-@keyframes janPopIn {
-  0% { transform: scale(0.5); opacity: 0; }
-  70% { transform: scale(1.08); }
-  100% { transform: scale(1); opacity: 1; }
-}
-#janTitle {
-  font-size: 1.8em;
-  font-weight: bold;
-  text-shadow: 2px 2px #000;
-  margin-bottom: 10px;
-}
-#janSubtitle {
-  font-size: 1em;
-  opacity: 0.85;
-  margin-bottom: 4px;
-}
-#janName {
-  font-size: 4em;
-  font-weight: bold;
-  color: #ffec8b;
-  text-shadow: 0 0 20px gold, 3px 3px #000;
-  letter-spacing: 4px;
-  margin: 6px 0 16px;
-  animation: janGlow 1.4s ease-in-out infinite alternate;
-}
-@keyframes janGlow {
-  from { text-shadow: 0 0 15px gold, 3px 3px #000; }
-  to { text-shadow: 0 0 40px gold, 0 0 60px orange, 3px 3px #000; }
-}
-#janMessage {
-  font-size: 0.95em;
-  opacity: 0.9;
-  line-height: 1.6;
-  margin-bottom: 22px;
-}
-#janCloseBtn {
-  background: linear-gradient(135deg, #ffec8b, #f4c430);
-  border: none;
-  color: #4a2e10;
-  font-weight: bold;
-  font-size: 1em;
-  padding: 10px 24px;
-  border-radius: 10px;
-  cursor: pointer;
-}
-#janCloseBtn:hover { background: linear-gradient(135deg, #fff3b0, #ffd84d); }
-
-.rage-message {
-  position: fixed;
-  font-weight: bold;
-  color: #ff1a1a;
-  text-shadow: 2px 2px #000, 0 0 12px red;
-  z-index: 999999;
-  pointer-events: none;
-  animation: rageFlash 2.2s ease-out forwards;
-  font-family: 'Comic Sans MS', sans-serif;
-}
-@keyframes rageFlash {
-  0% { opacity: 0; transform: scale(0.5); }
-  15% { opacity: 1; transform: scale(1.1); }
-  80% { opacity: 1; }
-  100% { opacity: 0; transform: scale(0.9) translateY(-20px); }
-}
-body.rage-shake {
-  animation: rageBodyShake 0.15s linear infinite;
-}
-@keyframes rageBodyShake {
-  0% { transform: translate(0,0); filter: hue-rotate(0deg) invert(0); }
-  20% { transform: translate(-8px,5px); filter: hue-rotate(60deg); }
-  40% { transform: translate(8px,-5px); filter: hue-rotate(180deg) invert(0.2); }
-  60% { transform: translate(-6px,-6px); filter: hue-rotate(270deg); }
-  80% { transform: translate(6px,6px); filter: hue-rotate(330deg) invert(0.1); }
-  100% { transform: translate(0,0); filter: hue-rotate(360deg); }
-}
-
-#doubleProdLabel {
-  display: none;
-  font-size: 0.8em;
-  font-weight: bold;
-  background: linear-gradient(135deg, #ffb300, #ff7043);
-  border-radius: 6px;
-  padding: 4px 10px;
-  margin: 2px 0 4px;
-  animation: doubleProdPulse 1s ease-in-out infinite alternate;
-}
-@keyframes doubleProdPulse { from { opacity: 0.85; } to { opacity: 1; } }
-
-#minigameOverlay {
-  position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.75);
-  z-index: 99997;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-#minigameOverlay.show { display: flex; }
-#minigameBox {
-  background: linear-gradient(135deg, #3a2010, #5a3825);
-  border: 3px solid #ffec8b;
-  border-radius: 16px;
-  padding: 20px 24px;
-  max-width: 92vw;
-  width: 460px;
-  text-align: center;
-  box-shadow: 0 0 40px rgba(255,236,139,0.4);
-}
-#minigameTitle { font-size: 1.3em; font-weight: bold; margin-bottom: 4px; text-shadow: 1px 1px #000; }
-#minigameSub { font-size: 0.85em; opacity: 0.85; margin-bottom: 10px; }
-#minigameHud {
-  display: flex; justify-content: space-between;
-  font-size: 0.95em; margin-bottom: 10px;
-  background: rgba(0,0,0,0.3); border-radius: 6px; padding: 6px 12px;
-}
-#minigameField {
-  position: relative;
-  width: 100%;
-  height: 240px;
-  background: rgba(0,0,0,0.35);
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 10px;
-}
-.minigame-target {
-  position: absolute;
-  font-size: 2em;
-  cursor: pointer;
-  animation: minigameTargetPop 0.25s ease-out, minigameTargetFade 2.2s linear forwards;
-  user-select: none;
-}
-@keyframes minigameTargetPop { from { transform: scale(0); } to { transform: scale(1); } }
-@keyframes minigameTargetFade { 0%,75% { opacity: 1; } 100% { opacity: 0; } }
-#minigameResult {
-  font-size: 1em;
-  font-weight: bold;
-  min-height: 1.4em;
-  display: none;
-}
+*{box-sizing:border-box;font-family:'Comic Sans MS','Trebuchet MS',sans-serif;margin:0;padding:0}
+html::-webkit-scrollbar{display:none}
+html{scrollbar-width:none;-ms-overflow-style:none;scroll-behavior:smooth}
+body{background:linear-gradient(135deg,#3a2010,#6a3a1c,#3a2010);color:#fff;display:flex;flex-direction:column;min-height:100vh;overflow-x:hidden;transition:background 2.5s ease-in-out}
+body.area-backyard{background:linear-gradient(135deg,#3a2010,#6a3a1c,#3a2010)}
+body.area-town{background:linear-gradient(135deg,#2b1f3a,#5a3d6a,#7a4a3a)}
+body.area-industry{background:linear-gradient(135deg,#1c1c1f,#3a3a40,#5a4a2a)}
+body.area-under{background:linear-gradient(135deg,#1a0505,#4a0f0f,#6a1a0a)}
+body.area-space{background:linear-gradient(135deg,#02040f,#0a1530,#160a35)}
+body.area-cosmic{background:linear-gradient(135deg,#1a0030,#4a0a6a,#7a1a8a,#2a0a4a)}
+#ticker{background:rgba(0,0,0,.5);padding:5px 0;overflow:hidden;white-space:nowrap;font-size:.85em;border-bottom:2px solid #ffec8b;flex-shrink:0}
+#tickerInner{display:inline-block;padding-left:100%;animation:ticker 22s linear infinite}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+#main{display:flex;flex:1;min-height:0}
+#left{flex:1.15;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:16px 14px;text-align:center;border-right:2px solid rgba(255,255,255,.1);overflow-y:auto}
+#right{flex:1;background:rgba(0,0,0,.35);display:flex;flex-direction:column;max-height:calc(100vh - 35px)}
+h1{margin:4px 0 2px;text-shadow:3px 3px #000;font-size:1.5em}
+#areaLabel{font-size:.85em;opacity:.8;margin-bottom:4px;color:#ffec8b}
+#count{font-size:2.4em;font-weight:bold;text-shadow:2px 2px #000;margin:2px 0}
+#perSec{font-size:.95em;opacity:.9;margin-bottom:2px}
+#clickVal{font-size:.8em;opacity:.75;margin-bottom:6px}
+#tomWrap{position:relative;display:inline-block;margin:4px 0}
+#tomImg{width:200px;height:200px;object-fit:cover;border-radius:50%;border:7px solid #8a5a2c;cursor:pointer;box-shadow:0 0 25px rgba(255,220,50,.3),0 0 10px rgba(0,0,0,.8);transition:transform .05s;background:#3a2010;display:block;user-select:none;-webkit-user-drag:none}
+#tomImg:active{transform:scale(.92)}
+#milestoneLabel{font-size:.78em;opacity:.7;margin-top:4px;min-height:1.2em}
+.floatup{position:absolute;font-weight:bold;color:#ffec8b;pointer-events:none;animation:floatUp 1s forwards;text-shadow:1px 1px #000;font-size:1.25em;z-index:10;left:50%;top:50%}
+@keyframes floatUp{from{opacity:1;transform:translate(-50%,-50%)}to{opacity:0;transform:translate(-50%,-130%)}}
+#goldenPoop{position:absolute;font-size:2.1em;cursor:pointer;animation:bobble .5s ease-in-out infinite alternate;display:none;z-index:20;filter:drop-shadow(0 0 8px gold);user-select:none}
+@keyframes bobble{from{transform:scale(1) rotate(-5deg)}to{transform:scale(1.15) rotate(5deg)}}
+#stats{font-size:.76em;opacity:.75;margin:5px 0;line-height:1.55}
+#prestigeArea{margin:6px 0}
+#prestigeBtn{background:linear-gradient(135deg,#7b1fa2,#4a148c);border:2px solid #ce93d8;color:#fff;padding:7px 16px;border-radius:8px;cursor:pointer;font-weight:bold;font-size:.95em;display:none}
+#prestigeBtn:hover{background:linear-gradient(135deg,#9c27b0,#6a1b9a)}
+#prestigeCount{font-size:.78em;opacity:.8}
+#saveBtns{margin-top:8px;display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+button.ctrl{background:#6a3a1c;border:2px solid #ffec8b;color:#fff;padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:.8em}
+button.ctrl:hover{background:#8a5a2c}
+#notice{position:fixed;top:45px;right:10px;background:#2e7d32;padding:8px 16px;border-radius:6px;opacity:0;transition:opacity .4s;pointer-events:none;z-index:100;max-width:300px;text-align:center}
+#notice.show{opacity:1}
+#achievePopup{position:fixed;bottom:20px;right:10px;background:linear-gradient(135deg,#b8860b,#8b6914);border:2px solid #ffec8b;padding:10px 16px;border-radius:8px;opacity:0;transition:opacity .5s;pointer-events:none;z-index:100;max-width:250px}
+#achievePopup.show{opacity:1}
+#tabs{display:flex;gap:3px;padding:8px 8px 0;flex-wrap:wrap}
+.tab{flex:1;min-width:70px;text-align:center;padding:7px 4px;background:rgba(255,255,255,.1);border-radius:6px 6px 0 0;cursor:pointer;font-weight:bold;font-size:.8em}
+.tab.active{background:rgba(255,255,255,.2);border-bottom:2px solid #ffec8b;color:#ffec8b}
+#tabBody{flex:1;overflow-y:auto;padding:8px}
+.tabContent{display:none}
+.tabContent.active{display:block}
+.upgrade,.building{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.12);border-radius:8px;padding:7px 9px;margin-bottom:5px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .12s,border-color .12s}
+.building:hover,.upgrade:hover{background:rgba(255,255,255,.18);border-color:#ffec8b}
+.disabled{opacity:.38;cursor:not-allowed}
+.disabled:hover{background:rgba(255,255,255,.07)!important;border-color:rgba(255,255,255,.12)!important}
+.name{font-weight:bold;font-size:.9em}
+.desc{font-size:.73em;opacity:.78;margin-top:1px}
+.price{font-size:.82em;white-space:nowrap;margin-left:8px;text-align:right}
+.owned{background:#4a2e10;border-radius:50%;min-width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:.78em;margin-left:6px;font-weight:bold}
+.secLabel{font-size:.76em;color:#ffec8b;margin:8px 0 3px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid rgba(255,236,139,.3);padding-bottom:2px}
+.areaHeader{font-size:.95em;font-weight:bold;margin:12px 0 4px;padding:6px 8px;border-radius:6px;background:rgba(255,236,139,.12);border-left:4px solid #ffec8b}
+.achieve{background:rgba(184,134,11,.15);border:2px solid rgba(184,134,11,.4);border-radius:8px;padding:7px 10px;margin-bottom:5px;display:flex;align-items:center;gap:10px}
+.achieve.locked{opacity:.35;filter:grayscale(.8)}
+.achieve-icon{font-size:1.7em}
+.achieve-name{font-weight:bold;font-size:.86em}
+.achieve-desc{font-size:.73em;opacity:.8}
+.stat-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:.82em}
+.stat-val{color:#ffec8b;font-weight:bold}
+#multiplierBar{font-size:.76em;background:rgba(0,0,0,.3);border-radius:6px;padding:5px 8px;margin:5px 0}
+.changelog-entry{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.12);border-left:4px solid #ffec8b;border-radius:8px;padding:9px 12px;margin-bottom:8px}
+.changelog-date{font-size:.72em;opacity:.7;color:#ffec8b;font-weight:bold;text-transform:uppercase;letter-spacing:.5px}
+.changelog-title{font-weight:bold;font-size:.92em;margin:2px 0 5px}
+.changelog-list{font-size:.8em;opacity:.85;margin:0;padding-left:18px;line-height:1.5}
+.changelog-list li{margin-bottom:2px}
+#janOverlay{position:fixed;top:0;left:0;width:100vw;height:100vh;background:radial-gradient(circle at 50% 40%,#4a148c,#1a0033 80%);z-index:99999;display:none;align-items:center;justify-content:center;overflow:hidden}
+#janOverlay.show{display:flex}
+#janConfettiLayer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+.jan-confetti{position:absolute;top:-40px;font-size:1.8em;animation:janFall linear forwards;pointer-events:none}
+@keyframes janFall{from{transform:translateY(0) rotate(0deg);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:.9}}
+#janContent{position:relative;text-align:center;background:rgba(0,0,0,.45);border:3px solid #ffec8b;border-radius:20px;padding:40px 50px;max-width:90vw;box-shadow:0 0 60px rgba(255,236,139,.5);animation:janPopIn .6s ease-out}
+@keyframes janPopIn{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+#janTitle{font-size:1.8em;font-weight:bold;text-shadow:2px 2px #000;margin-bottom:10px}
+#janSubtitle{font-size:1em;opacity:.85;margin-bottom:4px}
+#janName{font-size:4em;font-weight:bold;color:#ffec8b;text-shadow:0 0 20px gold,3px 3px #000;letter-spacing:4px;margin:6px 0 16px;animation:janGlow 1.4s ease-in-out infinite alternate}
+@keyframes janGlow{from{text-shadow:0 0 15px gold,3px 3px #000}to{text-shadow:0 0 40px gold,0 0 60px orange,3px 3px #000}}
+#janMessage{font-size:.95em;opacity:.9;line-height:1.6;margin-bottom:22px}
+#janCloseBtn{background:linear-gradient(135deg,#ffec8b,#f4c430);border:none;color:#4a2e10;font-weight:bold;font-size:1em;padding:10px 24px;border-radius:10px;cursor:pointer}
+#janCloseBtn:hover{background:linear-gradient(135deg,#fff3b0,#ffd84d)}
+.rage-message{position:fixed;font-weight:bold;color:#ff1a1a;text-shadow:2px 2px #000,0 0 12px red;z-index:999999;pointer-events:none;animation:rageFlash 2.2s ease-out forwards;font-family:'Comic Sans MS',sans-serif}
+@keyframes rageFlash{0%{opacity:0;transform:scale(.5)}15%{opacity:1;transform:scale(1.1)}80%{opacity:1}100%{opacity:0;transform:scale(.9) translateY(-20px)}}
+body.rage-shake{animation:rageBodyShake .15s linear infinite}
+@keyframes rageBodyShake{0%{transform:translate(0,0);filter:hue-rotate(0deg) invert(0)}20%{transform:translate(-8px,5px);filter:hue-rotate(60deg)}40%{transform:translate(8px,-5px);filter:hue-rotate(180deg) invert(.2)}60%{transform:translate(-6px,-6px);filter:hue-rotate(270deg)}80%{transform:translate(6px,6px);filter:hue-rotate(330deg) invert(.1)}100%{transform:translate(0,0);filter:hue-rotate(360deg)}}
+#doubleProdLabel{display:none;font-size:.8em;font-weight:bold;background:linear-gradient(135deg,#ffb300,#ff7043);border-radius:6px;padding:4px 10px;margin:2px 0 4px;animation:doubleProdPulse 1s ease-in-out infinite alternate}
+@keyframes doubleProdPulse{from{opacity:.85}to{opacity:1}}
+#minigameOverlay{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,.75);z-index:99997;display:none;align-items:center;justify-content:center}
+#minigameOverlay.show{display:flex}
+#minigameBox{background:linear-gradient(135deg,#3a2010,#5a3825);border:3px solid #ffec8b;border-radius:16px;padding:20px 24px;max-width:92vw;width:460px;text-align:center;box-shadow:0 0 40px rgba(255,236,139,.4)}
+#minigameTitle{font-size:1.3em;font-weight:bold;margin-bottom:4px;text-shadow:1px 1px #000}
+#minigameSub{font-size:.85em;opacity:.85;margin-bottom:10px}
+#minigameHud{display:flex;justify-content:space-between;font-size:.95em;margin-bottom:10px;background:rgba(0,0,0,.3);border-radius:6px;padding:6px 12px}
+#minigameField{position:relative;width:100%;height:240px;background:rgba(0,0,0,.35);border-radius:10px;overflow:hidden;margin-bottom:10px}
+.minigame-target{position:absolute;font-size:2em;cursor:pointer;animation:minigameTargetPop .25s ease-out,minigameTargetFade 2.2s linear forwards;user-select:none}
+@keyframes minigameTargetPop{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes minigameTargetFade{0%,75%{opacity:1}100%{opacity:0}}
+#minigameResult{font-size:1em;font-weight:bold;min-height:1.4em;display:none}
+#loadScreen{position:fixed;top:0;left:0;width:100vw;height:100vh;background:linear-gradient(135deg,#3a2010,#6a3a1c,#3a2010);z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .7s}
+#loadScreen.fade{opacity:0;pointer-events:none}
+#loadImg{width:180px;height:180px;object-fit:cover;border-radius:50%;border:7px solid #8a5a2c;box-shadow:0 0 35px rgba(255,220,50,.5);animation:loadPulse 1.2s ease-in-out infinite alternate}
+@keyframes loadPulse{from{box-shadow:0 0 20px rgba(255,220,50,.3)}to{box-shadow:0 0 50px rgba(255,220,50,.8),0 0 80px rgba(255,150,0,.4)}}
+#loadTitle{font-size:2em;font-weight:bold;text-shadow:3px 3px #000;color:#ffec8b}
+#loadSub{font-size:.9em;opacity:.75}
+#loadBar{width:220px;height:8px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden}
+#loadBarFill{height:100%;width:0%;background:linear-gradient(90deg,#ffb300,#ffec8b);border-radius:4px;transition:width .08s linear}
+#adminOverlay{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,.82);z-index:99998;display:none;align-items:center;justify-content:center}
+#adminOverlay.show{display:flex}
+#adminBox{background:linear-gradient(135deg,#0a0a12,#1a1030);border:2px solid #00ff88;border-radius:14px;padding:22px 26px;width:520px;max-width:95vw;max-height:88vh;overflow-y:auto;box-shadow:0 0 40px rgba(0,255,136,.3);font-family:'Courier New',monospace}
+#adminTitle{color:#00ff88;font-size:1.2em;font-weight:bold;margin-bottom:4px;text-shadow:0 0 10px #00ff88}
+#adminSub{font-size:.75em;opacity:.6;margin-bottom:14px;color:#aaa}
+#adminInput{width:100%;background:rgba(0,255,136,.07);border:1px solid #00ff88;border-radius:6px;color:#00ff88;font-family:'Courier New',monospace;font-size:.92em;padding:8px 10px;outline:none;margin-bottom:8px}
+#adminOutput{font-size:.8em;color:#aaffcc;min-height:32px;padding:6px 8px;background:rgba(0,0,0,.4);border-radius:6px;margin-bottom:12px;white-space:pre-wrap;word-break:break-all}
+#adminHelp{font-size:.73em;color:#888;line-height:1.7}
+#adminHelp b{color:#00ff88}
+#adminClose{float:right;background:none;border:1px solid #555;color:#aaa;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.8em;margin-top:-34px}
+#adminClose:hover{border-color:#00ff88;color:#00ff88}
+#adminAuthWrap{display:flex;flex-direction:column;align-items:center;gap:12px;padding:10px 0}
+#adminAuthInput{background:rgba(0,255,136,.07);border:1px solid #00ff88;border-radius:6px;color:#00ff88;font-family:'Courier New',monospace;font-size:1em;padding:8px 14px;outline:none;text-align:center;letter-spacing:4px;width:220px}
+#adminAuthBtn{background:linear-gradient(135deg,#00cc66,#006633);border:none;color:#fff;font-weight:bold;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:.9em}
+#adminAuthBtn:hover{background:linear-gradient(135deg,#00ff88,#00aa44)}
+#adminAuthErr{color:#ff4444;font-size:.8em;min-height:1em}
 </style>
 </head>
 <body>
-
-<div id="ticker"><span id="tickerInner">💩 Welcome to Tom Pearl: Poop Clicker! Click Tom to begin your journey... 💩</span></div>
-
+<div id="loadScreen">
+  <img id="loadImg" src="tomp.jfif" alt="Tom Pearl" onerror="this.style.background='#3a2010'">
+  <div id="loadTitle">💩 Tom Pearl 💩</div>
+  <div id="loadSub">Loading your poop empire...</div>
+  <div id="loadBar"><div id="loadBarFill"></div></div>
+</div>
+<div id="adminOverlay">
+  <div id="adminBox">
+    <div id="adminTitle">💻 ADMIN CONSOLE</div>
+    <button id="adminClose" onclick="closeAdmin()">✕ Close</button>
+    <div id="adminSub">Tom Pearl Dev Panel — authorised personnel only</div>
+    <div id="adminAuthWrap" id="adminAuthWrap">
+      <div style="color:#00ff88;font-size:.9em;margin-bottom:4px">Enter access code:</div>
+      <input id="adminAuthInput" type="password" placeholder="••••••••" autocomplete="off">
+      <button id="adminAuthBtn" onclick="adminAuth()">Authenticate</button>
+      <div id="adminAuthErr"></div>
+    </div>
+    <div id="adminPanel" style="display:none">
+      <input id="adminInput" placeholder="Type a command and press Enter..." autocomplete="off" spellcheck="false">
+      <div id="adminOutput">Ready. Type <b>help</b> for commands.</div>
+      <div id="adminHelp">
+        <b>give &lt;amount&gt;</b> — add poops (e.g. <b>give 1e15</b>)<br>
+        <b>give all</b> — give 1 sextillion poops<br>
+        <b>upgrade &lt;id|all&gt;</b> — unlock upgrade(s)<br>
+        <b>achieve &lt;id|all&gt;</b> — unlock achievement(s)<br>
+        <b>building &lt;id&gt; &lt;amount&gt;</b> — set building count<br>
+        <b>prestige &lt;count&gt;</b> — set prestige count &amp; recalc multiplier<br>
+        <b>event golden</b> — spawn a golden poop now<br>
+        <b>event double</b> — activate 2x production (5 min)<br>
+        <b>event jan</b> — trigger Jan celebration<br>
+        <b>event infinity</b> — trigger the infinity overflow event<br>
+        <b>reset multiplier</b> — reset prestige multiplier to x1<br>
+        <b>list upgrades</b> — print all upgrade IDs<br>
+        <b>list achievements</b> — print all achievement IDs<br>
+        <b>list buildings</b> — print all building IDs<br>
+        <b>clear</b> — clear output
+      </div>
+    </div>
+  </div>
+</div>
+<div id="ticker"><span id="tickerInner">💩 Welcome to Tom Pearl: Poop Clicker! Click Tom to begin... 💩</span></div>
 <div id="main">
 <div id="left">
   <h1>💩 Tom Pearl 💩</h1>
@@ -451,9 +198,9 @@ body.rage-shake {
     <button class="ctrl" onclick="exportSave()">📤 Export</button>
     <button class="ctrl" onclick="importSave()">📥 Import</button>
     <button class="ctrl" onclick="resetGame()">🔄 Reset</button>
+    <button class="ctrl" onclick="openAdmin()">💻 Admin</button>
   </div>
 </div>
-
 <div id="right">
   <div id="tabs">
     <div class="tab active" data-tab="buildings" onclick="switchTab('buildings')">🏗️ Producers</div>
@@ -471,10 +218,8 @@ body.rage-shake {
   </div>
 </div>
 </div>
-
 <div id="notice"></div>
 <div id="achievePopup"></div>
-
 <div id="janOverlay">
   <div id="janConfettiLayer"></div>
   <div id="janContent">
@@ -485,1390 +230,462 @@ body.rage-shake {
     <button id="janCloseBtn" onclick="closeJanCelebration()">Thank you, Jan 🙏</button>
   </div>
 </div>
-
 <div id="minigameOverlay">
   <div id="minigameBox">
     <div id="minigameTitle">✨ Golden Poop Challenge! ✨</div>
     <div id="minigameSub">Click all the poops before time runs out!</div>
-    <div id="minigameHud">
-      <span>Caught: <b id="minigameProgress">0 / 8</b></span>
-      <span>Time: <b id="minigameTimer">10.0s</b></span>
-    </div>
+    <div id="minigameHud"><span>Caught: <b id="minigameProgress">0 / 8</b></span><span>Time: <b id="minigameTimer">10.0s</b></span></div>
     <div id="minigameField"></div>
     <div id="minigameResult"></div>
   </div>
 </div>
-
 <script>
-
-/* ============================================================
-   AREAS (themed groups of buildings, unlock progressively)
-============================================================ */
-const areaData = [
-  { id:'backyard', name:'🏡 The Backyard',        unlockAt:0 },
-  { id:'town',     name:'🏘️ Pearl Town',          unlockAt:50000 },
-  { id:'industry', name:'🏭 Industrial District',  unlockAt:50000000 },
-  { id:'under',    name:'🕳️ The Underworld',       unlockAt:50000000000 },
-  { id:'space',    name:'🚀 Outer Space',          unlockAt:5e13 },
-  { id:'cosmic',   name:'🌌 The Cosmic Realm',     unlockAt:5e18 },
+const areaData=[
+  {id:'backyard',name:'🏡 The Backyard',unlockAt:0},
+  {id:'town',name:'🏘️ Pearl Town',unlockAt:50000},
+  {id:'industry',name:'🏭 Industrial District',unlockAt:50000000},
+  {id:'under',name:'🕳️ The Underworld',unlockAt:50000000000},
+  {id:'space',name:'🚀 Outer Space',unlockAt:5e13},
+  {id:'cosmic',name:'🌌 The Cosmic Realm',unlockAt:5e18},
 ];
 
-/* ============================================================
-   BUILDINGS
-============================================================ */
-const buildingData = [
-  // BACKYARD
-  { id:'finger',    name:'Pointer Finger',     emoji:'👆', area:'backyard', baseCost:15,              baseCps:0.1,        desc:'Tom scoops poop with one bare finger.' },
-  { id:'fly',       name:'Trained Fly',        emoji:'🪰', area:'backyard', baseCost:100,             baseCps:1,          desc:'A fly that sniffs out fresh poop deposits.' },
-  { id:'dog',       name:'Poop-Sniffing Dog',  emoji:'🐕', area:'backyard', baseCost:1100,            baseCps:8,          desc:'A loyal hound dedicated to finding poop.' },
-  { id:'toddler',   name:'Poop Toddler',       emoji:'👶', area:'backyard', baseCost:8000,            baseCps:35,         desc:'A toddler who produces poop at an alarming rate.' },
-  { id:'garden',    name:'Poop Garden',        emoji:'🌻', area:'backyard', baseCost:45000,           baseCps:140,        desc:'A small garden plot fertilised entirely by Tom.' },
-
-  // TOWN
-  { id:'farm',      name:'Poop Farm',          emoji:'🚜', area:'town', baseCost:55000,           baseCps:180,         desc:'A farm entirely dedicated to poop cultivation.' },
-  { id:'bakery',    name:'Poop Bakery',        emoji:'🥖', area:'town', baseCost:260000,          baseCps:420,         desc:'Bakes poop-scented bread for some reason.' },
-  { id:'truck',     name:'Poop Truck',         emoji:'🚛', area:'town', baseCost:1200000,         baseCps:1100,        desc:'Hauls enormous loads of poop across the country.' },
-  { id:'mall',      name:'Poop Mall',          emoji:'🏬', area:'town', baseCost:6000000,         baseCps:3600,        desc:'A shopping centre with poop kiosks on every floor.' },
-  { id:'stadium',   name:'Poop Stadium',       emoji:'🏟️', area:'town', baseCost:18000000,        baseCps:9200,        desc:'Sold-out crowds cheer as Tom eats on the big screen.' },
-
-  // INDUSTRY
-  { id:'factory',   name:'Poop Factory',       emoji:'🏭', area:'industry', baseCost:80000000,        baseCps:32000,      desc:'Mass-produces industrial-grade poop.' },
-  { id:'sewer',     name:'Sewer Network',      emoji:'🕸️', area:'industry', baseCost:400000000,       baseCps:140000,     desc:'A vast underground network funnelling poop to Tom.' },
-  { id:'powerplant',name:'Poop Power Plant',   emoji:'⚡', area:'industry', baseCost:2000000000,      baseCps:620000,     desc:'Burns poop methane to generate electricity, and more poop.' },
-  { id:'skyscraper',name:'Poop Skyscraper',    emoji:'🏙️', area:'industry', baseCost:9500000000,      baseCps:2400000,    desc:'Headquarters of Pearl Poop Industries Inc.' },
-  { id:'mine',      name:'Poop Mine',          emoji:'⛏️', area:'industry', baseCost:42000000000,     baseCps:9800000,    desc:'Deep shaft mining for ancient fossilised poop.' },
-
-  // UNDERWORLD
-  { id:'volcano',   name:'Poop Volcano',       emoji:'🌋', area:'under', baseCost:200000000000,    baseCps:42000000,    desc:'A volcano that erupts liquid poop every few seconds.' },
-  { id:'cave',      name:'Crystal Poop Cave',  emoji:'💎', area:'under', baseCost:900000000000,    baseCps:170000000,   desc:'Glittering caverns lined with crystallised poop.' },
-  { id:'lab',       name:'Poop Laboratory',    emoji:'🧪', area:'under', baseCost:4000000000000,   baseCps:680000000,   desc:'Scientists synthesise perfect poop molecules.' },
-  { id:'core',      name:'Earth Core Tap',     emoji:'🌍', area:'under', baseCost:18000000000000,  baseCps:2600000000,  desc:'Drills directly into the planet\u2019s molten poop core.' },
-
-  // SPACE
-  { id:'satellite', name:'Poop Satellite',     emoji:'🛰️', area:'space', baseCost:80000000000000,   baseCps:9500000000,  desc:'Orbits Earth collecting microgravity poop particles.' },
-  { id:'moonbase',  name:'Lunar Poop Base',    emoji:'🌕', area:'space', baseCost:350000000000000,  baseCps:36000000000, desc:'A colony on the moon devoted entirely to poop research.' },
-  { id:'rocket',    name:'Poop Rocket',        emoji:'🚀', area:'space', baseCost:1.6e15,           baseCps:140000000000,desc:'Launches into deep space to harvest alien poop.' },
-  { id:'station',   name:'Orbital Poop Station',emoji:'🛸',area:'space', baseCost:7e15,             baseCps:520000000000,desc:'A massive station collecting poop from passing comets.' },
-
-  // COSMIC
-  { id:'portal',    name:'Poop Portal',        emoji:'🌀', area:'cosmic', baseCost:3e16,            baseCps:2e12,         desc:'Tears open a rift to a dimension made of poop.' },
-  { id:'tomclone',  name:'Tom Clone',          emoji:'👥', area:'cosmic', baseCost:1.3e17,          baseCps:7.5e12,       desc:'A cloned Tom Pearl that eats and produces poop endlessly.' },
-  { id:'blackhole', name:'Poop Black Hole',    emoji:'🕳️', area:'cosmic', baseCost:6e17,            baseCps:2.8e13,       desc:'Compresses poop to infinite density. Smells awful.' },
-  { id:'universe',  name:'Pocket Universe',    emoji:'🌌', area:'cosmic', baseCost:2.5e18,          baseCps:1e14,         desc:'An entire universe whose physics only produce poop.' },
-  { id:'god',       name:'Poop God',           emoji:'🙏', area:'cosmic', baseCost:1e19,            baseCps:4e14,         desc:'An ancient deity who has watched over poop since time began.' },
+const buildingData=[
+  {id:'finger',name:'Pointer Finger',emoji:'👆',area:'backyard',baseCost:15,baseCps:.1,desc:'Tom scoops poop with one bare finger.'},
+  {id:'fly',name:'Trained Fly',emoji:'🪰',area:'backyard',baseCost:100,baseCps:1,desc:'A fly that sniffs out fresh poop deposits.'},
+  {id:'dog',name:'Poop-Sniffing Dog',emoji:'🐕',area:'backyard',baseCost:1100,baseCps:8,desc:'A loyal hound dedicated to finding poop.'},
+  {id:'toddler',name:'Poop Toddler',emoji:'👶',area:'backyard',baseCost:8000,baseCps:35,desc:'A toddler who produces poop at an alarming rate.'},
+  {id:'garden',name:'Poop Garden',emoji:'🌻',area:'backyard',baseCost:45000,baseCps:140,desc:'A small garden plot fertilised entirely by Tom.'},
+  {id:'farm',name:'Poop Farm',emoji:'🚜',area:'town',baseCost:55000,baseCps:180,desc:'A farm entirely dedicated to poop cultivation.'},
+  {id:'bakery',name:'Poop Bakery',emoji:'🥖',area:'town',baseCost:260000,baseCps:420,desc:'Bakes poop-scented bread for some reason.'},
+  {id:'truck',name:'Poop Truck',emoji:'🚛',area:'town',baseCost:1200000,baseCps:1100,desc:'Hauls enormous loads of poop across the country.'},
+  {id:'mall',name:'Poop Mall',emoji:'🏬',area:'town',baseCost:6000000,baseCps:3600,desc:'A shopping centre with poop kiosks on every floor.'},
+  {id:'stadium',name:'Poop Stadium',emoji:'🏟️',area:'town',baseCost:18000000,baseCps:9200,desc:'Sold-out crowds cheer as Tom eats on the big screen.'},
+  {id:'factory',name:'Poop Factory',emoji:'🏭',area:'industry',baseCost:80000000,baseCps:32000,desc:'Mass-produces industrial-grade poop.'},
+  {id:'sewer',name:'Sewer Network',emoji:'🕸️',area:'industry',baseCost:400000000,baseCps:140000,desc:'A vast underground network funnelling poop to Tom.'},
+  {id:'powerplant',name:'Poop Power Plant',emoji:'⚡',area:'industry',baseCost:2000000000,baseCps:620000,desc:'Burns poop methane to generate electricity, and more poop.'},
+  {id:'skyscraper',name:'Poop Skyscraper',emoji:'🏙️',area:'industry',baseCost:9500000000,baseCps:2400000,desc:'Headquarters of Pearl Poop Industries Inc.'},
+  {id:'mine',name:'Poop Mine',emoji:'⛏️',area:'industry',baseCost:42000000000,baseCps:9800000,desc:'Deep shaft mining for ancient fossilised poop.'},
+  {id:'volcano',name:'Poop Volcano',emoji:'🌋',area:'under',baseCost:200000000000,baseCps:42000000,desc:'A volcano that erupts liquid poop every few seconds.'},
+  {id:'cave',name:'Crystal Poop Cave',emoji:'💎',area:'under',baseCost:900000000000,baseCps:170000000,desc:'Glittering caverns lined with crystallised poop.'},
+  {id:'lab',name:'Poop Laboratory',emoji:'🧪',area:'under',baseCost:4000000000000,baseCps:680000000,desc:'Scientists synthesise perfect poop molecules.'},
+  {id:'core',name:'Earth Core Tap',emoji:'🌍',area:'under',baseCost:18000000000000,baseCps:2600000000,desc:'Drills directly into the planet\'s molten poop core.'},
+  {id:'satellite',name:'Poop Satellite',emoji:'🛰️',area:'space',baseCost:80000000000000,baseCps:9500000000,desc:'Orbits Earth collecting microgravity poop particles.'},
+  {id:'moonbase',name:'Lunar Poop Base',emoji:'🌕',area:'space',baseCost:350000000000000,baseCps:36000000000,desc:'A colony on the moon devoted entirely to poop research.'},
+  {id:'rocket',name:'Poop Rocket',emoji:'🚀',area:'space',baseCost:1.6e15,baseCps:140000000000,desc:'Launches into deep space to harvest alien poop.'},
+  {id:'station',name:'Orbital Poop Station',emoji:'🛸',area:'space',baseCost:7e15,baseCps:520000000000,desc:'A massive station collecting poop from passing comets.'},
+  {id:'portal',name:'Poop Portal',emoji:'🌀',area:'cosmic',baseCost:3e16,baseCps:2e12,desc:'Tears open a rift to a dimension made of poop.'},
+  {id:'tomclone',name:'Tom Clone',emoji:'👥',area:'cosmic',baseCost:1.3e17,baseCps:7.5e12,desc:'A cloned Tom Pearl that eats and produces poop endlessly.'},
+  {id:'blackhole',name:'Poop Black Hole',emoji:'🕳️',area:'cosmic',baseCost:6e17,baseCps:2.8e13,desc:'Compresses poop to infinite density. Smells awful.'},
+  {id:'universe',name:'Pocket Universe',emoji:'🌌',area:'cosmic',baseCost:2.5e18,baseCps:1e14,desc:'An entire universe whose physics only produce poop.'},
+  {id:'god',name:'Poop God',emoji:'🙏',area:'cosmic',baseCost:1e19,baseCps:4e14,desc:'An ancient deity who has watched over poop since time began.'},
 ];
 
-/* ============================================================
-   UPGRADES
-============================================================ */
-const upgradeData = [
-  // --- CLICK ---
-  { id:'c1',  name:'Bigger Hands',           desc:'Click +1.',                          cost:75,           type:'click',       value:1    },
-  { id:'c2',  name:'Longer Nails',           desc:'Click +5.',                          cost:600,          type:'click',       value:5    },
-  { id:'c3',  name:'Reinforced Gloves',      desc:'Click +10.',                         cost:4000,         type:'click',       value:10   },
-  { id:'c4',  name:'Mechanical Fingers',     desc:'Click power x1.5.',                  cost:25000,        type:'clickMult',   value:1.5  },
-  { id:'c5',  name:'Golden Scoop',           desc:'Click +50.',                         cost:150000,       type:'click',       value:50   },
-  { id:'c6',  name:'Diamond Fingertips',     desc:'Click power x1.5.',                  cost:3000000,      type:'clickMult',   value:1.5  },
-  { id:'c7',  name:'Bionic Hand',            desc:'Click +500.',                        cost:40000000,     type:'click',       value:500  },
-  { id:'c8',  name:'Quantum Fingers',        desc:'+2% of CPS added to each click.',    cost:1000000000,   type:'clickFromCps',value:0.02 },
-  { id:'c9',  name:'Poop Mittens',           desc:'Click power x1.5.',                  cost:20000000000,  type:'clickMult',   value:1.5  },
-  { id:'c10', name:'Godly Grip',             desc:'+3% of CPS added to each click.',    cost:400000000000, type:'clickFromCps',value:0.03 },
-  { id:'c11', name:'Infinite Arm',           desc:'Click power x2.',                    cost:1.2e13,       type:'clickMult',   value:2    },
-  { id:'c12', name:'Tom\u2019s Sixth Finger',desc:'Click +5000.',                       cost:2e14,         type:'click',       value:5000 },
-  { id:'c13', name:'Cosmic Fingertip',       desc:'+5% of CPS added to each click.',    cost:1.5e16,       type:'clickFromCps',value:0.05 },
-  { id:'c14', name:'Hand of the Poop God',   desc:'Click power x2.',                    cost:9e17,         type:'clickMult',   value:2    },
-
-  // --- FINGER (5 buildings worth) ---
-  { id:'f1', name:'Extra Finger',            desc:'Pointer Fingers x2.',  cost:200,    type:'building', target:'finger', mult:2, req:{id:'finger',amt:1}  },
-  { id:'f2', name:'Carpal Tunnel Cream',     desc:'Pointer Fingers x2.',  cost:1000,   type:'building', target:'finger', mult:2, req:{id:'finger',amt:5}  },
-  { id:'f3', name:'Ten Fingers',             desc:'Pointer Fingers x2.',  cost:18000,  type:'building', target:'finger', mult:2, req:{id:'finger',amt:10} },
-  { id:'f4', name:'Latex Gloves',            desc:'Pointer Fingers x3.',  cost:500000, type:'building', target:'finger', mult:3, req:{id:'finger',amt:25} },
-  { id:'f5', name:'Finger Speed Serum',      desc:'Pointer Fingers x3.',  cost:20000000,type:'building',target:'finger', mult:3, req:{id:'finger',amt:50} },
-
-  // --- FLY ---
-  { id:'fl1', name:'Bigger Flies',           desc:'Trained Flies x2.',   cost:1000,   type:'building', target:'fly', mult:2, req:{id:'fly',amt:1}  },
-  { id:'fl2', name:'Fly Swarm Training',     desc:'Trained Flies x2.',   cost:5000,   type:'building', target:'fly', mult:2, req:{id:'fly',amt:5}  },
-  { id:'fl3', name:'Fly GPS Collars',        desc:'Trained Flies x2.',   cost:90000,  type:'building', target:'fly', mult:2, req:{id:'fly',amt:10} },
-  { id:'fl4', name:'Mutant Mega-Fly',        desc:'Trained Flies x3.',   cost:3000000,type:'building', target:'fly', mult:3, req:{id:'fly',amt:25} },
-  { id:'fl5', name:'Fly Hive Mind',          desc:'Trained Flies x3.',   cost:120000000,type:'building',target:'fly', mult:3, req:{id:'fly',amt:50} },
-
-  // --- DOG ---
-  { id:'d1', name:'Bigger Noses',            desc:'Poop Dogs x2.',       cost:8000,    type:'building', target:'dog', mult:2, req:{id:'dog',amt:1}  },
-  { id:'d2', name:'Doggy Treats',            desc:'Poop Dogs x2.',       cost:40000,   type:'building', target:'dog', mult:2, req:{id:'dog',amt:5}  },
-  { id:'d3', name:'Pack Leader Training',    desc:'Poop Dogs x2.',       cost:800000,  type:'building', target:'dog', mult:2, req:{id:'dog',amt:10} },
-  { id:'d4', name:'Cybernetic Snout',        desc:'Poop Dogs x3.',       cost:25000000,type:'building', target:'dog', mult:3, req:{id:'dog',amt:25} },
-  { id:'d5', name:'Superdog Formula',        desc:'Poop Dogs x3.',       cost:900000000,type:'building',target:'dog', mult:3, req:{id:'dog',amt:50} },
-
-  // --- TODDLER ---
-  { id:'t1', name:'Extra Fibre Diet',        desc:'Poop Toddlers x2.',   cost:50000,   type:'building', target:'toddler', mult:2, req:{id:'toddler',amt:1}  },
-  { id:'t2', name:'Diaper Turbocharge',      desc:'Poop Toddlers x2.',   cost:250000,  type:'building', target:'toddler', mult:2, req:{id:'toddler',amt:5}  },
-  { id:'t3', name:'Toddler Army',            desc:'Poop Toddlers x2.',   cost:5000000, type:'building', target:'toddler', mult:2, req:{id:'toddler',amt:10} },
-  { id:'t4', name:'Super-Fibre Formula',     desc:'Poop Toddlers x3.',   cost:150000000,type:'building',target:'toddler', mult:3, req:{id:'toddler',amt:25} },
-
-  // --- GARDEN ---
-  { id:'gd1', name:'Better Soil',            desc:'Poop Gardens x2.',    cost:90000,   type:'building', target:'garden', mult:2, req:{id:'garden',amt:1}  },
-  { id:'gd2', name:'Greenhouse Roof',        desc:'Poop Gardens x2.',    cost:450000,  type:'building', target:'garden', mult:2, req:{id:'garden',amt:5}  },
-  { id:'gd3', name:'Compost Accelerator',    desc:'Poop Gardens x3.',    cost:9000000, type:'building', target:'garden', mult:3, req:{id:'garden',amt:25} },
-
-  // --- FARM ---
-  { id:'fa1', name:'Fertilizer',             desc:'Poop Farms x2.',      cost:400000,  type:'building', target:'farm', mult:2, req:{id:'farm',amt:1}  },
-  { id:'fa2', name:'Crop Rotation',          desc:'Poop Farms x2.',      cost:2000000, type:'building', target:'farm', mult:2, req:{id:'farm',amt:5}  },
-  { id:'fa3', name:'Mega Silos',             desc:'Poop Farms x2.',      cost:40000000,type:'building', target:'farm', mult:2, req:{id:'farm',amt:10} },
-  { id:'fa4', name:'Irrigation Canals',      desc:'Poop Farms x3.',      cost:1200000000,type:'building',target:'farm', mult:3, req:{id:'farm',amt:25} },
-  { id:'fa5', name:'GMO Poop Seeds',         desc:'Poop Farms x3.',      cost:50000000000,type:'building',target:'farm', mult:3, req:{id:'farm',amt:50} },
-
-  // --- BAKERY ---
-  { id:'bk1', name:'Bigger Ovens',           desc:'Poop Bakeries x2.',   cost:2000000, type:'building', target:'bakery', mult:2, req:{id:'bakery',amt:1}  },
-  { id:'bk2', name:'Secret Recipe',          desc:'Poop Bakeries x2.',   cost:10000000,type:'building', target:'bakery', mult:2, req:{id:'bakery',amt:5}  },
-  { id:'bk3', name:'Franchise Expansion',    desc:'Poop Bakeries x3.',   cost:200000000,type:'building',target:'bakery', mult:3, req:{id:'bakery',amt:25} },
-
-  // --- TRUCK ---
-  { id:'tr1', name:'Bigger Tanks',           desc:'Poop Trucks x2.',     cost:6000000, type:'building', target:'truck', mult:2, req:{id:'truck',amt:1}  },
-  { id:'tr2', name:'Turbo Engine',           desc:'Poop Trucks x2.',     cost:30000000,type:'building', target:'truck', mult:2, req:{id:'truck',amt:5}  },
-  { id:'tr3', name:'Poop Highway',           desc:'Poop Trucks x2.',     cost:600000000,type:'building',target:'truck', mult:2, req:{id:'truck',amt:10} },
-  { id:'tr4', name:'Self-Driving Trucks',    desc:'Poop Trucks x3.',     cost:9000000000,type:'building',target:'truck', mult:3, req:{id:'truck',amt:25} },
-
-  // --- MALL ---
-  { id:'ml1', name:'More Kiosks',            desc:'Poop Malls x2.',      cost:30000000,type:'building', target:'mall', mult:2, req:{id:'mall',amt:1}  },
-  { id:'ml2', name:'Food Court',             desc:'Poop Malls x2.',      cost:150000000,type:'building',target:'mall', mult:2, req:{id:'mall',amt:5}  },
-  { id:'ml3', name:'Mega Mall License',      desc:'Poop Malls x3.',      cost:3000000000,type:'building',target:'mall', mult:3, req:{id:'mall',amt:25} },
-
-  // --- STADIUM ---
-  { id:'st1', name:'Bigger Bleachers',       desc:'Poop Stadiums x2.',   cost:90000000,type:'building', target:'stadium', mult:2, req:{id:'stadium',amt:1}  },
-  { id:'st2', name:'Jumbotron Upgrade',      desc:'Poop Stadiums x2.',   cost:450000000,type:'building',target:'stadium', mult:2, req:{id:'stadium',amt:5}  },
-  { id:'st3', name:'World Tour',             desc:'Poop Stadiums x3.',   cost:9000000000,type:'building',target:'stadium', mult:3, req:{id:'stadium',amt:25} },
-
-  // --- FACTORY ---
-  { id:'fc1', name:'Assembly Optimisation',  desc:'Poop Factories x2.',  cost:160000000,type:'building',target:'factory', mult:2, req:{id:'factory',amt:1}  },
-  { id:'fc2', name:'Night Shifts',           desc:'Poop Factories x2.',  cost:800000000,type:'building', target:'factory', mult:2, req:{id:'factory',amt:5}  },
-  { id:'fc3', name:'Robotic Arms',           desc:'Poop Factories x2.',  cost:16000000000,type:'building',target:'factory', mult:2, req:{id:'factory',amt:10} },
-  { id:'fc4', name:'Nano-Assembly',          desc:'Poop Factories x3.',  cost:400000000000,type:'building',target:'factory', mult:3, req:{id:'factory',amt:25} },
-  { id:'fc5', name:'Dark Matter Conveyor',   desc:'Poop Factories x3.',  cost:1.5e13,type:'building',  target:'factory', mult:3, req:{id:'factory',amt:50} },
-
-  // --- SEWER ---
-  { id:'sw1', name:'Wider Pipes',            desc:'Sewer Networks x2.',  cost:800000000,type:'building',target:'sewer', mult:2, req:{id:'sewer',amt:1}  },
-  { id:'sw2', name:'Pressure Pumps',         desc:'Sewer Networks x2.',  cost:4000000000,type:'building',target:'sewer', mult:2, req:{id:'sewer',amt:5}  },
-  { id:'sw3', name:'Underground City',       desc:'Sewer Networks x2.',  cost:80000000000,type:'building',target:'sewer', mult:2, req:{id:'sewer',amt:10} },
-  { id:'sw4', name:'Biogas Recycling',       desc:'Sewer Networks x3.',  cost:2e12,  type:'building', target:'sewer', mult:3, req:{id:'sewer',amt:25} },
-
-  // --- POWERPLANT ---
-  { id:'pp1', name:'Methane Capture',        desc:'Power Plants x2.',    cost:4000000000,type:'building',target:'powerplant', mult:2, req:{id:'powerplant',amt:1}  },
-  { id:'pp2', name:'Turbine Upgrade',        desc:'Power Plants x2.',    cost:20000000000,type:'building',target:'powerplant', mult:2, req:{id:'powerplant',amt:5}  },
-  { id:'pp3', name:'Grid Domination',        desc:'Power Plants x3.',    cost:4e11, type:'building',  target:'powerplant', mult:3, req:{id:'powerplant',amt:25} },
-
-  // --- SKYSCRAPER ---
-  { id:'sk1', name:'More Floors',            desc:'Skyscrapers x2.',     cost:19000000000,type:'building',target:'skyscraper', mult:2, req:{id:'skyscraper',amt:1}  },
-  { id:'sk2', name:'Executive Suites',       desc:'Skyscrapers x2.',     cost:95000000000,type:'building', target:'skyscraper', mult:2, req:{id:'skyscraper',amt:5}  },
-  { id:'sk3', name:'Global HQ Status',       desc:'Skyscrapers x3.',     cost:1.9e12,type:'building',  target:'skyscraper', mult:3, req:{id:'skyscraper',amt:25} },
-
-  // --- MINE ---
-  { id:'m1', name:'Diamond Drills',          desc:'Poop Mines x2.',      cost:84000000000,type:'building',target:'mine', mult:2, req:{id:'mine',amt:1}  },
-  { id:'m2', name:'Deeper Shafts',           desc:'Poop Mines x2.',      cost:420000000000,type:'building',target:'mine', mult:2, req:{id:'mine',amt:5}  },
-  { id:'m3', name:'Lava-Proof Suits',        desc:'Poop Mines x2.',      cost:8.4e12,type:'building', target:'mine', mult:2, req:{id:'mine',amt:10} },
-  { id:'m4', name:'Tectonic Driller',        desc:'Poop Mines x3.',      cost:2e14, type:'building',  target:'mine', mult:3, req:{id:'mine',amt:25} },
-  { id:'m5', name:'Core Mining Rig',         desc:'Poop Mines x3.',      cost:8e15, type:'building',  target:'mine', mult:3, req:{id:'mine',amt:50} },
-
-  // --- VOLCANO ---
-  { id:'v1', name:'Lava Channels',           desc:'Poop Volcanoes x2.',  cost:400000000000,type:'building',target:'volcano', mult:2, req:{id:'volcano',amt:1}  },
-  { id:'v2', name:'Eruption Control',        desc:'Poop Volcanoes x2.',  cost:2e12, type:'building',  target:'volcano', mult:2, req:{id:'volcano',amt:5}  },
-  { id:'v3', name:'Supervolcano',            desc:'Poop Volcanoes x3.',  cost:4e13, type:'building',  target:'volcano', mult:3, req:{id:'volcano',amt:25} },
-
-  // --- CAVE ---
-  { id:'cv1', name:'Crystal Polishing',      desc:'Crystal Caves x2.',   cost:1.8e12,type:'building', target:'cave', mult:2, req:{id:'cave',amt:1}  },
-  { id:'cv2', name:'Deeper Tunnels',         desc:'Crystal Caves x2.',   cost:9e12, type:'building',  target:'cave', mult:2, req:{id:'cave',amt:5}  },
-  { id:'cv3', name:'Geode Harvester',        desc:'Crystal Caves x3.',   cost:1.8e14,type:'building', target:'cave', mult:3, req:{id:'cave',amt:25} },
-
-  // --- LAB ---
-  { id:'lb1', name:'Bunsen Burners',         desc:'Poop Labs x2.',       cost:8e12, type:'building',  target:'lab', mult:2, req:{id:'lab',amt:1}  },
-  { id:'lb2', name:'PhD Researchers',        desc:'Poop Labs x2.',       cost:4e13, type:'building',  target:'lab', mult:2, req:{id:'lab',amt:5}  },
-  { id:'lb3', name:'Particle Accelerator',   desc:'Poop Labs x2.',       cost:8e14, type:'building',  target:'lab', mult:2, req:{id:'lab',amt:10} },
-  { id:'lb4', name:'Quantum Synthesis',      desc:'Poop Labs x3.',       cost:2.5e16,type:'building', target:'lab', mult:3, req:{id:'lab',amt:25} },
-
-  // --- CORE ---
-  { id:'co1', name:'Reinforced Drill Bits',  desc:'Earth Core Taps x2.', cost:3.6e13,type:'building', target:'core', mult:2, req:{id:'core',amt:1}  },
-  { id:'co2', name:'Magma Cooling System',   desc:'Earth Core Taps x2.', cost:1.8e14,type:'building', target:'core', mult:2, req:{id:'core',amt:5}  },
-  { id:'co3', name:'Planetary Drainage',     desc:'Earth Core Taps x3.', cost:3.6e15,type:'building', target:'core', mult:3, req:{id:'core',amt:25} },
-
-  // --- SATELLITE ---
-  { id:'sa1', name:'Solar Panels',           desc:'Poop Satellites x2.', cost:1.6e14,type:'building', target:'satellite',mult:2,req:{id:'satellite',amt:1}},
-  { id:'sa2', name:'Orbital Network',        desc:'Poop Satellites x2.', cost:8e14, type:'building',  target:'satellite',mult:2,req:{id:'satellite',amt:5}},
-  { id:'sa3', name:'Geostationary Lock',     desc:'Poop Satellites x3.', cost:1.6e16,type:'building', target:'satellite',mult:3,req:{id:'satellite',amt:25}},
-
-  // --- MOONBASE ---
-  { id:'mb1', name:'Pressurised Domes',      desc:'Lunar Bases x2.',     cost:7e14, type:'building',  target:'moonbase', mult:2, req:{id:'moonbase',amt:1}  },
-  { id:'mb2', name:'Moon Rover Fleet',       desc:'Lunar Bases x2.',     cost:3.5e15,type:'building', target:'moonbase', mult:2, req:{id:'moonbase',amt:5}  },
-  { id:'mb3', name:'Lunar Capital City',     desc:'Lunar Bases x3.',     cost:7e16, type:'building',  target:'moonbase', mult:3, req:{id:'moonbase',amt:25} },
-
-  // --- ROCKET ---
-  { id:'r1', name:'Bigger Boosters',         desc:'Poop Rockets x2.',    cost:3.2e15,type:'building', target:'rocket', mult:2, req:{id:'rocket',amt:1}  },
-  { id:'r2', name:'Orbital Collection Nets', desc:'Poop Rockets x2.',    cost:1.6e16,type:'building', target:'rocket', mult:2, req:{id:'rocket',amt:5}  },
-  { id:'r3', name:'Warp Drive',              desc:'Poop Rockets x3.',    cost:3.2e17,type:'building', target:'rocket', mult:3, req:{id:'rocket',amt:25} },
-
-  // --- STATION ---
-  { id:'sn1', name:'Docking Bay Expansion',  desc:'Orbital Stations x2.',cost:1.4e16,type:'building', target:'station', mult:2, req:{id:'station',amt:1}  },
-  { id:'sn2', name:'Comet Tractor Beam',     desc:'Orbital Stations x2.',cost:7e16, type:'building',  target:'station', mult:2, req:{id:'station',amt:5}  },
-  { id:'sn3', name:'Megastructure Status',   desc:'Orbital Stations x3.',cost:1.4e18,type:'building', target:'station', mult:3, req:{id:'station',amt:25} },
-
-  // --- PORTAL ---
-  { id:'p1', name:'Wider Rift',              desc:'Poop Portals x2.',    cost:6e16, type:'building',  target:'portal', mult:2, req:{id:'portal',amt:1}  },
-  { id:'p2', name:'Dimensional Stabiliser',  desc:'Poop Portals x2.',    cost:3e17, type:'building',  target:'portal', mult:2, req:{id:'portal',amt:5}  },
-  { id:'p3', name:'Interdimensional Treaty', desc:'Poop Portals x3.',    cost:6e18, type:'building',  target:'portal', mult:3, req:{id:'portal',amt:25} },
-
-  // --- CLONE ---
-  { id:'cl1', name:'Clone Stabilisation',    desc:'Tom Clones x2.',      cost:2.6e17,type:'building', target:'tomclone', mult:2, req:{id:'tomclone',amt:1}  },
-  { id:'cl2', name:'Clone Army',             desc:'Tom Clones x2.',      cost:1.3e18,type:'building', target:'tomclone', mult:2, req:{id:'tomclone',amt:5}  },
-  { id:'cl3', name:'Genetic Perfection',     desc:'Tom Clones x3.',      cost:2.6e19,type:'building', target:'tomclone', mult:3, req:{id:'tomclone',amt:25} },
-
-  // --- BLACK HOLE ---
-  { id:'bh1', name:'Event Horizon Tuning',   desc:'Black Holes x2.',     cost:1.2e18,type:'building', target:'blackhole', mult:2, req:{id:'blackhole',amt:1}  },
-  { id:'bh2', name:'Hawking Radiation Tap',  desc:'Black Holes x2.',     cost:6e18, type:'building',  target:'blackhole', mult:2, req:{id:'blackhole',amt:5}  },
-  { id:'bh3', name:'Singularity Engine',     desc:'Black Holes x3.',     cost:1.2e20,type:'building', target:'blackhole', mult:3, req:{id:'blackhole',amt:25} },
-
-  // --- UNIVERSE ---
-  { id:'u1', name:'New Physics',             desc:'Pocket Universes x2.',cost:5e18, type:'building',  target:'universe', mult:2, req:{id:'universe',amt:1}  },
-  { id:'u2', name:'Cosmic Constants Tweaked',desc:'Pocket Universes x2.',cost:2.5e19,type:'building', target:'universe', mult:2, req:{id:'universe',amt:5}  },
-  { id:'u3', name:'Big Bang Reactor',        desc:'Pocket Universes x3.',cost:5e20, type:'building',  target:'universe', mult:3, req:{id:'universe',amt:25} },
-
-  // --- POOP GOD ---
-  { id:'g1', name:'First Prayer',            desc:'Poop Gods x2.',       cost:2e19, type:'building',  target:'god', mult:2, req:{id:'god',amt:1}  },
-  { id:'g2', name:'Divine Covenant',         desc:'Poop Gods x2.',       cost:1e20, type:'building',  target:'god', mult:2, req:{id:'god',amt:5}  },
-  { id:'g3', name:'Holy Poop Scripture',     desc:'Poop Gods x3.',       cost:2e21, type:'building',  target:'god', mult:3, req:{id:'god',amt:25} },
-  { id:'g4', name:'Ascended Pantheon',       desc:'Poop Gods x5.',       cost:5e22, type:'building',  target:'god', mult:5, req:{id:'god',amt:50} },
-
-  // --- GLOBAL MULTIPLIERS ---
-  { id:'gm1',  name:'Toms Iron Stomach',     desc:'All production +10%.', cost:60000,        type:'globalMult', mult:1.10 },
-  { id:'gm2',  name:'Toms Refined Palate',   desc:'All production +10%.', cost:1200000,      type:'globalMult', mult:1.10 },
-  { id:'gm3',  name:'Toms Legendary Diet',   desc:'All production +20%.', cost:150000000,    type:'globalMult', mult:1.20 },
-  { id:'gm4',  name:'Tom Pearl Statue',      desc:'All production +20%.', cost:12000000000,  type:'globalMult', mult:1.20 },
-  { id:'gm5',  name:'Tom Pearl Religion',    desc:'All production x2.',   cost:1.5e12,       type:'globalMult', mult:2    },
-  { id:'gm6',  name:'Tom Pearl Ascension',   desc:'All production x2.',   cost:2e14,         type:'globalMult', mult:2    },
-  { id:'gm7',  name:'Tom Pearl Is God',      desc:'All production x2.5.', cost:3e16,         type:'globalMult', mult:2.5  },
-  { id:'gm8',  name:'Universal Poop Law',    desc:'All production x3.',   cost:5e19,         type:'globalMult', mult:3    },
-  { id:'gm9',  name:'Poop Singularity',      desc:'All production x5.',   cost:8e22,         type:'globalMult', mult:5    },
+const upgradeData=[
+  {id:'c1',name:'Bigger Hands',desc:'Click +1.',cost:75,type:'click',value:1},
+  {id:'c2',name:'Longer Nails',desc:'Click +5.',cost:600,type:'click',value:5},
+  {id:'c3',name:'Reinforced Gloves',desc:'Click +10.',cost:4000,type:'click',value:10},
+  {id:'c4',name:'Mechanical Fingers',desc:'Click power x1.5.',cost:25000,type:'clickMult',value:1.5},
+  {id:'c5',name:'Golden Scoop',desc:'Click +50.',cost:150000,type:'click',value:50},
+  {id:'c6',name:'Diamond Fingertips',desc:'Click power x1.5.',cost:3000000,type:'clickMult',value:1.5},
+  {id:'c7',name:'Bionic Hand',desc:'Click +500.',cost:40000000,type:'click',value:500},
+  {id:'c8',name:'Quantum Fingers',desc:'+2% of CPS added to each click.',cost:1000000000,type:'clickFromCps',value:.02},
+  {id:'c9',name:'Poop Mittens',desc:'Click power x1.5.',cost:20000000000,type:'clickMult',value:1.5},
+  {id:'c10',name:'Godly Grip',desc:'+3% of CPS added to each click.',cost:400000000000,type:'clickFromCps',value:.03},
+  {id:'c11',name:'Infinite Arm',desc:'Click power x2.',cost:1.2e13,type:'clickMult',value:2},
+  {id:'c12',name:'Tom\'s Sixth Finger',desc:'Click +5000.',cost:2e14,type:'click',value:5000},
+  {id:'c13',name:'Cosmic Fingertip',desc:'+5% of CPS added to each click.',cost:1.5e16,type:'clickFromCps',value:.05},
+  {id:'c14',name:'Hand of the Poop God',desc:'Click power x2.',cost:9e17,type:'clickMult',value:2},
+  {id:'f1',name:'Extra Finger',desc:'Pointer Fingers x2.',cost:200,type:'building',target:'finger',mult:2,req:{id:'finger',amt:1}},
+  {id:'f2',name:'Carpal Tunnel Cream',desc:'Pointer Fingers x2.',cost:1000,type:'building',target:'finger',mult:2,req:{id:'finger',amt:5}},
+  {id:'f3',name:'Ten Fingers',desc:'Pointer Fingers x2.',cost:18000,type:'building',target:'finger',mult:2,req:{id:'finger',amt:10}},
+  {id:'f4',name:'Latex Gloves',desc:'Pointer Fingers x3.',cost:500000,type:'building',target:'finger',mult:3,req:{id:'finger',amt:25}},
+  {id:'f5',name:'Finger Speed Serum',desc:'Pointer Fingers x3.',cost:20000000,type:'building',target:'finger',mult:3,req:{id:'finger',amt:50}},
+  {id:'fl1',name:'Bigger Flies',desc:'Trained Flies x2.',cost:1000,type:'building',target:'fly',mult:2,req:{id:'fly',amt:1}},
+  {id:'fl2',name:'Fly Swarm Training',desc:'Trained Flies x2.',cost:5000,type:'building',target:'fly',mult:2,req:{id:'fly',amt:5}},
+  {id:'fl3',name:'Fly GPS Collars',desc:'Trained Flies x2.',cost:90000,type:'building',target:'fly',mult:2,req:{id:'fly',amt:10}},
+  {id:'fl4',name:'Mutant Mega-Fly',desc:'Trained Flies x3.',cost:3000000,type:'building',target:'fly',mult:3,req:{id:'fly',amt:25}},
+  {id:'fl5',name:'Fly Hive Mind',desc:'Trained Flies x3.',cost:120000000,type:'building',target:'fly',mult:3,req:{id:'fly',amt:50}},
+  {id:'d1',name:'Bigger Noses',desc:'Poop Dogs x2.',cost:8000,type:'building',target:'dog',mult:2,req:{id:'dog',amt:1}},
+  {id:'d2',name:'Doggy Treats',desc:'Poop Dogs x2.',cost:40000,type:'building',target:'dog',mult:2,req:{id:'dog',amt:5}},
+  {id:'d3',name:'Pack Leader Training',desc:'Poop Dogs x2.',cost:800000,type:'building',target:'dog',mult:2,req:{id:'dog',amt:10}},
+  {id:'d4',name:'Cybernetic Snout',desc:'Poop Dogs x3.',cost:25000000,type:'building',target:'dog',mult:3,req:{id:'dog',amt:25}},
+  {id:'d5',name:'Superdog Formula',desc:'Poop Dogs x3.',cost:900000000,type:'building',target:'dog',mult:3,req:{id:'dog',amt:50}},
+  {id:'t1',name:'Extra Fibre Diet',desc:'Poop Toddlers x2.',cost:50000,type:'building',target:'toddler',mult:2,req:{id:'toddler',amt:1}},
+  {id:'t2',name:'Diaper Turbocharge',desc:'Poop Toddlers x2.',cost:250000,type:'building',target:'toddler',mult:2,req:{id:'toddler',amt:5}},
+  {id:'t3',name:'Toddler Army',desc:'Poop Toddlers x2.',cost:5000000,type:'building',target:'toddler',mult:2,req:{id:'toddler',amt:10}},
+  {id:'t4',name:'Super-Fibre Formula',desc:'Poop Toddlers x3.',cost:150000000,type:'building',target:'toddler',mult:3,req:{id:'toddler',amt:25}},
+  {id:'gd1',name:'Better Soil',desc:'Poop Gardens x2.',cost:90000,type:'building',target:'garden',mult:2,req:{id:'garden',amt:1}},
+  {id:'gd2',name:'Greenhouse Roof',desc:'Poop Gardens x2.',cost:450000,type:'building',target:'garden',mult:2,req:{id:'garden',amt:5}},
+  {id:'gd3',name:'Compost Accelerator',desc:'Poop Gardens x3.',cost:9000000,type:'building',target:'garden',mult:3,req:{id:'garden',amt:25}},
+  {id:'fa1',name:'Fertilizer',desc:'Poop Farms x2.',cost:400000,type:'building',target:'farm',mult:2,req:{id:'farm',amt:1}},
+  {id:'fa2',name:'Crop Rotation',desc:'Poop Farms x2.',cost:2000000,type:'building',target:'farm',mult:2,req:{id:'farm',amt:5}},
+  {id:'fa3',name:'Mega Silos',desc:'Poop Farms x2.',cost:40000000,type:'building',target:'farm',mult:2,req:{id:'farm',amt:10}},
+  {id:'fa4',name:'Irrigation Canals',desc:'Poop Farms x3.',cost:1200000000,type:'building',target:'farm',mult:3,req:{id:'farm',amt:25}},
+  {id:'fa5',name:'GMO Poop Seeds',desc:'Poop Farms x3.',cost:50000000000,type:'building',target:'farm',mult:3,req:{id:'farm',amt:50}},
+  {id:'bk1',name:'Bigger Ovens',desc:'Poop Bakeries x2.',cost:2000000,type:'building',target:'bakery',mult:2,req:{id:'bakery',amt:1}},
+  {id:'bk2',name:'Secret Recipe',desc:'Poop Bakeries x2.',cost:10000000,type:'building',target:'bakery',mult:2,req:{id:'bakery',amt:5}},
+  {id:'bk3',name:'Franchise Expansion',desc:'Poop Bakeries x3.',cost:200000000,type:'building',target:'bakery',mult:3,req:{id:'bakery',amt:25}},
+  {id:'tr1',name:'Bigger Tanks',desc:'Poop Trucks x2.',cost:6000000,type:'building',target:'truck',mult:2,req:{id:'truck',amt:1}},
+  {id:'tr2',name:'Turbo Engine',desc:'Poop Trucks x2.',cost:30000000,type:'building',target:'truck',mult:2,req:{id:'truck',amt:5}},
+  {id:'tr3',name:'Poop Highway',desc:'Poop Trucks x2.',cost:600000000,type:'building',target:'truck',mult:2,req:{id:'truck',amt:10}},
+  {id:'tr4',name:'Self-Driving Trucks',desc:'Poop Trucks x3.',cost:9000000000,type:'building',target:'truck',mult:3,req:{id:'truck',amt:25}},
+  {id:'ml1',name:'More Kiosks',desc:'Poop Malls x2.',cost:30000000,type:'building',target:'mall',mult:2,req:{id:'mall',amt:1}},
+  {id:'ml2',name:'Food Court',desc:'Poop Malls x2.',cost:150000000,type:'building',target:'mall',mult:2,req:{id:'mall',amt:5}},
+  {id:'ml3',name:'Mega Mall License',desc:'Poop Malls x3.',cost:3000000000,type:'building',target:'mall',mult:3,req:{id:'mall',amt:25}},
+  {id:'st1',name:'Bigger Bleachers',desc:'Poop Stadiums x2.',cost:90000000,type:'building',target:'stadium',mult:2,req:{id:'stadium',amt:1}},
+  {id:'st2',name:'Jumbotron Upgrade',desc:'Poop Stadiums x2.',cost:450000000,type:'building',target:'stadium',mult:2,req:{id:'stadium',amt:5}},
+  {id:'st3',name:'World Tour',desc:'Poop Stadiums x3.',cost:9000000000,type:'building',target:'stadium',mult:3,req:{id:'stadium',amt:25}},
+  {id:'fc1',name:'Assembly Optimisation',desc:'Poop Factories x2.',cost:160000000,type:'building',target:'factory',mult:2,req:{id:'factory',amt:1}},
+  {id:'fc2',name:'Night Shifts',desc:'Poop Factories x2.',cost:800000000,type:'building',target:'factory',mult:2,req:{id:'factory',amt:5}},
+  {id:'fc3',name:'Robotic Arms',desc:'Poop Factories x2.',cost:16000000000,type:'building',target:'factory',mult:2,req:{id:'factory',amt:10}},
+  {id:'fc4',name:'Nano-Assembly',desc:'Poop Factories x3.',cost:400000000000,type:'building',target:'factory',mult:3,req:{id:'factory',amt:25}},
+  {id:'fc5',name:'Dark Matter Conveyor',desc:'Poop Factories x3.',cost:1.5e13,type:'building',target:'factory',mult:3,req:{id:'factory',amt:50}},
+  {id:'sw1',name:'Wider Pipes',desc:'Sewer Networks x2.',cost:800000000,type:'building',target:'sewer',mult:2,req:{id:'sewer',amt:1}},
+  {id:'sw2',name:'Pressure Pumps',desc:'Sewer Networks x2.',cost:4000000000,type:'building',target:'sewer',mult:2,req:{id:'sewer',amt:5}},
+  {id:'sw3',name:'Underground City',desc:'Sewer Networks x2.',cost:80000000000,type:'building',target:'sewer',mult:2,req:{id:'sewer',amt:10}},
+  {id:'sw4',name:'Biogas Recycling',desc:'Sewer Networks x3.',cost:2e12,type:'building',target:'sewer',mult:3,req:{id:'sewer',amt:25}},
+  {id:'pp1',name:'Methane Capture',desc:'Power Plants x2.',cost:4000000000,type:'building',target:'powerplant',mult:2,req:{id:'powerplant',amt:1}},
+  {id:'pp2',name:'Turbine Upgrade',desc:'Power Plants x2.',cost:20000000000,type:'building',target:'powerplant',mult:2,req:{id:'powerplant',amt:5}},
+  {id:'pp3',name:'Grid Domination',desc:'Power Plants x3.',cost:4e11,type:'building',target:'powerplant',mult:3,req:{id:'powerplant',amt:25}},
+  {id:'sk1',name:'More Floors',desc:'Skyscrapers x2.',cost:19000000000,type:'building',target:'skyscraper',mult:2,req:{id:'skyscraper',amt:1}},
+  {id:'sk2',name:'Executive Suites',desc:'Skyscrapers x2.',cost:95000000000,type:'building',target:'skyscraper',mult:2,req:{id:'skyscraper',amt:5}},
+  {id:'sk3',name:'Global HQ Status',desc:'Skyscrapers x3.',cost:1.9e12,type:'building',target:'skyscraper',mult:3,req:{id:'skyscraper',amt:25}},
+  {id:'m1',name:'Diamond Drills',desc:'Poop Mines x2.',cost:84000000000,type:'building',target:'mine',mult:2,req:{id:'mine',amt:1}},
+  {id:'m2',name:'Deeper Shafts',desc:'Poop Mines x2.',cost:420000000000,type:'building',target:'mine',mult:2,req:{id:'mine',amt:5}},
+  {id:'m3',name:'Lava-Proof Suits',desc:'Poop Mines x2.',cost:8.4e12,type:'building',target:'mine',mult:2,req:{id:'mine',amt:10}},
+  {id:'m4',name:'Tectonic Driller',desc:'Poop Mines x3.',cost:2e14,type:'building',target:'mine',mult:3,req:{id:'mine',amt:25}},
+  {id:'m5',name:'Core Mining Rig',desc:'Poop Mines x3.',cost:8e15,type:'building',target:'mine',mult:3,req:{id:'mine',amt:50}},
+  {id:'v1',name:'Lava Channels',desc:'Poop Volcanoes x2.',cost:400000000000,type:'building',target:'volcano',mult:2,req:{id:'volcano',amt:1}},
+  {id:'v2',name:'Eruption Control',desc:'Poop Volcanoes x2.',cost:2e12,type:'building',target:'volcano',mult:2,req:{id:'volcano',amt:5}},
+  {id:'v3',name:'Supervolcano',desc:'Poop Volcanoes x3.',cost:4e13,type:'building',target:'volcano',mult:3,req:{id:'volcano',amt:25}},
+  {id:'cv1',name:'Crystal Polishing',desc:'Crystal Caves x2.',cost:1.8e12,type:'building',target:'cave',mult:2,req:{id:'cave',amt:1}},
+  {id:'cv2',name:'Deeper Tunnels',desc:'Crystal Caves x2.',cost:9e12,type:'building',target:'cave',mult:2,req:{id:'cave',amt:5}},
+  {id:'cv3',name:'Geode Harvester',desc:'Crystal Caves x3.',cost:1.8e14,type:'building',target:'cave',mult:3,req:{id:'cave',amt:25}},
+  {id:'lb1',name:'Bunsen Burners',desc:'Poop Labs x2.',cost:8e12,type:'building',target:'lab',mult:2,req:{id:'lab',amt:1}},
+  {id:'lb2',name:'PhD Researchers',desc:'Poop Labs x2.',cost:4e13,type:'building',target:'lab',mult:2,req:{id:'lab',amt:5}},
+  {id:'lb3',name:'Particle Accelerator',desc:'Poop Labs x2.',cost:8e14,type:'building',target:'lab',mult:2,req:{id:'lab',amt:10}},
+  {id:'lb4',name:'Quantum Synthesis',desc:'Poop Labs x3.',cost:2.5e16,type:'building',target:'lab',mult:3,req:{id:'lab',amt:25}},
+  {id:'co1',name:'Reinforced Drill Bits',desc:'Earth Core Taps x2.',cost:3.6e13,type:'building',target:'core',mult:2,req:{id:'core',amt:1}},
+  {id:'co2',name:'Magma Cooling System',desc:'Earth Core Taps x2.',cost:1.8e14,type:'building',target:'core',mult:2,req:{id:'core',amt:5}},
+  {id:'co3',name:'Planetary Drainage',desc:'Earth Core Taps x3.',cost:3.6e15,type:'building',target:'core',mult:3,req:{id:'core',amt:25}},
+  {id:'sa1',name:'Solar Panels',desc:'Poop Satellites x2.',cost:1.6e14,type:'building',target:'satellite',mult:2,req:{id:'satellite',amt:1}},
+  {id:'sa2',name:'Orbital Network',desc:'Poop Satellites x2.',cost:8e14,type:'building',target:'satellite',mult:2,req:{id:'satellite',amt:5}},
+  {id:'sa3',name:'Geostationary Lock',desc:'Poop Satellites x3.',cost:1.6e16,type:'building',target:'satellite',mult:3,req:{id:'satellite',amt:25}},
+  {id:'mb1',name:'Pressurised Domes',desc:'Lunar Bases x2.',cost:7e14,type:'building',target:'moonbase',mult:2,req:{id:'moonbase',amt:1}},
+  {id:'mb2',name:'Moon Rover Fleet',desc:'Lunar Bases x2.',cost:3.5e15,type:'building',target:'moonbase',mult:2,req:{id:'moonbase',amt:5}},
+  {id:'mb3',name:'Lunar Capital City',desc:'Lunar Bases x3.',cost:7e16,type:'building',target:'moonbase',mult:3,req:{id:'moonbase',amt:25}},
+  {id:'r1',name:'Bigger Boosters',desc:'Poop Rockets x2.',cost:3.2e15,type:'building',target:'rocket',mult:2,req:{id:'rocket',amt:1}},
+  {id:'r2',name:'Orbital Collection Nets',desc:'Poop Rockets x2.',cost:1.6e16,type:'building',target:'rocket',mult:2,req:{id:'rocket',amt:5}},
+  {id:'r3',name:'Warp Drive',desc:'Poop Rockets x3.',cost:3.2e17,type:'building',target:'rocket',mult:3,req:{id:'rocket',amt:25}},
+  {id:'sn1',name:'Docking Bay Expansion',desc:'Orbital Stations x2.',cost:1.4e16,type:'building',target:'station',mult:2,req:{id:'station',amt:1}},
+  {id:'sn2',name:'Comet Tractor Beam',desc:'Orbital Stations x2.',cost:7e16,type:'building',target:'station',mult:2,req:{id:'station',amt:5}},
+  {id:'sn3',name:'Megastructure Status',desc:'Orbital Stations x3.',cost:1.4e18,type:'building',target:'station',mult:3,req:{id:'station',amt:25}},
+  {id:'p1',name:'Wider Rift',desc:'Poop Portals x2.',cost:6e16,type:'building',target:'portal',mult:2,req:{id:'portal',amt:1}},
+  {id:'p2',name:'Dimensional Stabiliser',desc:'Poop Portals x2.',cost:3e17,type:'building',target:'portal',mult:2,req:{id:'portal',amt:5}},
+  {id:'p3',name:'Interdimensional Treaty',desc:'Poop Portals x3.',cost:6e18,type:'building',target:'portal',mult:3,req:{id:'portal',amt:25}},
+  {id:'cl1',name:'Clone Stabilisation',desc:'Tom Clones x2.',cost:2.6e17,type:'building',target:'tomclone',mult:2,req:{id:'tomclone',amt:1}},
+  {id:'cl2',name:'Clone Army',desc:'Tom Clones x2.',cost:1.3e18,type:'building',target:'tomclone',mult:2,req:{id:'tomclone',amt:5}},
+  {id:'cl3',name:'Genetic Perfection',desc:'Tom Clones x3.',cost:2.6e19,type:'building',target:'tomclone',mult:3,req:{id:'tomclone',amt:25}},
+  {id:'bh1',name:'Event Horizon Tuning',desc:'Black Holes x2.',cost:1.2e18,type:'building',target:'blackhole',mult:2,req:{id:'blackhole',amt:1}},
+  {id:'bh2',name:'Hawking Radiation Tap',desc:'Black Holes x2.',cost:6e18,type:'building',target:'blackhole',mult:2,req:{id:'blackhole',amt:5}},
+  {id:'bh3',name:'Singularity Engine',desc:'Black Holes x3.',cost:1.2e20,type:'building',target:'blackhole',mult:3,req:{id:'blackhole',amt:25}},
+  {id:'u1',name:'New Physics',desc:'Pocket Universes x2.',cost:5e18,type:'building',target:'universe',mult:2,req:{id:'universe',amt:1}},
+  {id:'u2',name:'Cosmic Constants Tweaked',desc:'Pocket Universes x2.',cost:2.5e19,type:'building',target:'universe',mult:2,req:{id:'universe',amt:5}},
+  {id:'u3',name:'Big Bang Reactor',desc:'Pocket Universes x3.',cost:5e20,type:'building',target:'universe',mult:3,req:{id:'universe',amt:25}},
+  {id:'g1',name:'First Prayer',desc:'Poop Gods x2.',cost:2e19,type:'building',target:'god',mult:2,req:{id:'god',amt:1}},
+  {id:'g2',name:'Divine Covenant',desc:'Poop Gods x2.',cost:1e20,type:'building',target:'god',mult:2,req:{id:'god',amt:5}},
+  {id:'g3',name:'Holy Poop Scripture',desc:'Poop Gods x3.',cost:2e21,type:'building',target:'god',mult:3,req:{id:'god',amt:25}},
+  {id:'g4',name:'Ascended Pantheon',desc:'Poop Gods x5.',cost:5e22,type:'building',target:'god',mult:5,req:{id:'god',amt:50}},
+  {id:'gm1',name:'Toms Iron Stomach',desc:'All production +10%.',cost:60000,type:'globalMult',mult:1.10},
+  {id:'gm2',name:'Toms Refined Palate',desc:'All production +10%.',cost:1200000,type:'globalMult',mult:1.10},
+  {id:'gm3',name:'Toms Legendary Diet',desc:'All production +20%.',cost:150000000,type:'globalMult',mult:1.20},
+  {id:'gm4',name:'Tom Pearl Statue',desc:'All production +20%.',cost:12000000000,type:'globalMult',mult:1.20},
+  {id:'gm5',name:'Tom Pearl Religion',desc:'All production x2.',cost:1.5e12,type:'globalMult',mult:2},
+  {id:'gm6',name:'Tom Pearl Ascension',desc:'All production x2.',cost:2e14,type:'globalMult',mult:2},
+  {id:'gm7',name:'Tom Pearl Is God',desc:'All production x2.5.',cost:3e16,type:'globalMult',mult:2.5},
+  {id:'gm8',name:'Universal Poop Law',desc:'All production x3.',cost:5e19,type:'globalMult',mult:3},
+  {id:'gm9',name:'Poop Singularity',desc:'All production x5.',cost:8e22,type:'globalMult',mult:5},
 ];
 
-/* ============================================================
-   ACHIEVEMENTS
-============================================================ */
-const achievementData = [
-  { id:'a1',  name:'First Poop',            icon:'💩', desc:'Collect 1 poop.',                  req: s => s.totalPoopsEarned >= 1 },
-  { id:'a2',  name:'Getting Started',       icon:'🌱', desc:'Collect 100 poops.',               req: s => s.totalPoopsEarned >= 100 },
-  { id:'a3',  name:'Poop Apprentice',       icon:'📦', desc:'Collect 1,000 poops.',             req: s => s.totalPoopsEarned >= 1000 },
-  { id:'a4',  name:'Poop Journeyman',       icon:'🎒', desc:'Collect 10,000 poops.',            req: s => s.totalPoopsEarned >= 10000 },
-  { id:'a5',  name:'Poop Expert',           icon:'🏅', desc:'Collect 100,000 poops.',           req: s => s.totalPoopsEarned >= 100000 },
-  { id:'a6',  name:'Poop Master',           icon:'🥇', desc:'Collect 1 million poops.',         req: s => s.totalPoopsEarned >= 1e6 },
-  { id:'a7',  name:'Poop Grand Master',     icon:'🏆', desc:'Collect 1 billion poops.',         req: s => s.totalPoopsEarned >= 1e9 },
-  { id:'a8',  name:'Poop Legend',           icon:'🌟', desc:'Collect 1 trillion poops.',        req: s => s.totalPoopsEarned >= 1e12 },
-  { id:'a9',  name:'Poop Deity',            icon:'⚡', desc:'Collect 1 quadrillion poops.',     req: s => s.totalPoopsEarned >= 1e15 },
-  { id:'a10', name:'Tom Transcends',        icon:'🌌', desc:'Collect 1 quintillion poops.',     req: s => s.totalPoopsEarned >= 1e18 },
-  { id:'a11', name:'Beyond Comprehension',  icon:'♾️', desc:'Collect 1 sextillion poops.',      req: s => s.totalPoopsEarned >= 1e21 },
-
-  { id:'ck1', name:'First Click',           icon:'👆', desc:'Click Tom once.',                  req: s => s.totalClicks >= 1 },
-  { id:'ck2', name:'Clickaholic',           icon:'🖱️', desc:'Click Tom 100 times.',             req: s => s.totalClicks >= 100 },
-  { id:'ck3', name:'Click Maniac',          icon:'💥', desc:'Click Tom 1,000 times.',           req: s => s.totalClicks >= 1000 },
-  { id:'ck4', name:'Carpal Tunnel Award',   icon:'🏥', desc:'Click Tom 10,000 times.',          req: s => s.totalClicks >= 10000 },
-  { id:'ck5', name:'Click God',             icon:'🙌', desc:'Click Tom 100,000 times.',         req: s => s.totalClicks >= 100000 },
-
-  { id:'b1',  name:'First Employee',        icon:'🤝', desc:'Own your first producer.',         req: s => totalBuildings(s) >= 1 },
-  { id:'b2',  name:'Small Business',        icon:'🏪', desc:'Own 10 producers total.',          req: s => totalBuildings(s) >= 10 },
-  { id:'b3',  name:'Medium Business',       icon:'🏢', desc:'Own 50 producers total.',          req: s => totalBuildings(s) >= 50 },
-  { id:'b4',  name:'Big Business',          icon:'🏦', desc:'Own 100 producers total.',         req: s => totalBuildings(s) >= 100 },
-  { id:'b5',  name:'Poop Corporation',      icon:'🌐', desc:'Own 200 producers total.',         req: s => totalBuildings(s) >= 200 },
-  { id:'b6',  name:'Poop Empire',           icon:'👑', desc:'Own 500 producers total.',         req: s => totalBuildings(s) >= 500 },
-  { id:'b7',  name:'Poop Civilisation',     icon:'🗽', desc:'Own 1000 producers total.',        req: s => totalBuildings(s) >= 1000 },
-
-  { id:'cps1', name:'Poop Trickle',         icon:'💧', desc:'Reach 1 poop/sec.',               req: s => calcCps() >= 1 },
-  { id:'cps2', name:'Poop Stream',          icon:'🌊', desc:'Reach 100 poops/sec.',             req: s => calcCps() >= 100 },
-  { id:'cps3', name:'Poop River',           icon:'🏞️', desc:'Reach 10,000 poops/sec.',          req: s => calcCps() >= 10000 },
-  { id:'cps4', name:'Poop Flood',           icon:'🌧️', desc:'Reach 1 million poops/sec.',       req: s => calcCps() >= 1e6 },
-  { id:'cps5', name:'Poop Tsunami',         icon:'🌊', desc:'Reach 1 billion poops/sec.',       req: s => calcCps() >= 1e9 },
-  { id:'cps6', name:'Poop Supernova',       icon:'💫', desc:'Reach 1 trillion poops/sec.',      req: s => calcCps() >= 1e12 },
-  { id:'cps7', name:'Poop Big Bang',        icon:'🎆', desc:'Reach 1 quadrillion poops/sec.',   req: s => calcCps() >= 1e15 },
-
-  { id:'gp1', name:'Golden Catch',          icon:'✨', desc:'Click your first golden poop.',    req: s => s.goldenPoopsClicked >= 1 },
-  { id:'gp2', name:'Golden Hunter',         icon:'🏅', desc:'Click 10 golden poops.',           req: s => s.goldenPoopsClicked >= 10 },
-  { id:'gp3', name:'Golden Obsession',      icon:'💛', desc:'Click 50 golden poops.',           req: s => s.goldenPoopsClicked >= 50 },
-
-  { id:'pr1', name:'Fresh Start',           icon:'♻️', desc:'Prestige for the first time.',     req: s => s.prestigeCount >= 1 },
-  { id:'pr2', name:'Prestige Addict',       icon:'🔮', desc:'Prestige 5 times.',                req: s => s.prestigeCount >= 5 },
-  { id:'pr3', name:'Eternal Pooper',        icon:'∞',  desc:'Prestige 10 times.',               req: s => s.prestigeCount >= 10 },
-  { id:'pr4', name:'Reincarnation Master',  icon:'🔁', desc:'Prestige 25 times.',               req: s => s.prestigeCount >= 25 },
-
-  { id:'up1', name:'Upgrade Novice',        icon:'⬆️', desc:'Buy your first upgrade.',          req: s => Object.keys(s.upgradesBought).length >= 1 },
-  { id:'up2', name:'Upgrade Addict',        icon:'📈', desc:'Buy 10 upgrades.',                 req: s => Object.keys(s.upgradesBought).length >= 10 },
-  { id:'up3', name:'Upgrade Master',        icon:'🔝', desc:'Buy 25 upgrades.',                 req: s => Object.keys(s.upgradesBought).length >= 25 },
-  { id:'up4', name:'Upgrade God',           icon:'🌠', desc:'Buy 50 upgrades.',                 req: s => Object.keys(s.upgradesBought).length >= 50 },
-  { id:'up5', name:'Upgrade Completionist', icon:'✅', desc:'Buy 100 upgrades.',                req: s => Object.keys(s.upgradesBought).length >= 100 },
-
-  { id:'ar1', name:'Welcome to Town',       icon:'🏘️', desc:'Unlock Pearl Town.',               req: s => s.totalPoopsEarned >= 50000 },
-  { id:'ar2', name:'Industrial Revolution', icon:'🏭', desc:'Unlock the Industrial District.',  req: s => s.totalPoopsEarned >= 50000000 },
-  { id:'ar3', name:'Down Under',            icon:'🕳️', desc:'Unlock the Underworld.',           req: s => s.totalPoopsEarned >= 50000000000 },
-  { id:'ar4', name:'Final Frontier',        icon:'🚀', desc:'Unlock Outer Space.',              req: s => s.totalPoopsEarned >= 5e13 },
-  { id:'ar5', name:'Cosmic Awakening',      icon:'🌌', desc:'Unlock The Cosmic Realm.',         req: s => s.totalPoopsEarned >= 5e18 },
+const achievementData=[
+  {id:'a1',name:'First Poop',icon:'💩',desc:'Collect 1 poop.',req:s=>s.totalPoopsEarned>=1},
+  {id:'a2',name:'Getting Started',icon:'🌱',desc:'Collect 100 poops.',req:s=>s.totalPoopsEarned>=100},
+  {id:'a3',name:'Poop Apprentice',icon:'📦',desc:'Collect 1,000 poops.',req:s=>s.totalPoopsEarned>=1000},
+  {id:'a4',name:'Poop Journeyman',icon:'🎒',desc:'Collect 10,000 poops.',req:s=>s.totalPoopsEarned>=10000},
+  {id:'a5',name:'Poop Expert',icon:'🏅',desc:'Collect 100,000 poops.',req:s=>s.totalPoopsEarned>=100000},
+  {id:'a6',name:'Poop Master',icon:'🥇',desc:'Collect 1 million poops.',req:s=>s.totalPoopsEarned>=1e6},
+  {id:'a7',name:'Poop Grand Master',icon:'🏆',desc:'Collect 1 billion poops.',req:s=>s.totalPoopsEarned>=1e9},
+  {id:'a8',name:'Poop Legend',icon:'🌟',desc:'Collect 1 trillion poops.',req:s=>s.totalPoopsEarned>=1e12},
+  {id:'a9',name:'Poop Deity',icon:'⚡',desc:'Collect 1 quadrillion poops.',req:s=>s.totalPoopsEarned>=1e15},
+  {id:'a10',name:'Tom Transcends',icon:'🌌',desc:'Collect 1 quintillion poops.',req:s=>s.totalPoopsEarned>=1e18},
+  {id:'a11',name:'Beyond Comprehension',icon:'♾️',desc:'Collect 1 sextillion poops.',req:s=>s.totalPoopsEarned>=1e21},
+  {id:'ck1',name:'First Click',icon:'👆',desc:'Click Tom once.',req:s=>s.totalClicks>=1},
+  {id:'ck2',name:'Clickaholic',icon:'🖱️',desc:'Click Tom 100 times.',req:s=>s.totalClicks>=100},
+  {id:'ck3',name:'Click Maniac',icon:'💥',desc:'Click Tom 1,000 times.',req:s=>s.totalClicks>=1000},
+  {id:'ck4',name:'Carpal Tunnel Award',icon:'🏥',desc:'Click Tom 10,000 times.',req:s=>s.totalClicks>=10000},
+  {id:'ck5',name:'Click God',icon:'🙌',desc:'Click Tom 100,000 times.',req:s=>s.totalClicks>=100000},
+  {id:'b1',name:'First Employee',icon:'🤝',desc:'Own your first producer.',req:s=>totalBuildings(s)>=1},
+  {id:'b2',name:'Small Business',icon:'🏪',desc:'Own 10 producers total.',req:s=>totalBuildings(s)>=10},
+  {id:'b3',name:'Medium Business',icon:'🏢',desc:'Own 50 producers total.',req:s=>totalBuildings(s)>=50},
+  {id:'b4',name:'Big Business',icon:'🏦',desc:'Own 100 producers total.',req:s=>totalBuildings(s)>=100},
+  {id:'b5',name:'Poop Corporation',icon:'🌐',desc:'Own 200 producers total.',req:s=>totalBuildings(s)>=200},
+  {id:'b6',name:'Poop Empire',icon:'👑',desc:'Own 500 producers total.',req:s=>totalBuildings(s)>=500},
+  {id:'b7',name:'Poop Civilisation',icon:'🗽',desc:'Own 1000 producers total.',req:s=>totalBuildings(s)>=1000},
+  {id:'cps1',name:'Poop Trickle',icon:'💧',desc:'Reach 1 poop/sec.',req:()=>calcCps()>=1},
+  {id:'cps2',name:'Poop Stream',icon:'🌊',desc:'Reach 100 poops/sec.',req:()=>calcCps()>=100},
+  {id:'cps3',name:'Poop River',icon:'🏞️',desc:'Reach 10,000 poops/sec.',req:()=>calcCps()>=10000},
+  {id:'cps4',name:'Poop Flood',icon:'🌧️',desc:'Reach 1 million poops/sec.',req:()=>calcCps()>=1e6},
+  {id:'cps5',name:'Poop Tsunami',icon:'🌊',desc:'Reach 1 billion poops/sec.',req:()=>calcCps()>=1e9},
+  {id:'cps6',name:'Poop Supernova',icon:'💫',desc:'Reach 1 trillion poops/sec.',req:()=>calcCps()>=1e12},
+  {id:'cps7',name:'Poop Big Bang',icon:'🎆',desc:'Reach 1 quadrillion poops/sec.',req:()=>calcCps()>=1e15},
+  {id:'gp1',name:'Golden Catch',icon:'✨',desc:'Click your first golden poop.',req:s=>s.goldenPoopsClicked>=1},
+  {id:'gp2',name:'Golden Hunter',icon:'🏅',desc:'Click 10 golden poops.',req:s=>s.goldenPoopsClicked>=10},
+  {id:'gp3',name:'Golden Obsession',icon:'💛',desc:'Click 50 golden poops.',req:s=>s.goldenPoopsClicked>=50},
+  {id:'pr1',name:'Fresh Start',icon:'♻️',desc:'Prestige for the first time.',req:s=>s.prestigeCount>=1},
+  {id:'pr2',name:'Prestige Addict',icon:'🔮',desc:'Prestige 5 times.',req:s=>s.prestigeCount>=5},
+  {id:'pr3',name:'Eternal Pooper',icon:'∞',desc:'Prestige 10 times.',req:s=>s.prestigeCount>=10},
+  {id:'pr4',name:'Reincarnation Master',icon:'🔁',desc:'Prestige 25 times.',req:s=>s.prestigeCount>=25},
+  {id:'up1',name:'Upgrade Novice',icon:'⬆️',desc:'Buy your first upgrade.',req:s=>Object.keys(s.upgradesBought).length>=1},
+  {id:'up2',name:'Upgrade Addict',icon:'📈',desc:'Buy 10 upgrades.',req:s=>Object.keys(s.upgradesBought).length>=10},
+  {id:'up3',name:'Upgrade Master',icon:'🔝',desc:'Buy 25 upgrades.',req:s=>Object.keys(s.upgradesBought).length>=25},
+  {id:'up4',name:'Upgrade God',icon:'🌠',desc:'Buy 50 upgrades.',req:s=>Object.keys(s.upgradesBought).length>=50},
+  {id:'up5',name:'Upgrade Completionist',icon:'✅',desc:'Buy 100 upgrades.',req:s=>Object.keys(s.upgradesBought).length>=100},
+  {id:'ar1',name:'Welcome to Town',icon:'🏘️',desc:'Unlock Pearl Town.',req:s=>s.totalPoopsEarned>=50000},
+  {id:'ar2',name:'Industrial Revolution',icon:'🏭',desc:'Unlock the Industrial District.',req:s=>s.totalPoopsEarned>=50000000},
+  {id:'ar3',name:'Down Under',icon:'🕳️',desc:'Unlock the Underworld.',req:s=>s.totalPoopsEarned>=50000000000},
+  {id:'ar4',name:'Final Frontier',icon:'🚀',desc:'Unlock Outer Space.',req:s=>s.totalPoopsEarned>=5e13},
+  {id:'ar5',name:'Cosmic Awakening',icon:'🌌',desc:'Unlock The Cosmic Realm.',req:s=>s.totalPoopsEarned>=5e18},
 ];
 
-/* ============================================================
-   MILESTONES (Tom image swaps)
-============================================================ */
-const tomMilestones = [
-  { threshold:0,           img:'tomp.jfif',  label:'Tom is hungry...' },
-  { threshold:100,         img:'tomp2.png',  label:'Tom found a small snack 💩' },
-  { threshold:1000,        img:'tomp3.png',  label:'Tom is getting into it 💩💩' },
-  { threshold:10000,       img:'tomp4.png',  label:'Tom is a dedicated eater 💩💩💩' },
-  { threshold:100000,      img:'tomp5.png',  label:'Tom is a poop connoisseur 🏅' },
-  { threshold:1000000,     img:'tomp6.png',  label:'Tom Pearl: Poop Master 🏆' },
-  { threshold:10000000,    img:'tomp7.jfif', label:'Tom has transcended humanity 🌟' },
-  { threshold:100000000,   img:'tomp8.jfif', label:'Tom Pearl: Poop Legend ⚡' },
-  { threshold:100000000000,img:'tomp9.jfif', label:'Tom Pearl is eternal 🌌' },
+const tomMilestones=[
+  {threshold:0,img:'tomp.jfif',label:'Tom is hungry...'},
+  {threshold:100,img:'tomp2.png',label:'Tom found a small snack 💩'},
+  {threshold:1000,img:'tomp3.png',label:'Tom is getting into it 💩💩'},
+  {threshold:10000,img:'tomp4.png',label:'Tom is a dedicated eater 💩💩💩'},
+  {threshold:100000,img:'tomp5.png',label:'Tom is a poop connoisseur 🏅'},
+  {threshold:1000000,img:'tomp6.png',label:'Tom Pearl: Poop Master 🏆'},
+  {threshold:10000000,img:'tomp7.jfif',label:'Tom has transcended humanity 🌟'},
+  {threshold:100000000,img:'tomp8.jfif',label:'Tom Pearl: Poop Legend ⚡'},
+  {threshold:100000000000,img:'tomp9.jfif',label:'Tom Pearl is eternal 🌌'},
 ];
 
-/* ============================================================
-   NEWS TICKER LINES
-============================================================ */
-const newsLines = [
-  "Local man Tom Pearl eating poop at record rates \u2014 doctors baffled",
-  "Poop prices surge 400% as Tom Pearl corners the market",
-  "Scientists confirm Tom Pearl's stomach is its own ecosystem",
-  "Tom Pearl wins Nobel Prize for Poop Sciences three years running",
-  "Area man claims Tom Pearl personally ate his entire backyard",
-  "Poop portal discovered behind Tom Pearl's shed \u2014 government silent",
-  "Tom Pearl clones now outnumber actual people \u2014 census bureau panicking",
-  "Poop Black Hole detected in Tom Pearl's garage \u2014 NASA concerned",
-  "Tom Pearl's Poop Farm named National Heritage Site",
-  "Tom Pearl spotted eating poop on the moon \u2014 NASA confirms",
-  "Poop Rocket launch successful \u2014 Tom Pearl waves from orbit",
-  "Local fly trainer says working for Tom Pearl changed his life forever",
-  "Tom Pearl's digestive system declared a wonder of the modern world",
-  "Poop prices at all-time high \u2014 Tom Pearl blamed",
-  "Tom Pearl religion growing: 3 million followers and counting",
-  "Breaking: Tom Pearl eats 1 trillion poops \u2014 sets world record",
-  "Poop God confirmed real \u2014 turns out it is Tom Pearl",
-  "Pearl Town renames Main Street to Poop Boulevard in his honour",
-  "Underworld explorers report finding 'a friendly giant named Tom' down there",
-  "Cosmic Realm scientists baffled: 'the whole universe smells like Tom'",
+const newsLines=['Local man Tom Pearl eating poop at record rates — doctors baffled','Poop prices surge 400% as Tom Pearl corners the market','Scientists confirm Tom Pearl\'s stomach is its own ecosystem','Tom Pearl wins Nobel Prize for Poop Sciences three years running','Area man claims Tom Pearl personally ate his entire backyard','Poop portal discovered behind Tom Pearl\'s shed — government silent','Tom Pearl clones now outnumber actual people — census bureau panicking','Poop Black Hole detected in Tom Pearl\'s garage — NASA concerned','Tom Pearl\'s Poop Farm named National Heritage Site','Tom Pearl spotted eating poop on the moon — NASA confirms','Poop Rocket launch successful — Tom Pearl waves from orbit','Local fly trainer says working for Tom Pearl changed his life forever','Tom Pearl\'s digestive system declared a wonder of the modern world','Poop prices at all-time high — Tom Pearl blamed','Tom Pearl religion growing: 3 million followers and counting','Breaking: Tom Pearl eats 1 trillion poops — sets world record','Poop God confirmed real — turns out it is Tom Pearl','Pearl Town renames Main Street to Poop Boulevard in his honour','Underworld explorers report finding \'a friendly giant named Tom\' down there','Cosmic Realm scientists baffled: \'the whole universe smells like Tom\''];
+
+const changelogData=[
+  {date:'2026-06-17',title:'Anti-Cheat: Clock Manipulation Fix',changes:['Closed the "change your system clock forward" exploit','Offline progress hard-capped at 12 hours per session','Offline production runs at 0.5x rate','Added backward clock jump detection (awards zero bonus)','Added live clock-tamper check while game is open']},
+  {date:'2026-06-17',title:'Click Upgrade Nerf & Reset Button Fix',changes:['Fixed Reset button instantly restoring save on reload','Nerfed click multiplier upgrades to x1.5/x1.5/x1.5/x2/x2','Nerfed "% of CPS added to click" to a combined 10%','Increased cost of several click upgrades']},
+  {date:'2026-06-17',title:'Difficulty Overhaul, Golden Poop Minigame & Infinity Event',changes:['Producer cost scaling increased to x1.19','Prestige requires 5 trillion total poops; smaller bonus per point','Golden Poops spawn every 2–5 minutes (was 30–120 seconds)','Clicking a Golden Poop opens a reflex minigame','Winning grants 2x production for 5 minutes; losing gives nothing','Added Infinity Overflow event for overflow past safe limits']},
+  {date:'2026-06-16',title:'All Hail Jan',changes:['Beating the game triggers a full-screen Jan celebration','Added falling confetti animation and tribute message','Triggers once per save file']},
+  {date:'2026-06-16',title:'The Big Expansion Update',changes:['Added 6 themed Areas unlocking progressively','Added 10 new producers (total 28)','Added dozens of new upgrades (total 120+)','Added 12 new achievements (total 47)','Added Shift-click buy-max on producers','Added Update Log tab','Fixed save/load NaN bugs','Fixed export save fallback']},
+  {date:'2026-06-16',title:'Milestone Images Update',changes:['Tom\'s image changes at 9 lifetime poop milestones','Added milestone label under Tom']},
+  {date:'2026-06-16',title:'Initial Release',changes:['Launched Tom Pearl: Poop Clicker','12 producers, click/global upgrades, autosave, export/import, offline progress']},
 ];
 
-/* ============================================================
-   CHANGELOG
-============================================================ */
-const changelogData = [
-  {
-    date: '2026-06-17',
-    title: 'Anti-Cheat: Clock Manipulation Fix',
-    changes: [
-      'Closed the "change your system clock forward" exploit that let players claim huge amounts of offline poops',
-      'Offline progress is now hard-capped at 12 hours per session, no matter how large the claimed time gap is',
-      'Offline production now runs at half the normal rate (0.5x) compared to active play',
-      'Added detection for backward clock jumps \u2014 these now award zero bonus poops instead of risking negative/broken state',
-      'Added a live clock-tamper check while the game is open: if your system clock changes mid-session, the game detects the mismatch against a tamper-resistant internal timer and resyncs without granting a bonus',
-      'A normal short trip away from the game (minutes to a few hours) is unaffected and still rewarded fairly',
-    ]
-  },
-  {
-    date: '2026-06-17',
-    title: 'Click Upgrade Nerf & Reset Button Fix',
-    changes: [
-      'Fixed a bug where clicking the Reset button would clear your save but instantly restore it, because the auto-save-on-close handler fired during the page reload and wrote your old progress right back',
-      'Nerfed click multiplier upgrades from x2/x2/x3/x5/x10 (x600 total) down to x1.5/x1.5/x1.5/x2/x2 (x13.5 total)',
-      'Nerfed "% of CPS added to click" upgrades from a combined 30% down to a combined 10%',
-      'Increased the cost of several click upgrades to match their reduced power',
-      'Clicking is now a useful supplement to your idle production instead of a way to trivialize it',
-    ]
-  },
-  {
-    date: '2026-06-17',
-    title: 'Difficulty Overhaul, Golden Poop Minigame & The Infinity Event',
-    changes: [
-      'Increased producer cost scaling from x1.15 to x1.19 per purchase \u2014 the game now takes significantly longer',
-      'Prestige now requires 5 trillion total poops (up from 1 trillion) and gives a smaller bonus per point, for a slower late-game curve',
-      'Increased the cost of every Global Multiplier upgrade and reduced some of their bonuses slightly',
-      'Golden Poops are now MUCH rarer: they spawn every 2\u20135 minutes instead of every 30\u2013120 seconds',
-      'Clicking a Golden Poop now opens a reflex minigame: catch 8 fleeting poops within 10 seconds',
-      'Winning the minigame grants 2x production for a full 5 minutes (the buff timer is visible under your stats and survives a save/reload)',
-      'Losing the minigame gives nothing \u2014 no more guaranteed free bonus just for clicking',
-      'Added the Infinity Overflow event: if your poop count ever overflows past safe limits, the screen erupts with "I HATE YOU" and "ALL HAIL JAN" messages, the screen shakes and flashes colors, and your current poops are reset to zero as punishment',
-    ]
-  },
-  {
-    date: '2026-06-16',
-    title: 'All Hail Jan',
-    changes: [
-      'Beating the game (unlocking the "Beyond Comprehension" achievement at 1 sextillion total poops) now triggers a huge full-screen celebration honoring Jan',
-      'Added falling confetti animation and a dedicated tribute message',
-      'This celebration only triggers once per save file',
-    ]
-  },
-  {
-    date: '2026-06-16',
-    title: 'The Big Expansion Update',
-    changes: [
-      'Added 6 new themed Areas (Backyard, Pearl Town, Industrial District, Underworld, Outer Space, Cosmic Realm) that unlock progressively as you earn more poops',
-      'Added 10 new producers, bringing the total to 28 (Poop Garden, Poop Bakery, Poop Mall, Poop Stadium, Power Plant, Skyscraper, Crystal Cave, Earth Core Tap, Lunar Base, Orbital Station)',
-      'Added dozens of new upgrades, bringing the total to over 120',
-      'Added 12 new achievements, bringing the total to 47',
-      'Added Shift-click "buy max" on producers',
-      'Added this Update Log tab',
-      'Nerfed Golden Poops back to their original, simple version (60 sec of CPS or 10% of stash)',
-      'Fixed save/load bugs where corrupted numeric fields could turn into NaN',
-      'Fixed export save fallback when clipboard access is unavailable',
-      'Fixed an issue where a single broken achievement check could prevent all others from being checked',
-    ]
-  },
-  {
-    date: '2026-06-16',
-    title: 'Golden Poop Overhaul (later reverted)',
-    changes: [
-      'Golden Poops temporarily became a multi-phase chase mini-game with screen shake, decoys, and stacked effects',
-      'This was reverted in the next update at user request for being too disruptive',
-    ]
-  },
-  {
-    date: '2026-06-16',
-    title: 'Milestone Images Update',
-    changes: [
-      'Tom\u2019s image now changes automatically at 9 lifetime poop milestones (100, 1K, 10K, 100K, 1M, 10M, 100M, 100B)',
-      'Added a milestone label under Tom describing his current state',
-    ]
-  },
-  {
-    date: '2026-06-16',
-    title: 'Bug Fix Update',
-    changes: [
-      'Fixed a critical syntax error from unescaped apostrophes that broke all clicking and tab switching',
-    ]
-  },
-  {
-    date: '2026-06-16',
-    title: 'Initial Release',
-    changes: [
-      'Launched Tom Pearl: Poop Clicker',
-      '12 producers from Pointer Finger to Pocket Universe',
-      'Click and global upgrades',
-      'Autosave every 30 seconds plus save on page close',
-      'Export/Import save strings for cross-device play',
-      'Offline progress while away',
-    ]
-  },
-];
+let state={poops:0,totalPoopsEarned:0,totalClicks:0,clickValue:1,clickMultiplier:1,clickFromCpsRate:0,globalMultiplier:1,prestigeCount:0,prestigeMultiplier:1,buildings:{},buildingMultipliers:{},upgradesBought:{},achievementsUnlocked:{},goldenPoopsClicked:0,gameBeaten:false,doubleProdUntil:0,lastSave:Date.now()};
+buildingData.forEach(b=>{state.buildings[b.id]=0;state.buildingMultipliers[b.id]=1;});
 
-/* ============================================================
-   STATE
-============================================================ */
-let state = {
-  poops: 0,
-  totalPoopsEarned: 0,
-  totalClicks: 0,
-  clickValue: 1,
-  clickMultiplier: 1,
-  clickFromCpsRate: 0,
-  globalMultiplier: 1,
-  prestigeCount: 0,
-  prestigeMultiplier: 1,
-  buildings: {},
-  buildingMultipliers: {},
-  upgradesBought: {},
-  achievementsUnlocked: {},
-  goldenPoopsClicked: 0,
-  gameBeaten: false,
-  doubleProdUntil: 0,
-  lastSave: Date.now(),
-};
-
-buildingData.forEach(b => {
-  state.buildings[b.id] = 0;
-  state.buildingMultipliers[b.id] = 1;
-});
-
-/* ============================================================
-   HELPERS
-============================================================ */
-function totalBuildings(s) {
-  return Object.values(s.buildings).reduce((a,b)=>a+b,0);
+function totalBuildings(s){return Object.values(s.buildings).reduce((a,b)=>a+b,0);}
+function formatNumber(n){if(typeof n!=='number'||isNaN(n)||!isFinite(n))return '0';if(n<0)return '-'+formatNumber(-n);if(n<1000)return Math.floor(n).toString();const u=['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc','Ud','Dd','Td'];let i=0;while(n>=1000&&i<u.length-1){n/=1000;i++;}return n.toFixed(2)+u[i];}
+function buildingCost(b){return Math.ceil(b.baseCost*Math.pow(1.19,state.buildings[b.id]||0));}
+function buildingCps(b){return b.baseCps*(state.buildings[b.id]||0)*(state.buildingMultipliers[b.id]||1);}
+function getTempBuff(){return(state.doubleProdUntil&&Date.now()<state.doubleProdUntil)?2:1;}
+function calcRawCps(){let t=0;buildingData.forEach(b=>t+=buildingCps(b));return t*state.globalMultiplier*state.prestigeMultiplier;}
+function calcCps(){return calcRawCps()*getTempBuff();}
+function calcClickValue(){return((state.clickValue+calcRawCps()*state.clickFromCpsRate)*state.clickMultiplier*state.globalMultiplier*state.prestigeMultiplier)*getTempBuff();}
+function prestigeGain(){
+  if(state.prestigeCount>=100)return null;
+  const req=5e12*Math.pow(8,state.prestigeCount);
+  if(state.totalPoopsEarned<req)return null;
+  const bonus=1+0.03;
+  return bonus;
 }
+function prestigeRequirement(){return 5e12*Math.pow(8,state.prestigeCount||0);}
+function isAreaUnlocked(id){const a=areaData.find(x=>x.id===id);return!a||state.totalPoopsEarned>=a.unlockAt;}
+function currentArea(){let c=areaData[0];for(const a of areaData)if(state.totalPoopsEarned>=a.unlockAt)c=a;return c;}
 
-function formatNumber(num) {
-  if (typeof num !== 'number' || isNaN(num) || !isFinite(num)) return '0';
-  if (num < 0) return '-'+formatNumber(-num);
-  if (num < 1000) return Math.floor(num).toString();
-  const units=['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc','Ud','Dd','Td'];
-  let i=0;
-  while (num>=1000 && i<units.length-1){ num/=1000; i++; }
-  return num.toFixed(2)+units[i];
-}
+let lastAppliedAreaId=null;
+function updateAreaBackground(){const a=currentArea();if(a.id===lastAppliedAreaId)return;const first=lastAppliedAreaId===null;lastAppliedAreaId=a.id;areaData.forEach(x=>document.body.classList.remove('area-'+x.id));document.body.classList.add('area-'+a.id);if(!first)showNotice('🚪 Entering '+a.name+'!',3500);}
 
-function buildingCost(b) {
-  return Math.ceil(b.baseCost * Math.pow(1.19, state.buildings[b.id] || 0));
-}
+const SAVE_KEY='tomPearlPoopClickerV3';
+function showNotice(text,dur){const el=document.getElementById('notice');el.textContent=text;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),dur||2200);}
 
-function buildingCps(b) {
-  return b.baseCps * (state.buildings[b.id]||0) * (state.buildingMultipliers[b.id] || 1);
-}
+function saveGame(silent){try{state.lastSave=Date.now();localStorage.setItem(SAVE_KEY,JSON.stringify(state));if(!silent)showNotice('💾 Game Saved!');}catch(e){if(!silent)showNotice('⚠️ Save failed');}}
 
-function getTempBuffMultiplier() {
-  if (state.doubleProdUntil && Date.now() < state.doubleProdUntil) return 2;
-  return 1;
-}
-
-function calcRawCps() {
-  let t=0;
-  buildingData.forEach(b=>{ t+=buildingCps(b); });
-  return t * state.globalMultiplier * state.prestigeMultiplier;
-}
-
-function calcCps() {
-  return calcRawCps() * getTempBuffMultiplier();
-}
-
-function calcClickValue() {
-  const rawCps = calcRawCps();
-  const base = (state.clickValue + rawCps * state.clickFromCpsRate) * state.clickMultiplier * state.globalMultiplier * state.prestigeMultiplier;
-  return base * getTempBuffMultiplier();
-}
-
-function prestigeGain() {
-  const gain = Math.floor(state.totalPoopsEarned / 5e12);
-  return gain > 0 ? 1 + gain * 0.05 : null;
-}
-
-function isAreaUnlocked(areaId) {
-  const area = areaData.find(a => a.id === areaId);
-  if (!area) return true;
-  return state.totalPoopsEarned >= area.unlockAt;
-}
-
-function currentArea() {
-  let current = areaData[0];
-  for (const a of areaData) {
-    if (state.totalPoopsEarned >= a.unlockAt) current = a;
-  }
-  return current;
-}
-
-let lastAppliedAreaId = null;
-function updateAreaBackground() {
-  const area = currentArea();
-  if (area.id === lastAppliedAreaId) return;
-  const isFirstApply = lastAppliedAreaId === null;
-  lastAppliedAreaId = area.id;
-  areaData.forEach(a => document.body.classList.remove('area-' + a.id));
-  document.body.classList.add('area-' + area.id);
-  if (!isFirstApply) {
-    showNotice('\ud83d\udeaa Entering ' + area.name + '!', 3500);
-  }
-}
-
-/* ============================================================
-   SAVE / LOAD
-============================================================ */
-const SAVE_KEY = 'tomPearlPoopClickerV3';
-
-function saveGame(silent) {
-  try {
-    state.lastSave = Date.now();
-    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-    if (!silent) showNotice('\ud83d\udcbe Game Saved!');
-  } catch(e) {
-    console.error('Save failed', e);
-    if (!silent) showNotice('\u26a0\ufe0f Save failed (storage full?)');
-  }
-}
-
-function loadGame() {
-  const raw = localStorage.getItem(SAVE_KEY);
-  if (!raw) return;
-  try {
-    const loaded = JSON.parse(raw);
-    if (!loaded || typeof loaded !== 'object') return;
-    state = Object.assign(state, loaded);
-
-    // re-merge nested objects safely in case of partial/old saves
-    state.buildings = Object.assign({}, state.buildings || {});
-    state.buildingMultipliers = Object.assign({}, state.buildingMultipliers || {});
-    state.upgradesBought = Object.assign({}, state.upgradesBought || {});
-    state.achievementsUnlocked = Object.assign({}, state.achievementsUnlocked || {});
-
-    buildingData.forEach(b => {
-      if (typeof state.buildings[b.id] !== 'number' || isNaN(state.buildings[b.id])) state.buildings[b.id]=0;
-      if (typeof state.buildingMultipliers[b.id] !== 'number' || isNaN(state.buildingMultipliers[b.id])) state.buildingMultipliers[b.id]=1;
-    });
-    if (typeof state.prestigeMultiplier !== 'number' || isNaN(state.prestigeMultiplier)) state.prestigeMultiplier=1;
-    if (typeof state.goldenPoopsClicked !== 'number' || isNaN(state.goldenPoopsClicked)) state.goldenPoopsClicked=0;
-    if (typeof state.gameBeaten !== 'boolean') state.gameBeaten=false;
-    if (typeof state.doubleProdUntil !== 'number' || isNaN(state.doubleProdUntil)) state.doubleProdUntil=0;
-    if (typeof state.globalMultiplier !== 'number' || isNaN(state.globalMultiplier)) state.globalMultiplier=1;
-    if (typeof state.clickMultiplier !== 'number' || isNaN(state.clickMultiplier)) state.clickMultiplier=1;
-    if (typeof state.clickValue !== 'number' || isNaN(state.clickValue)) state.clickValue=1;
-    if (typeof state.clickFromCpsRate !== 'number' || isNaN(state.clickFromCpsRate)) state.clickFromCpsRate=0;
-    if (typeof state.poops !== 'number' || isNaN(state.poops)) state.poops=0;
-    if (typeof state.totalPoopsEarned !== 'number' || isNaN(state.totalPoopsEarned)) state.totalPoopsEarned=0;
-    if (typeof state.totalClicks !== 'number' || isNaN(state.totalClicks)) state.totalClicks=0;
-    if (typeof state.prestigeCount !== 'number' || isNaN(state.prestigeCount)) state.prestigeCount=0;
-
-    // offline earnings \u2014 hardened against system clock manipulation.
-    // We cross-check the wall-clock delta (Date.now) against a monotonic
-    // delta (performance.now) saved alongside it. Real elapsed time while
-    // the tab was closed can only be measured by Date.now, but if the
-    // two clocks disagree wildly while the page WAS open (i.e. player
-    // changed the clock mid-session) we will have already caught it via
-    // the periodic clock-skew check below. For the closed-tab case we
-    // simply clamp hard and treat backward jumps as zero.
-    const rawSecs = (Date.now() - (state.lastSave || Date.now())) / 1000;
-
-    if (rawSecs < -5) {
-      // Clock was moved backwards since last save. Don't reward anything,
-      // and don't let a backward jump corrupt future calculations either.
-      showNotice('\u26a0\ufe0f System clock looks like it moved backwards \u2014 no offline bonus awarded.', 4000);
-    } else {
-      // Hard cap: no matter how long the claimed gap is, only ever credit
-      // up to 12 hours of offline production per load. This keeps a
-      // legitimate "I was away for the weekend" case feeling rewarding
-      // while making a multi-day clock-forward exploit far less lucrative.
-      const MAX_OFFLINE_SECONDS = 12 * 60 * 60;
-      const secs = Math.max(0, Math.min(rawSecs, MAX_OFFLINE_SECONDS));
-      if (secs > 5) {
-        // Offline production also runs at a reduced rate compared to
-        // active play, further reducing the payoff of clock skipping.
-        const OFFLINE_RATE = 0.5;
-        const earned = calcCps() * secs * OFFLINE_RATE;
-        if (earned > 0 && isFinite(earned)) {
-          state.poops += earned;
-          state.totalPoopsEarned += earned;
-          setTimeout(()=>showNotice('\ud83d\udc4b Welcome back! Tom made '+formatNumber(earned)+' poops while you were away!',4000),500);
-        }
-      }
-      if (rawSecs > MAX_OFFLINE_SECONDS) {
-        setTimeout(()=>showNotice('\u23f3 Offline earnings are capped at 12 hours per session.',4000),4600);
-      }
-    }
-  } catch(e){ console.error('Load failed', e); }
-}
-
-function exportSave() {
-  state.lastSave=Date.now();
-  let data;
-  try {
-    data=btoa(JSON.stringify(state));
-  } catch(e) {
-    alert('Failed to export save.');
-    return;
-  }
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(data).then(()=>showNotice('\ud83d\udccb Save copied to clipboard!'))
-      .catch(()=>fallbackCopy(data));
-  } else {
-    fallbackCopy(data);
-  }
-}
-
-function fallbackCopy(data) {
-  const ta=document.createElement('textarea');
-  ta.value=data;
-  ta.style.position='fixed';
-  ta.style.left='-9999px';
-  document.body.appendChild(ta);
-  ta.select();
-  try {
-    document.execCommand('copy');
-    showNotice('\ud83d\udccb Save copied to clipboard!');
-  } catch(e) {
-    prompt('Copy this save string:', data);
-  }
-  document.body.removeChild(ta);
-}
-
-function importSave() {
-  const data=prompt('Paste your save string:');
-  if (!data) return;
-  try {
-    const loaded=JSON.parse(atob(data.trim()));
-    if (!loaded || typeof loaded !== 'object') throw new Error('bad data');
+function loadGame(){
+  const raw=localStorage.getItem(SAVE_KEY);if(!raw)return;
+  try{
+    const loaded=JSON.parse(raw);if(!loaded||typeof loaded!=='object')return;
     state=Object.assign(state,loaded);
-    state.buildings = Object.assign({}, state.buildings || {});
-    state.buildingMultipliers = Object.assign({}, state.buildingMultipliers || {});
+    state.buildings=Object.assign({},state.buildings||{});
+    state.buildingMultipliers=Object.assign({},state.buildingMultipliers||{});
+    state.upgradesBought=Object.assign({},state.upgradesBought||{});
+    state.achievementsUnlocked=Object.assign({},state.achievementsUnlocked||{});
     buildingData.forEach(b=>{
-      if(typeof state.buildings[b.id] !== 'number') state.buildings[b.id]=0;
-      if(typeof state.buildingMultipliers[b.id] !== 'number') state.buildingMultipliers[b.id]=1;
+      if(typeof state.buildings[b.id]!=='number'||isNaN(state.buildings[b.id]))state.buildings[b.id]=0;
+      if(typeof state.buildingMultipliers[b.id]!=='number'||isNaN(state.buildingMultipliers[b.id]))state.buildingMultipliers[b.id]=1;
     });
-    saveGame(true); renderAll(); showNotice('\u2705 Save imported!');
-  } catch(e){ alert('Invalid save string.'); }
-}
-
-let resetInProgress = false;
-
-function resetGame() {
-  if (!confirm('Reset ALL progress? This cannot be undone.')) return;
-  resetInProgress = true;
-  localStorage.removeItem(SAVE_KEY);
-  location.reload();
-}
-
-function doPrestige() {
-  const gain = prestigeGain();
-  if (!gain) return;
-  if (!confirm('Prestige? You will lose all poops and producers, but gain a permanent x'+gain.toFixed(2)+' bonus on top of your current x'+state.prestigeMultiplier.toFixed(2)+'!')) return;
-
-  state.poops=0;
-  state.totalPoopsEarned=0;
-  state.totalClicks=0;
-  state.clickValue=1;
-  state.clickMultiplier=1;
-  state.clickFromCpsRate=0;
-  state.globalMultiplier=1;
-  buildingData.forEach(b=>{ state.buildings[b.id]=0; state.buildingMultipliers[b.id]=1; });
-  state.upgradesBought={};
-  state.prestigeCount=(state.prestigeCount||0)+1;
-  state.prestigeMultiplier=(state.prestigeMultiplier||1)*gain;
-  saveGame(true); renderAll();
-  showNotice('\u2697\ufe0f Prestige! You now have a x'+state.prestigeMultiplier.toFixed(2)+' permanent bonus!',4000);
-}
-
-/* ============================================================
-   ACTIONS
-============================================================ */
-function clickTom(e) {
-  const amount=calcClickValue();
-  state.poops+=amount;
-  state.totalPoopsEarned+=amount;
-  state.totalClicks++;
-
-  const float=document.createElement('div');
-  float.className='floatup';
-  float.textContent='+'+formatNumber(amount);
-  // randomise position slightly so repeated clicks don't all stack exactly
-  float.style.left=(50+(Math.random()*30-15))+'%';
-  float.style.top=(50+(Math.random()*20-10))+'%';
-  document.getElementById('tomWrap').appendChild(float);
-  setTimeout(()=>float.remove(),1000);
-  updateDisplay();
-  checkAchievements();
-  checkInfinityOverflow();
-}
-
-function buyBuilding(b) {
-  if (!isAreaUnlocked(b.area)) return;
-  const cost=buildingCost(b);
-  if (state.poops<cost) return;
-  state.poops-=cost;
-  state.buildings[b.id]++;
-  renderBuildings(); renderUpgrades(); updateDisplay();
-  checkAchievements();
-}
-
-function buyMaxBuilding(b) {
-  if (!isAreaUnlocked(b.area)) return;
-  let bought = 0;
-  // iteratively buy while affordable, capped to avoid runaway loops
-  while (bought < 10000) {
-    const cost = buildingCost(b);
-    if (state.poops < cost) break;
-    state.poops -= cost;
-    state.buildings[b.id]++;
-    bought++;
-  }
-  if (bought > 0) {
-    renderBuildings(); renderUpgrades(); updateDisplay();
-    checkAchievements();
-  }
-}
-
-function buyUpgrade(u) {
-  if (state.upgradesBought[u.id]) return;
-  if (state.poops<u.cost) return;
-  if (u.req && (state.buildings[u.req.id]||0)<u.req.amt) return;
-  state.poops-=u.cost;
-  state.upgradesBought[u.id]=true;
-  switch(u.type) {
-    case 'click':        state.clickValue+=u.value; break;
-    case 'clickMult':    state.clickMultiplier*=u.value; break;
-    case 'clickFromCps': state.clickFromCpsRate+=u.value; break;
-    case 'building':     state.buildingMultipliers[u.target]=(state.buildingMultipliers[u.target]||1)*u.mult; break;
-    case 'globalMult':   state.globalMultiplier*=u.mult; break;
-  }
-  renderBuildings(); renderUpgrades(); updateDisplay();
-  checkAchievements();
-}
-
-/* ============================================================
-   GOLDEN POOP + MINIGAME
-============================================================ */
-let goldenActive=false;
-let goldenTimeout=null;
-let doubleProdActive=false;
-let doubleProdInterval=null;
-
-function scheduleGoldenPoop() {
-  // Much rarer now: 2 to 5 minutes between spawns
-  const delay = 120000 + Math.random() * 180000;
-  setTimeout(spawnGoldenPoop, delay);
-}
-
-function spawnGoldenPoop() {
-  if (goldenActive || infinityEventRunning) { scheduleGoldenPoop(); return; }
-  const el=document.getElementById('goldenPoop');
-  const wrap=document.getElementById('tomWrap');
-  const ww=wrap.offsetWidth || 200, wh=wrap.offsetHeight || 200;
-  el.style.left=Math.max(0,Math.random()*(ww-40))+'px';
-  el.style.top=Math.max(0,Math.random()*(wh-40))+'px';
-  el.style.display='block';
-  goldenActive=true;
-  // disappears after 12 seconds if not clicked
-  goldenTimeout=setTimeout(()=>{ el.style.display='none'; goldenActive=false; scheduleGoldenPoop(); },12000);
-}
-
-function setupGoldenPoopHandler() {
-  const el = document.getElementById('goldenPoop');
-  el.addEventListener('click',(e)=>{
-    e.stopPropagation();
-    if (!goldenActive) return;
-    clearTimeout(goldenTimeout);
-    el.style.display='none';
-    goldenActive=false;
-    state.goldenPoopsClicked++;
-    openGoldenMinigame();
-  });
-}
-
-/* --- Minigame: click 8 fleeting poop targets within the time limit --- */
-let minigameState = null;
-
-function openGoldenMinigame() {
-  const overlay = document.getElementById('minigameOverlay');
-  overlay.classList.add('show');
-  minigameState = {
-    targetsHit: 0,
-    targetsNeeded: 8,
-    timeLeft: 10,
-    active: true,
-    spawnTimer: null,
-    countdownTimer: null,
-  };
-  document.getElementById('minigameProgress').textContent = '0 / 8';
-  document.getElementById('minigameTimer').textContent = '10.0s';
-  document.getElementById('minigameField').innerHTML = '';
-  document.getElementById('minigameResult').textContent = '';
-  document.getElementById('minigameResult').style.display = 'none';
-
-  spawnMinigameTarget();
-  minigameState.spawnTimer = setInterval(spawnMinigameTarget, 900);
-  minigameState.countdownTimer = setInterval(() => {
-    if (!minigameState || !minigameState.active) return;
-    minigameState.timeLeft -= 0.1;
-    document.getElementById('minigameTimer').textContent = Math.max(0, minigameState.timeLeft).toFixed(1) + 's';
-    if (minigameState.timeLeft <= 0) endMinigame(false);
-  }, 100);
-}
-
-function spawnMinigameTarget() {
-  if (!minigameState || !minigameState.active) return;
-  const field = document.getElementById('minigameField');
-  if (!field) return;
-  const fw = field.offsetWidth || 400, fh = field.offsetHeight || 240;
-  const target = document.createElement('div');
-  target.className = 'minigame-target';
-  target.textContent = '\ud83d\udca9';
-  target.style.left = Math.max(0, Math.random() * (fw - 50)) + 'px';
-  target.style.top = Math.max(0, Math.random() * (fh - 50)) + 'px';
-  target.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (!minigameState || !minigameState.active) return;
-    target.remove();
-    minigameState.targetsHit++;
-    document.getElementById('minigameProgress').textContent = minigameState.targetsHit + ' / ' + minigameState.targetsNeeded;
-    if (minigameState.targetsHit >= minigameState.targetsNeeded) endMinigame(true);
-  });
-  field.appendChild(target);
-  // each target only stays for a couple seconds before vanishing
-  setTimeout(() => { if (target.parentNode) target.remove(); }, 2200);
-}
-
-function endMinigame(won) {
-  if (!minigameState || !minigameState.active) return;
-  minigameState.active = false;
-  clearInterval(minigameState.spawnTimer);
-  clearInterval(minigameState.countdownTimer);
-  document.getElementById('minigameField').innerHTML = '';
-
-  const resultEl = document.getElementById('minigameResult');
-  resultEl.style.display = 'block';
-
-  if (won) {
-    resultEl.innerHTML = '\ud83c\udf89 You caught them all! <b>2x production for 5 minutes!</b>';
-    activateDoubleProduction();
-    const consolationBonus = Math.max(calcCps()*30, state.poops*0.05);
-    state.poops += consolationBonus;
-    state.totalPoopsEarned += consolationBonus;
-  } else {
-    resultEl.innerHTML = '\u23f0 Too slow! You caught ' + minigameState.targetsHit + ' / ' + minigameState.targetsNeeded + '. Better luck next time.';
-  }
-  updateDisplay();
-  checkAchievements();
-  checkInfinityOverflow();
-
-  setTimeout(() => {
-    document.getElementById('minigameOverlay').classList.remove('show');
-    scheduleGoldenPoop();
-  }, 2600);
-}
-
-function activateDoubleProduction() {
-  const now = Date.now();
-  // extend if already active, otherwise start fresh
-  const base = (state.doubleProdUntil && state.doubleProdUntil > now) ? state.doubleProdUntil : now;
-  state.doubleProdUntil = base + 300000;
-  doubleProdActive = true;
-  if (doubleProdInterval) clearInterval(doubleProdInterval);
-  doubleProdInterval = setInterval(refreshDoubleProdLabel, 1000);
-  refreshDoubleProdLabel();
-}
-
-function refreshDoubleProdLabel() {
-  const secondsLeft = state.doubleProdUntil ? Math.max(0, Math.round((state.doubleProdUntil - Date.now())/1000)) : 0;
-  updateDoubleProdLabel(secondsLeft);
-  if (secondsLeft <= 0) {
-    if (doubleProdActive) {
-      doubleProdActive = false;
-      showNotice('2x production buff ended.', 2500);
-      updateDisplay();
+    const numFields=['prestigeMultiplier','goldenPoopsClicked','doubleProdUntil','globalMultiplier','clickMultiplier','clickValue','clickFromCpsRate','poops','totalPoopsEarned','totalClicks','prestigeCount'];
+    const numDefaults=[1,0,0,1,1,1,0,0,0,0,0];
+    numFields.forEach((f,i)=>{if(typeof state[f]!=='number'||isNaN(state[f]))state[f]=numDefaults[i];});
+    if(typeof state.gameBeaten!=='boolean')state.gameBeaten=false;
+    const rawSecs=(Date.now()-(state.lastSave||Date.now()))/1000;
+    if(rawSecs<-5){showNotice('⚠️ Clock moved backwards — no offline bonus.',4000);}
+    else{
+      const secs=Math.max(0,Math.min(rawSecs,43200));
+      if(secs>5){const earned=calcCps()*secs*.5;if(earned>0&&isFinite(earned)){state.poops+=earned;state.totalPoopsEarned+=earned;setTimeout(()=>showNotice('👋 Welcome back! Tom made '+formatNumber(earned)+' poops!',4000),500);}}
+      if(rawSecs>43200)setTimeout(()=>showNotice('⏳ Offline earnings capped at 12 hours.',4000),4600);
     }
-    if (doubleProdInterval) { clearInterval(doubleProdInterval); doubleProdInterval = null; }
-  }
+  }catch(e){console.error('Load failed',e);}
 }
 
-function updateDoubleProdLabel(secondsLeft) {
-  const el = document.getElementById('doubleProdLabel');
-  if (!el) return;
-  if (secondsLeft > 0) {
-    const m = Math.floor(secondsLeft/60), s=secondsLeft%60;
-    el.style.display = 'block';
-    el.textContent = '\u26a1 2x PRODUCTION: ' + m + ':' + (s<10?'0':'')+s;
-  } else {
-    el.style.display = 'none';
-  }
-}
+function exportSave(){state.lastSave=Date.now();let d;try{d=btoa(JSON.stringify(state));}catch(e){alert('Export failed.');return;}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(d).then(()=>showNotice('📋 Copied!')).catch(()=>fallbackCopy(d));}else fallbackCopy(d);}
+function fallbackCopy(d){const ta=document.createElement('textarea');ta.value=d;ta.style.cssText='position:fixed;left:-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showNotice('📋 Copied!');}catch(e){prompt('Copy save:',d);}document.body.removeChild(ta);}
+function importSave(){const d=prompt('Paste save string:');if(!d)return;try{const l=JSON.parse(atob(d.trim()));if(!l||typeof l!=='object')throw 0;state=Object.assign(state,l);state.buildings=Object.assign({},state.buildings||{});state.buildingMultipliers=Object.assign({},state.buildingMultipliers||{});buildingData.forEach(b=>{if(typeof state.buildings[b.id]!=='number')state.buildings[b.id]=0;if(typeof state.buildingMultipliers[b.id]!=='number')state.buildingMultipliers[b.id]=1;});saveGame(true);renderAll();showNotice('✅ Imported!');}catch(e){alert('Invalid save.');}}
 
-/* ============================================================
-   ACHIEVEMENTS
-============================================================ */
-function checkAchievements() {
-  achievementData.forEach(a=>{
-    if (!state.achievementsUnlocked[a.id]) {
-      let unlocked = false;
-      try { unlocked = !!a.req(state); } catch(e) { unlocked = false; }
-      if (unlocked) {
-        state.achievementsUnlocked[a.id]=true;
-        showAchievementPopup(a);
-        if (a.id === 'a11' && !state.gameBeaten) {
-          state.gameBeaten = true;
-          setTimeout(triggerJanCelebration, 600);
-        }
-      }
-    }
-  });
-}
+let resetInProgress=false;
+function resetGame(){if(!confirm('Reset ALL progress?'))return;resetInProgress=true;localStorage.removeItem(SAVE_KEY);location.reload();}
 
-function showAchievementPopup(a) {
-  const el=document.getElementById('achievePopup');
-  el.innerHTML=`<b>${a.icon} Achievement Unlocked!</b><br>${a.name}<br><small>${a.desc}</small>`;
-  el.classList.add('show');
-  clearTimeout(el._timeout);
-  el._timeout=setTimeout(()=>el.classList.remove('show'),4000);
-}
+function doPrestige(){const g=prestigeGain();if(!g)return;const newMult=Math.min(100,(state.prestigeMultiplier||1)*g);if(!confirm('Prestige #'+(state.prestigeCount+1)+'/100? Lose all poops/producers, gain permanent x'+newMult.toFixed(3)+' total multiplier.\n\nNext prestige requires: '+formatNumber(prestigeRequirement()*8)+' total poops.'))return;state.poops=0;state.totalPoopsEarned=0;state.totalClicks=0;state.clickValue=1;state.clickMultiplier=1;state.clickFromCpsRate=0;state.globalMultiplier=1;buildingData.forEach(b=>{state.buildings[b.id]=0;state.buildingMultipliers[b.id]=1;});state.upgradesBought={};state.prestigeCount=(state.prestigeCount||0)+1;state.prestigeMultiplier=newMult;saveGame(true);renderAll();showNotice('⚗️ Prestige #'+state.prestigeCount+'! Multiplier: x'+state.prestigeMultiplier.toFixed(3),4000);}
 
-const janConfettiEmojis = ['🎉','✨','💩','🏆','⭐','🎊','👑','💛'];
-let janConfettiInterval = null;
+function clickTom(){const a=calcClickValue();state.poops+=a;state.totalPoopsEarned+=a;state.totalClicks++;const f=document.createElement('div');f.className='floatup';f.textContent='+'+formatNumber(a);f.style.left=(50+(Math.random()*30-15))+'%';f.style.top=(50+(Math.random()*20-10))+'%';document.getElementById('tomWrap').appendChild(f);setTimeout(()=>f.remove(),1000);updateDisplay();checkAchievements();checkInfinityOverflow();}
 
-function spawnJanConfettiBurst(count) {
-  const layer = document.getElementById('janConfettiLayer');
-  if (!layer) return;
-  for (let i = 0; i < count; i++) {
-    const c = document.createElement('div');
-    c.className = 'jan-confetti';
-    c.textContent = janConfettiEmojis[Math.floor(Math.random() * janConfettiEmojis.length)];
-    c.style.left = (Math.random() * 100) + 'vw';
-    c.style.fontSize = (1.2 + Math.random() * 1.8) + 'em';
-    c.style.animationDuration = (2.5 + Math.random() * 2.5) + 's';
-    layer.appendChild(c);
-    setTimeout(() => c.remove(), 5500);
-  }
-}
+function buyBuilding(b){if(!isAreaUnlocked(b.area))return;const c=buildingCost(b);if(state.poops<c)return;state.poops-=c;state.buildings[b.id]++;renderBuildings();renderUpgrades();updateDisplay();checkAchievements();}
+function buyMaxBuilding(b){if(!isAreaUnlocked(b.area))return;let n=0;while(n<10000){const c=buildingCost(b);if(state.poops<c)break;state.poops-=c;state.buildings[b.id]++;n++;}if(n>0){renderBuildings();renderUpgrades();updateDisplay();checkAchievements();}}
 
-function triggerJanCelebration() {
-  const overlay = document.getElementById('janOverlay');
-  if (!overlay) return;
-  overlay.classList.add('show');
-  spawnJanConfettiBurst(40);
-  janConfettiInterval = setInterval(() => spawnJanConfettiBurst(15), 700);
-  showNotice('🎉 You beat the game! All hail Jan!', 5000);
-}
+function buyUpgrade(u){if(state.upgradesBought[u.id]||state.poops<u.cost)return;if(u.req&&(state.buildings[u.req.id]||0)<u.req.amt)return;state.poops-=u.cost;state.upgradesBought[u.id]=true;if(u.type==='click')state.clickValue+=u.value;else if(u.type==='clickMult')state.clickMultiplier*=u.value;else if(u.type==='clickFromCps')state.clickFromCpsRate+=u.value;else if(u.type==='building')state.buildingMultipliers[u.target]=(state.buildingMultipliers[u.target]||1)*u.mult;else if(u.type==='globalMult')state.globalMultiplier*=u.mult;renderBuildings();renderUpgrades();updateDisplay();checkAchievements();}
 
-function closeJanCelebration() {
-  const overlay = document.getElementById('janOverlay');
-  if (overlay) overlay.classList.remove('show');
-  if (janConfettiInterval) { clearInterval(janConfettiInterval); janConfettiInterval = null; }
-  saveGame(true);
-}
+let goldenActive=false,goldenTimeout=null,doubleProdInterval=null;
+function scheduleGoldenPoop(){setTimeout(spawnGoldenPoop,120000+Math.random()*180000);}
+function spawnGoldenPoop(){if(goldenActive||infinityEventRunning){scheduleGoldenPoop();return;}const el=document.getElementById('goldenPoop'),wrap=document.getElementById('tomWrap');el.style.left=Math.max(0,Math.random()*((wrap.offsetWidth||200)-40))+'px';el.style.top=Math.max(0,Math.random()*((wrap.offsetHeight||200)-40))+'px';el.style.display='block';goldenActive=true;goldenTimeout=setTimeout(()=>{el.style.display='none';goldenActive=false;scheduleGoldenPoop();},12000);}
+function setupGoldenPoopHandler(){document.getElementById('goldenPoop').addEventListener('click',e=>{e.stopPropagation();if(!goldenActive)return;clearTimeout(goldenTimeout);document.getElementById('goldenPoop').style.display='none';goldenActive=false;state.goldenPoopsClicked++;openGoldenMinigame();});}
 
-/* ============================================================
-   INFINITY OVERFLOW EVENT
-============================================================ */
-let infinityEventRunning = false;
-const rageMessages = ['I HATE YOU', 'ALL HAIL JAN', 'JAN WARNED YOU', 'TOO MUCH POOP', 'THIS IS JAN\u2019S DOING'];
+let minigameState=null;
+function openGoldenMinigame(){const ov=document.getElementById('minigameOverlay');ov.classList.add('show');minigameState={targetsHit:0,targetsNeeded:8,timeLeft:10,active:true,spawnTimer:null,countdownTimer:null};document.getElementById('minigameProgress').textContent='0 / 8';document.getElementById('minigameTimer').textContent='10.0s';document.getElementById('minigameField').innerHTML='';document.getElementById('minigameResult').style.display='none';spawnMinigameTarget();minigameState.spawnTimer=setInterval(spawnMinigameTarget,900);minigameState.countdownTimer=setInterval(()=>{if(!minigameState||!minigameState.active)return;minigameState.timeLeft-=.1;document.getElementById('minigameTimer').textContent=Math.max(0,minigameState.timeLeft).toFixed(1)+'s';if(minigameState.timeLeft<=0)endMinigame(false);},100);}
+function spawnMinigameTarget(){if(!minigameState||!minigameState.active)return;const field=document.getElementById('minigameField');const t=document.createElement('div');t.className='minigame-target';t.textContent='💩';t.style.left=Math.max(0,Math.random()*((field.offsetWidth||400)-50))+'px';t.style.top=Math.max(0,Math.random()*((field.offsetHeight||240)-50))+'px';t.addEventListener('click',e=>{e.stopPropagation();if(!minigameState||!minigameState.active)return;t.remove();minigameState.targetsHit++;document.getElementById('minigameProgress').textContent=minigameState.targetsHit+' / '+minigameState.targetsNeeded;if(minigameState.targetsHit>=minigameState.targetsNeeded)endMinigame(true);});field.appendChild(t);setTimeout(()=>{if(t.parentNode)t.remove();},2200);}
+function endMinigame(won){if(!minigameState||!minigameState.active)return;minigameState.active=false;clearInterval(minigameState.spawnTimer);clearInterval(minigameState.countdownTimer);document.getElementById('minigameField').innerHTML='';const r=document.getElementById('minigameResult');r.style.display='block';if(won){r.innerHTML='🎉 You caught them all! <b>2x production for 5 minutes!</b>';activateDoubleProduction();const b=Math.max(calcCps()*30,state.poops*.05);state.poops+=b;state.totalPoopsEarned+=b;}else{r.innerHTML='⏰ Too slow! Caught '+minigameState.targetsHit+' / '+minigameState.targetsNeeded+'.';}updateDisplay();checkAchievements();checkInfinityOverflow();setTimeout(()=>{document.getElementById('minigameOverlay').classList.remove('show');scheduleGoldenPoop();},2600);}
+function activateDoubleProduction(){const now=Date.now();state.doubleProdUntil=((state.doubleProdUntil&&state.doubleProdUntil>now)?state.doubleProdUntil:now)+300000;if(doubleProdInterval)clearInterval(doubleProdInterval);doubleProdInterval=setInterval(refreshDoubleProdLabel,1000);refreshDoubleProdLabel();}
+function refreshDoubleProdLabel(){const s=state.doubleProdUntil?Math.max(0,Math.round((state.doubleProdUntil-Date.now())/1000)):0;const el=document.getElementById('doubleProdLabel');if(s>0){const m=Math.floor(s/60);el.style.display='block';el.textContent='⚡ 2x PRODUCTION: '+m+':'+(s%60<10?'0':'')+s%60;}else{el.style.display='none';if(doubleProdInterval){clearInterval(doubleProdInterval);doubleProdInterval=null;}updateDisplay();}}
 
-function checkInfinityOverflow() {
-  if (infinityEventRunning) return;
-  const broken = !isFinite(state.poops) || !isFinite(state.totalPoopsEarned) ||
-                 state.poops >= 1e300 || state.totalPoopsEarned >= 1e300;
-  if (broken) triggerInfinityOverflow();
-}
+function checkAchievements(){achievementData.forEach(a=>{if(!state.achievementsUnlocked[a.id]){let u=false;try{u=!!a.req(state);}catch(e){}if(u){state.achievementsUnlocked[a.id]=true;const el=document.getElementById('achievePopup');el.innerHTML=`<b>${a.icon} Achievement Unlocked!</b><br>${a.name}<br><small>${a.desc}</small>`;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),4000);if(a.id==='a11'&&!state.gameBeaten){state.gameBeaten=true;setTimeout(triggerJanCelebration,600);}}}});}
 
-function spawnRageMessage() {
-  const msg = document.createElement('div');
-  msg.className = 'rage-message';
-  msg.textContent = rageMessages[Math.floor(Math.random() * rageMessages.length)];
-  msg.style.left = (Math.random() * 80) + 'vw';
-  msg.style.top = (Math.random() * 80) + 'vh';
-  msg.style.fontSize = (1.2 + Math.random() * 2.2) + 'em';
-  msg.style.transform = 'rotate(' + (Math.random() * 60 - 30) + 'deg)';
-  document.body.appendChild(msg);
-  setTimeout(() => msg.remove(), 2200);
-}
+const janConfettiEmojis=['🎉','✨','💩','🏆','⭐','🎊','👑','💛'];
+let janConfettiInterval=null;
+function spawnJanConfettiBurst(n){const layer=document.getElementById('janConfettiLayer');for(let i=0;i<n;i++){const c=document.createElement('div');c.className='jan-confetti';c.textContent=janConfettiEmojis[Math.floor(Math.random()*janConfettiEmojis.length)];c.style.left=(Math.random()*100)+'vw';c.style.fontSize=(1.2+Math.random()*1.8)+'em';c.style.animationDuration=(2.5+Math.random()*2.5)+'s';layer.appendChild(c);setTimeout(()=>c.remove(),5500);}}
+function triggerJanCelebration(){const ov=document.getElementById('janOverlay');if(!ov)return;ov.classList.add('show');spawnJanConfettiBurst(40);janConfettiInterval=setInterval(()=>spawnJanConfettiBurst(15),700);showNotice('🎉 You beat the game! All hail Jan!',5000);}
+function closeJanCelebration(){const ov=document.getElementById('janOverlay');if(ov)ov.classList.remove('show');if(janConfettiInterval){clearInterval(janConfettiInterval);janConfettiInterval=null;}saveGame(true);}
 
-function triggerInfinityOverflow() {
-  infinityEventRunning = true;
-  document.body.classList.add('rage-shake');
+let infinityEventRunning=false;
+const rageMessages=['I HATE YOU','ALL HAIL JAN','JAN WARNED YOU','TOO MUCH POOP','THIS IS JAN\'S DOING'];
+function checkInfinityOverflow(){if(infinityEventRunning)return;if(!isFinite(state.poops)||!isFinite(state.totalPoopsEarned)||state.poops>=1e300||state.totalPoopsEarned>=1e300)triggerInfinityOverflow();}
+function triggerInfinityOverflow(){infinityEventRunning=true;document.body.classList.add('rage-shake');let n=0;const iv=setInterval(()=>{for(let i=0;i<2;i++){const m=document.createElement('div');m.className='rage-message';m.textContent=rageMessages[Math.floor(Math.random()*rageMessages.length)];m.style.cssText=`left:${Math.random()*80}vw;top:${Math.random()*80}vh;font-size:${1.2+Math.random()*2.2}em;transform:rotate(${Math.random()*60-30}deg)`;document.body.appendChild(m);setTimeout(()=>m.remove(),2200);}n++;if(n>=35){clearInterval(iv);document.body.classList.remove('rage-shake');state.poops=0;state.totalPoopsEarned=0;infinityEventRunning=false;updateDisplay();renderAll();saveGame(true);showNotice('💢 Jan punished your greed. Poops reset.',5000);}},120);showNotice('⚠️ SOMETHING HAS GONE TERRIBLY WRONG ⚠️',3000);}
 
-  let count = 0;
-  const spamInterval = setInterval(() => {
-    spawnRageMessage();
-    spawnRageMessage();
-    count++;
-    if (count >= 35) {
-      clearInterval(spamInterval);
-      document.body.classList.remove('rage-shake');
-      // The almighty reset
-      state.poops = 0;
-      state.totalPoopsEarned = 0;
-      infinityEventRunning = false;
-      updateDisplay();
-      renderAll();
-      saveGame(true);
-      showNotice('\ud83d\udca2 Jan punished your greed. Poops reset to zero.', 5000);
-    }
-  }, 120);
+function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));document.querySelectorAll('.tabContent').forEach(c=>c.classList.toggle('active',c.id===tab));if(tab==='achievements')renderAchievements();if(tab==='statsTab')renderStats();if(tab==='changelogTab')renderChangelog();}
 
-  showNotice('\u26a0\ufe0f SOMETHING HAS GONE TERRIBLY WRONG \u26a0\ufe0f', 3000);
-}
+function renderBuildings(){const ct=document.getElementById('buildings');ct.innerHTML='';areaData.forEach(area=>{const unlocked=isAreaUnlocked(area.id);const blds=buildingData.filter(b=>b.area===area.id);if(!blds.length)return;if(!unlocked){const pi=areaData.indexOf(area)-1;if(pi>=0&&!isAreaUnlocked(areaData[pi].id))return;const h=document.createElement('div');h.className='areaHeader';h.style.opacity='.5';h.textContent=area.name+' 🔒 (unlocks at '+formatNumber(area.unlockAt)+' total poops)';ct.appendChild(h);return;}const h=document.createElement('div');h.className='areaHeader';h.textContent=area.name;ct.appendChild(h);blds.forEach(b=>{const cost=buildingCost(b),owned=state.buildings[b.id]||0,cps=buildingCps(b)*state.globalMultiplier*state.prestigeMultiplier;const d=document.createElement('div');d.className='building'+(state.poops>=cost?'':' disabled');d.dataset.bid=b.id;d.title='Shift-click to buy max';d.onclick=e=>{if(e.shiftKey)buyMaxBuilding(b);else buyBuilding(b);};d.innerHTML=`<div style="flex:1"><div class="name">${b.emoji} ${b.name}</div><div class="desc">${b.desc}</div><div class="desc" style="color:#aef">Producing: ${formatNumber(cps)}/s total</div></div><div style="display:flex;align-items:center;gap:4px"><div class="price">${formatNumber(cost)}<br><small>poops</small></div><div class="owned">${owned}</div></div>`;ct.appendChild(d);});});}
 
-/* ============================================================
-   RENDERING
-============================================================ */
-function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
-  document.querySelectorAll('.tabContent').forEach(c=>c.classList.toggle('active',c.id===tab));
-  if (tab==='achievements') renderAchievements();
-  if (tab==='statsTab') renderStats();
-  if (tab==='changelogTab') renderChangelog();
-}
+function renderUpgrades(){const ct=document.getElementById('upgrades');ct.innerHTML='';let shown=0;[{label:'👆 Click Upgrades',list:upgradeData.filter(u=>['click','clickMult','clickFromCps'].includes(u.type))},{label:'🏗️ Producer Upgrades',list:upgradeData.filter(u=>u.type==='building')},{label:'🌍 Global Multipliers',list:upgradeData.filter(u=>u.type==='globalMult')}].forEach(g=>{const av=g.list.filter(u=>!state.upgradesBought[u.id]&&(!u.req||(state.buildings[u.req.id]||0)>=u.req.amt));if(!av.length)return;const l=document.createElement('div');l.className='secLabel';l.textContent=g.label;ct.appendChild(l);av.forEach(u=>{shown++;const d=document.createElement('div');d.className='upgrade'+(state.poops>=u.cost?'':' disabled');d.onclick=()=>buyUpgrade(u);d.innerHTML=`<div><div class="name">${u.name}</div><div class="desc">${u.desc}</div></div><div class="price">${formatNumber(u.cost)}<br><small>poops</small></div>`;ct.appendChild(d);});});if(!shown)ct.innerHTML='<div class="desc" style="padding:12px;text-align:center">No upgrades available yet — keep collecting! 💩</div>';}
 
-function renderBuildings() {
-  const container=document.getElementById('buildings');
-  container.innerHTML='';
-  areaData.forEach(area=>{
-    const unlocked = isAreaUnlocked(area.id);
-    const buildingsInArea = buildingData.filter(b=>b.area===area.id);
-    if (!buildingsInArea.length) return;
+function renderAchievements(){const ct=document.getElementById('achievements');const n=Object.keys(state.achievementsUnlocked).length;ct.innerHTML=`<div class="secLabel">🏆 Achievements (${n}/${achievementData.length})</div>`;achievementData.forEach(a=>{const got=!!state.achievementsUnlocked[a.id];const d=document.createElement('div');d.className='achieve'+(got?'':' locked');d.innerHTML=`<div class="achieve-icon">${a.icon}</div><div><div class="achieve-name">${got?a.name:'???'}</div><div class="achieve-desc">${got?a.desc:'Keep playing to unlock...'}</div></div>`;ct.appendChild(d);});}
 
-    if (!unlocked) {
-      // show a locked teaser only if the previous area is unlocked (avoid wall of locked content)
-      const prevIndex = areaData.indexOf(area)-1;
-      const prevUnlocked = prevIndex<0 || isAreaUnlocked(areaData[prevIndex].id);
-      if (!prevUnlocked) return;
-      const header=document.createElement('div');
-      header.className='areaHeader';
-      header.style.opacity='0.5';
-      header.textContent=area.name+' \ud83d\udd12 (unlocks at '+formatNumber(area.unlockAt)+' total poops)';
-      container.appendChild(header);
-      return;
-    }
+const sessionStart=Date.now();
+function formatTime(ms){const s=Math.floor(ms/1000),m=Math.floor(s/60),h=Math.floor(m/60);return h?`${h}h ${m%60}m`:`${m}m ${s%60}s`;}
+function renderStats(){const ct=document.getElementById('statsTab');ct.innerHTML='<div class="secLabel">📊 Statistics</div>'+[['Total Poops Collected',formatNumber(state.totalPoopsEarned)],['Current Poops',formatNumber(state.poops)],['Poops Per Second',formatNumber(calcCps())],['Poops Per Click',formatNumber(calcClickValue())],['Total Clicks',formatNumber(state.totalClicks)],['Total Producers',formatNumber(totalBuildings(state))],['Upgrades Bought',Object.keys(state.upgradesBought).length+' / '+upgradeData.length],['Achievements',Object.keys(state.achievementsUnlocked).length+' / '+achievementData.length],['Golden Poops Clicked',state.goldenPoopsClicked],['Global Multiplier','x'+state.globalMultiplier.toFixed(2)],['Prestige Multiplier','x'+state.prestigeMultiplier.toFixed(2)],['Prestige Count',state.prestigeCount],['Current Area',currentArea().name],['Session Time',formatTime(Date.now()-sessionStart)]].map(([l,v])=>`<div class="stat-row"><span>${l}</span><span class="stat-val">${v}</span></div>`).join('');}
 
-    const header=document.createElement('div');
-    header.className='areaHeader';
-    header.textContent=area.name;
-    container.appendChild(header);
+function renderChangelog(){const ct=document.getElementById('changelogTab');ct.innerHTML='<div class="secLabel">📜 Update Log</div>'+changelogData.map(e=>`<div class="changelog-entry"><div class="changelog-date">${e.date}</div><div class="changelog-title">${e.title}</div><ul class="changelog-list">${e.changes.map(c=>`<li>${c}</li>`).join('')}</ul></div>`).join('');}
 
-    buildingsInArea.forEach(b=>{
-      const cost=buildingCost(b);
-      const owned=state.buildings[b.id]||0;
-      const cps=buildingCps(b)*state.globalMultiplier*state.prestigeMultiplier;
-      const canAfford=state.poops>=cost;
-      const div=document.createElement('div');
-      div.className='building'+(canAfford?'':' disabled');
-      div.dataset.bid=b.id;
-      div.onclick=(e)=>{
-        if (e.shiftKey) buyMaxBuilding(b);
-        else buyBuilding(b);
-      };
-      div.title='Shift-click to buy as many as you can afford';
-      div.innerHTML=`
-        <div style="flex:1">
-          <div class="name">${b.emoji} ${b.name}</div>
-          <div class="desc">${b.desc}</div>
-          <div class="desc" style="color:#aef">Producing: ${formatNumber(cps)}/s total</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:4px">
-          <div class="price">${formatNumber(cost)}<br><small>poops</small></div>
-          <div class="owned">${owned}</div>
-        </div>`;
-      container.appendChild(div);
-    });
-  });
-}
+function updateTomImage(){let cur=tomMilestones[0];for(const m of tomMilestones)if(state.totalPoopsEarned>=m.threshold)cur=m;const el=document.getElementById('tomImg');if(el.dataset.currentImg!==cur.img){el.dataset.currentImg=cur.img;el.src=cur.img;el.onerror=()=>{el.style.background='#3a2010';};document.getElementById('milestoneLabel').textContent=cur.label;}}
 
-function renderUpgrades() {
-  const container=document.getElementById('upgrades');
-  container.innerHTML='';
-  let shown=0;
-  const groups=[
-    {label:'\ud83d\udc46 Click Upgrades', list:upgradeData.filter(u=>['click','clickMult','clickFromCps'].includes(u.type))},
-    {label:'\ud83c\udfd7\ufe0f Producer Upgrades', list:upgradeData.filter(u=>u.type==='building')},
-    {label:'\ud83c\udf0d Global Multipliers', list:upgradeData.filter(u=>u.type==='globalMult')},
-  ];
-  groups.forEach(g=>{
-    const available=g.list.filter(u=>{
-      if (state.upgradesBought[u.id]) return false;
-      if (u.req && (state.buildings[u.req.id]||0)<u.req.amt) return false;
-      return true;
-    });
-    if (!available.length) return;
-    const lbl=document.createElement('div');
-    lbl.className='secLabel';
-    lbl.textContent=g.label;
-    container.appendChild(lbl);
-    available.forEach(u=>{
-      shown++;
-      const div=document.createElement('div');
-      div.className='upgrade'+(state.poops>=u.cost?'':' disabled');
-      div.onclick=()=>buyUpgrade(u);
-      div.innerHTML=`
-        <div>
-          <div class="name">${u.name}</div>
-          <div class="desc">${u.desc}</div>
-        </div>
-        <div class="price">${formatNumber(u.cost)}<br><small>poops</small></div>`;
-      container.appendChild(div);
-    });
-  });
-  if (!shown) container.innerHTML='<div class="desc" style="padding:12px;text-align:center">No upgrades available yet \u2014 keep collecting poop! \ud83d\udca9</div>';
-}
+function updateDisplay(){updateTomImage();updateAreaBackground();document.getElementById('areaLabel').textContent=currentArea().name;document.getElementById('count').textContent=formatNumber(state.poops)+' 💩';document.getElementById('perSec').textContent=formatNumber(calcCps())+' poops/sec';document.getElementById('clickVal').textContent='+'+formatNumber(calcClickValue())+' per click';document.getElementById('globalMult').textContent='x'+state.globalMultiplier.toFixed(2);document.getElementById('prestigeBonus').textContent='x'+state.prestigeMultiplier.toFixed(2);document.getElementById('stats').innerHTML='Total: '+formatNumber(state.totalPoopsEarned)+' 💩<br>Clicks: '+formatNumber(state.totalClicks)+' | Prestige: '+state.prestigeCount;const pg=prestigeGain();const pb=document.getElementById('prestigeBtn');if(pg&&state.prestigeCount<100){pb.style.display='inline-block';document.getElementById('prestigeMult').textContent=Math.min(100,(state.prestigeMultiplier||1)*pg).toFixed(3);}else{pb.style.display='none';const msg=state.prestigeCount>=100?'🏆 Max prestige reached! (100/100)':state.prestigeCount>0?'Prestiges: '+state.prestigeCount+'/100 | Bonus: x'+state.prestigeMultiplier.toFixed(3)+' | Next: '+formatNumber(prestigeRequirement())+' poops':'Next prestige at '+formatNumber(prestigeRequirement())+' total poops';document.getElementById('prestigeCount').textContent=msg;}document.querySelectorAll('#buildings .building[data-bid]').forEach(el=>{const b=buildingData.find(x=>x.id===el.dataset.bid);if(b)el.classList.toggle('disabled',state.poops<buildingCost(b));});}
 
-function renderAchievements() {
-  const container=document.getElementById('achievements');
-  const unlocked=Object.keys(state.achievementsUnlocked).length;
-  container.innerHTML=`<div class="secLabel">\ud83c\udfc6 Achievements (${unlocked}/${achievementData.length})</div>`;
-  achievementData.forEach(a=>{
-    const got=!!state.achievementsUnlocked[a.id];
-    const div=document.createElement('div');
-    div.className='achieve'+(got?'':' locked');
-    div.innerHTML=`
-      <div class="achieve-icon">${a.icon}</div>
-      <div>
-        <div class="achieve-name">${got?a.name:'???'}</div>
-        <div class="achieve-desc">${got?a.desc:'Keep playing to unlock...'}</div>
-      </div>`;
-    container.appendChild(div);
-  });
-}
+function renderAll(){renderBuildings();renderUpgrades();updateDisplay();}
 
-function renderStats() {
-  const container=document.getElementById('statsTab');
-  const rows=[
-    ['Total Poops Collected', formatNumber(state.totalPoopsEarned)],
-    ['Current Poops', formatNumber(state.poops)],
-    ['Poops Per Second', formatNumber(calcCps())],
-    ['Poops Per Click', formatNumber(calcClickValue())],
-    ['Total Clicks', formatNumber(state.totalClicks)],
-    ['Total Producers', formatNumber(totalBuildings(state))],
-    ['Upgrades Bought', Object.keys(state.upgradesBought).length+' / '+upgradeData.length],
-    ['Achievements', Object.keys(state.achievementsUnlocked).length+' / '+achievementData.length],
-    ['Golden Poops Clicked', state.goldenPoopsClicked],
-    ['Global Multiplier', 'x'+state.globalMultiplier.toFixed(2)],
-    ['Prestige Multiplier', 'x'+state.prestigeMultiplier.toFixed(2)],
-    ['Prestige Count', state.prestigeCount],
-    ['Current Area', currentArea().name],
-    ['Session Time', formatTime(Date.now()-sessionStart)],
-  ];
-  container.innerHTML='<div class="secLabel">\ud83d\udcca Statistics</div>'+
-    rows.map(([l,v])=>`<div class="stat-row"><span>${l}</span><span class="stat-val">${v}</span></div>`).join('');
-}
+let lastWallClock=Date.now(),lastMonotonic=performance.now();
+setInterval(()=>{const nw=Date.now(),nm=performance.now();if(Math.abs((nw-lastWallClock)-(nm-lastMonotonic))>5000){state.lastSave=nw;saveGame(true);showNotice('⚠️ Clock change detected — no bonus awarded.',4000);}lastWallClock=nw;lastMonotonic=nm;},5000);
 
-function formatChangelogDate(dateStr) {
-  const d = new Date(dateStr + 'T00:00:00');
-  if (isNaN(d.getTime())) return dateStr;
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
-}
-
-function renderChangelog() {
-  const container = document.getElementById('changelogTab');
-  container.innerHTML = '<div class="secLabel">\ud83d\udcdc Update Log</div>' +
-    changelogData.map(entry => `
-      <div class="changelog-entry">
-        <div class="changelog-date">${formatChangelogDate(entry.date)}</div>
-        <div class="changelog-title">${entry.title}</div>
-        <ul class="changelog-list">
-          ${entry.changes.map(c => `<li>${c}</li>`).join('')}
-        </ul>
-      </div>
-    `).join('');
-}
-
-let sessionStart=Date.now();
-function formatTime(ms) {
-  const s=Math.floor(ms/1000),m=Math.floor(s/60),h=Math.floor(m/60);
-  return h?`${h}h ${m%60}m`:`${m}m ${s%60}s`;
-}
-
-/* ============================================================
-   CLOCK TAMPER DETECTION (mid-session)
-   Date.now() reflects the OS wall clock, which the player can
-   freely change. performance.now() is monotonic and unaffected
-   by system clock changes, so we use it as a trusted reference.
-   If the two clocks drift apart by more than a small tolerance
-   while the tab is open, we resync lastSave to "now" so the
-   skipped time can never be cashed in as offline progress, and
-   we do NOT grant any retroactive bonus for the jump.
-============================================================ */
-let lastWallClock = Date.now();
-let lastMonotonic = performance.now();
-
-function checkClockTamper() {
-  const nowWall = Date.now();
-  const nowMono = performance.now();
-  const wallDelta = nowWall - lastWallClock;
-  const monoDelta = nowMono - lastMonotonic;
-  // Allow a little slack for normal timer jitter / tab throttling.
-  const driftMs = wallDelta - monoDelta;
-
-  if (Math.abs(driftMs) > 5000) {
-    // Wall clock moved very differently from real elapsed time:
-    // the system date/time was changed while the page was open.
-    state.lastSave = nowWall;
-    saveGame(true);
-    showNotice('\u26a0\ufe0f Clock change detected \u2014 no bonus poops awarded for it.', 4000);
-  }
-
-  lastWallClock = nowWall;
-  lastMonotonic = nowMono;
-}
-
-setInterval(checkClockTamper, 5000);
-
-function updateTomImage() {
-  let current=tomMilestones[0];
-  for (const m of tomMilestones) {
-    if (state.totalPoopsEarned>=m.threshold) current=m;
-  }
-  const imgEl=document.getElementById('tomImg');
-  if (imgEl.dataset.currentImg!==current.img) {
-    imgEl.dataset.currentImg=current.img;
-    imgEl.src=current.img;
-    imgEl.onerror=()=>{ imgEl.style.background='#3a2010'; };
-    document.getElementById('milestoneLabel').textContent=current.label;
-  }
-}
-
-function showNotice(text, duration) {
-  const el = document.getElementById('notice');
-  el.textContent = text;
-  el.classList.add('show');
-  clearTimeout(el._timeout);
-  el._timeout = setTimeout(() => el.classList.remove('show'), duration || 2200);
-}
-
-function updateDisplay() {
-  updateTomImage();
-  updateAreaBackground();
-  document.getElementById('areaLabel').textContent = currentArea().name;
-  document.getElementById('count').textContent=formatNumber(state.poops)+' \ud83d\udca9';
-  document.getElementById('perSec').textContent=formatNumber(calcCps())+' poops/sec';
-  document.getElementById('clickVal').textContent='+'+formatNumber(calcClickValue())+' per click';
-  document.getElementById('globalMult').textContent='x'+(state.globalMultiplier).toFixed(2);
-  document.getElementById('prestigeBonus').textContent='x'+(state.prestigeMultiplier).toFixed(2);
-  document.getElementById('stats').innerHTML=
-    'Total: '+formatNumber(state.totalPoopsEarned)+' \ud83d\udca9<br>'+
-    'Clicks: '+formatNumber(state.totalClicks)+' | Prestige: '+state.prestigeCount;
-
-  const pg=prestigeGain();
-  const pbtn=document.getElementById('prestigeBtn');
-  if (pg && state.totalPoopsEarned>=1e12) {
-    pbtn.style.display='inline-block';
-    document.getElementById('prestigeMult').textContent=pg.toFixed(2);
-  } else {
-    pbtn.style.display='none';
-    document.getElementById('prestigeCount').textContent=state.prestigeCount>0?'Prestiges: '+state.prestigeCount+' | Bonus: x'+state.prestigeMultiplier.toFixed(2):'Reach 5 trillion total poops to prestige!';
-  }
-
-  // refresh affordability without a full re-render
-  document.querySelectorAll('#buildings .building[data-bid]').forEach(el=>{
-    const b=buildingData.find(bb=>bb.id===el.dataset.bid);
-    if (b) el.classList.toggle('disabled', state.poops<buildingCost(b));
-  });
-}
-
-function updateTicker() {
-  const line=newsLines[Math.floor(Math.random()*newsLines.length)];
-  document.getElementById('tickerInner').textContent='\ud83d\udca9 '+line+' \ud83d\udca9';
-}
-
-function renderAll() {
-  renderBuildings();
-  renderUpgrades();
-  updateDisplay();
-}
-
-/* ============================================================
-   INIT & LOOPS
-============================================================ */
-document.getElementById('tomImg').addEventListener('click', clickTom);
+document.getElementById('tomImg').addEventListener('click',clickTom);
 setupGoldenPoopHandler();
-
 loadGame();
 renderAll();
-if (state.doubleProdUntil && state.doubleProdUntil > Date.now()) {
-  doubleProdActive = true;
-  doubleProdInterval = setInterval(refreshDoubleProdLabel, 1000);
-  refreshDoubleProdLabel();
-}
+if(state.doubleProdUntil&&state.doubleProdUntil>Date.now()){doubleProdInterval=setInterval(refreshDoubleProdLabel,1000);refreshDoubleProdLabel();}
 scheduleGoldenPoop();
-updateTicker();
-setInterval(updateTicker, 22000);
 
-// main tick: 10/sec
-setInterval(()=>{
-  const cps=calcCps()/10;
-  if (isFinite(cps) && cps>0) {
-    state.poops+=cps;
-    state.totalPoopsEarned+=cps;
+const newsEl=document.getElementById('tickerInner');
+setInterval(()=>{newsEl.textContent='💩 '+newsLines[Math.floor(Math.random()*newsLines.length)]+' 💩';},22000);
+
+setInterval(()=>{const c=calcCps()/10;if(isFinite(c)&&c>0){state.poops+=c;state.totalPoopsEarned+=c;}updateDisplay();checkAchievements();checkInfinityOverflow();},100);
+setInterval(()=>{renderBuildings();renderUpgrades();const at=document.querySelector('.tab.active');if(at){if(at.dataset.tab==='statsTab')renderStats();if(at.dataset.tab==='achievements')renderAchievements();}},1000);
+setInterval(()=>saveGame(true),30000);
+window.addEventListener('beforeunload',()=>{if(!resetInProgress)saveGame(true);});
+
+/* ---- LOADING SCREEN ---- */
+(function(){
+  const ls=document.getElementById('loadScreen'),fill=document.getElementById('loadBarFill');
+  let p=0;
+  const iv=setInterval(()=>{p+=2+Math.random()*4;fill.style.width=Math.min(p,95)+'%';},60);
+  window.addEventListener('load',()=>{
+    clearInterval(iv);fill.style.width='100%';
+    setTimeout(()=>{ls.classList.add('fade');setTimeout(()=>ls.style.display='none',750);},400);
+  });
+})();
+
+/* ---- ADMIN CONSOLE ---- */
+const ADMIN_HASH='2d6c3b9f1e4a8705d2c6b3f9e1a47058d2c6b3f9';
+function adminHashStr(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return(h>>>0).toString(16).padStart(8,'0');}
+const ADMIN_CODE_HASH=adminHashStr('TomPoopGod2025!');
+
+let adminAuthed=false;
+function openAdmin(){document.getElementById('adminOverlay').classList.add('show');if(!adminAuthed){document.getElementById('adminAuthWrap').style.display='flex';document.getElementById('adminPanel').style.display='none';setTimeout(()=>document.getElementById('adminAuthInput').focus(),100);}}
+function closeAdmin(){document.getElementById('adminOverlay').classList.remove('show');}
+function adminAuth(){const v=document.getElementById('adminAuthInput').value;if(adminHashStr(v)===ADMIN_CODE_HASH){adminAuthed=true;document.getElementById('adminAuthWrap').style.display='none';document.getElementById('adminPanel').style.display='block';adminOut('✅ Authenticated. Welcome, developer.');document.getElementById('adminInput').focus();}else{const e=document.getElementById('adminAuthErr');e.textContent='❌ Wrong code. Try again.';document.getElementById('adminAuthInput').value='';setTimeout(()=>e.textContent='',2500);}}
+document.getElementById('adminAuthInput').addEventListener('keydown',e=>{if(e.key==='Enter')adminAuth();});
+
+function adminOut(msg){const el=document.getElementById('adminOutput');el.innerHTML=msg;}
+function adminCmd(raw){
+  const parts=raw.trim().split(/\s+/);
+  const cmd=parts[0].toLowerCase();
+  if(cmd==='help'){adminOut(document.getElementById('adminHelp').innerHTML);return;}
+  if(cmd==='clear'){adminOut('');return;}
+  if(cmd==='give'){
+    if(parts[1]==='all'){state.poops+=1e21;state.totalPoopsEarned+=1e21;updateDisplay();checkAchievements();adminOut('✅ Gave 1 sextillion poops.');}
+    else{const n=parseFloat(parts[1]);if(!isFinite(n)||n<=0){adminOut('❌ Invalid amount.');return;}state.poops+=n;state.totalPoopsEarned+=n;updateDisplay();checkAchievements();checkInfinityOverflow();adminOut('✅ Gave '+formatNumber(n)+' poops. Total: '+formatNumber(state.poops));}
+    return;
   }
-  updateDisplay();
-  checkAchievements();
-  checkInfinityOverflow();
-}, 100);
-
-// re-render panels: 1/sec (also catches newly-unlocked areas/buildings)
-setInterval(()=>{
-  renderBuildings();
-  renderUpgrades();
-  const active=document.querySelector('.tab.active');
-  if (active && active.dataset.tab==='statsTab') renderStats();
-  if (active && active.dataset.tab==='achievements') renderAchievements();
-}, 1000);
-
-// autosave: every 30 sec
-setInterval(()=>saveGame(true), 30000);
-
-window.addEventListener('beforeunload', ()=>{ if (!resetInProgress) saveGame(true); });
-
+  if(cmd==='upgrade'){
+    if(parts[1]==='all'){let c=0;upgradeData.forEach(u=>{if(!state.upgradesBought[u.id]){state.upgradesBought[u.id]=true;if(u.type==='click')state.clickValue+=u.value;else if(u.type==='clickMult')state.clickMultiplier*=u.value;else if(u.type==='clickFromCps')state.clickFromCpsRate+=u.value;else if(u.type==='building')state.buildingMultipliers[u.target]=(state.buildingMultipliers[u.target]||1)*u.mult;else if(u.type==='globalMult')state.globalMultiplier*=u.mult;c++;}});renderAll();adminOut('✅ Unlocked '+c+' upgrades.');}
+    else{const u=upgradeData.find(x=>x.id===parts[1]);if(!u){adminOut('❌ Unknown upgrade ID: '+parts[1]+'. Use "list upgrades".');return;}if(state.upgradesBought[u.id]){adminOut('⚠️ Already owned: '+u.name);return;}state.upgradesBought[u.id]=true;if(u.type==='click')state.clickValue+=u.value;else if(u.type==='clickMult')state.clickMultiplier*=u.value;else if(u.type==='clickFromCps')state.clickFromCpsRate+=u.value;else if(u.type==='building')state.buildingMultipliers[u.target]=(state.buildingMultipliers[u.target]||1)*u.mult;else if(u.type==='globalMult')state.globalMultiplier*=u.mult;renderAll();adminOut('✅ Unlocked upgrade: '+u.name);}
+    return;
+  }
+  if(cmd==='achieve'){
+    if(parts[1]==='all'){let c=0;achievementData.forEach(a=>{if(!state.achievementsUnlocked[a.id]){state.achievementsUnlocked[a.id]=true;c++;}});renderAchievements();adminOut('✅ Unlocked '+c+' achievements.');}
+    else{const a=achievementData.find(x=>x.id===parts[1]);if(!a){adminOut('❌ Unknown achievement ID: '+parts[1]+'. Use "list achievements".');return;}state.achievementsUnlocked[a.id]=true;renderAchievements();adminOut('✅ Unlocked achievement: '+a.name);}
+    return;
+  }
+  if(cmd==='building'){const b=buildingData.find(x=>x.id===parts[1]);if(!b){adminOut('❌ Unknown building ID: '+parts[1]+'. Use "list buildings".');return;}const n=parseInt(parts[2]);if(isNaN(n)||n<0){adminOut('❌ Invalid amount.');return;}state.buildings[b.id]=n;renderAll();adminOut('✅ Set '+b.name+' to '+n+'.');}
+  else if(cmd==='prestige'){
+    const n=parseInt(parts[1]);if(isNaN(n)||n<0||n>100){adminOut('❌ Count must be 0–100.');return;}
+    state.prestigeCount=n;state.prestigeMultiplier=Math.min(100,Math.pow(1.03,n));
+    updateDisplay();adminOut('✅ Set prestige to '+n+', multiplier x'+state.prestigeMultiplier.toFixed(3)+'.');
+  }
+  else if(cmd==='event'){
+    const ev=parts[1];
+    if(ev==='golden'){if(goldenActive){adminOut('⚠️ Golden poop already active.');return;}clearTimeout(goldenTimeout);spawnGoldenPoop();adminOut('✅ Spawned golden poop.');}
+    else if(ev==='double'){activateDoubleProduction();updateDisplay();adminOut('✅ Activated 2x production for 5 min.');}
+    else if(ev==='jan'){if(state.gameBeaten){triggerJanCelebration();adminOut('✅ Triggered Jan celebration.');}else{state.gameBeaten=true;triggerJanCelebration();adminOut('✅ Triggered Jan celebration (set gameBeaten=true).');}}
+    else if(ev==='infinity'){triggerInfinityOverflow();adminOut('✅ Triggered infinity overflow event.');}
+    else adminOut('❌ Unknown event: '+ev+'. Try: golden, double, jan, infinity');
+  }
+  else if(cmd==='reset'&&parts[1]==='multiplier'){state.prestigeMultiplier=1;updateDisplay();adminOut('✅ Prestige multiplier reset to x1.');}
+  else if(cmd==='list'){
+    if(parts[1]==='upgrades')adminOut(upgradeData.map(u=>u.id+' — '+u.name).join('\n'));
+    else if(parts[1]==='achievements')adminOut(achievementData.map(a=>a.id+' — '+a.name).join('\n'));
+    else if(parts[1]==='buildings')adminOut(buildingData.map(b=>b.id+' — '+b.name).join('\n'));
+    else adminOut('❌ list what? Try: upgrades, achievements, buildings');
+  }
+  else{adminOut('❌ Unknown command: "'+raw+'". Type <b>help</b> for commands.');}
+}
+document.getElementById('adminInput').addEventListener('keydown',e=>{if(e.key==='Enter'){const v=e.target.value.trim();if(v){adminCmd(v);e.target.value='';}}});
+document.getElementById('adminOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('adminOverlay'))closeAdmin();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAdmin();});
 </script>
 </body>
 </html>
