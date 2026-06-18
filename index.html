@@ -2,16 +2,14 @@
 <html lang="en">
 <head> 
 <meta charset="UTF-8">
-<title>Max Sheffield: Poop Clicker - Lochlan version</title>
+<title>Tom Pearl: Poop Clicker</title>
 <link rel="icon" type="image/png" href="logo1.png">
 <style>
 * { box-sizing: border-box; font-family: 'Comic Sans MS', 'Trebuchet MS', sans-serif; margin:0; padding:0; }
   html::-webkit-scrollbar { display: none; }
 html { scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth; }
 body {
-  background-image: url(pax1.png);
-  background-size: cover;
-  background-repear: never;
+  background: linear-gradient(135deg, #3a2010, #6a3a1c, #3a2010);
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -20,104 +18,23 @@ body {
   transition: background 2.5s ease-in-out;
 }
 body.area-backyard {
-  background-image: url(pax1.png);
-    background-size: cover;
-  background-repear: never;
+  background: linear-gradient(135deg, #3a2010, #6a3a1c, #3a2010);
 }
 body.area-town {
-  background-image: url(pax1.png);
-    background-size: cover;
-  background-repear: never;
+  background: linear-gradient(135deg, #2b1f3a, #5a3d6a, #7a4a3a);
 }
 body.area-industry {
-  background-image: url(pax1.png);
-    background-size: cover;
-  background-repear: never;
+  background: linear-gradient(135deg, #1c1c1f, #3a3a40, #5a4a2a);
 }
 body.area-under {
-  background-image: url(pax1.png);
-    background-size: cover;
-  background-repear: never;
+  background: linear-gradient(135deg, #1a0505, #4a0f0f, #6a1a0a);
 }
 body.area-space {
-  background-image: url(pax1.png);
-    background-size: cover;
-  background-repear: never;
+  background: linear-gradient(135deg, #02040f, #0a1530, #160a35);
 }
 body.area-cosmic {
-  background-image: url(pax1.png);
-    background-size: cover;
-  background-repear: never;
+  background: linear-gradient(135deg, #1a0030, #4a0a6a, #7a1a8a, #2a0a4a);
 }
-
-/* ============================================================
-   LOADING SCREEN
-============================================================ */
-#loadingScreen {
-  position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  background-image: url(pax1.png);
-  z-index: 999999;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  animation: loadingFadeOut 0.6s ease-out 2s forwards;
-}
-#loadingScreen.hidden {
-  display: none;
-}
-@keyframes loadingFadeOut {
-  from { opacity: 1; pointer-events: all; }
-  to   { opacity: 0; pointer-events: none; }
-}
-#loadingPoop {
-  font-size: 5em;
-  animation: loadingBob 0.8s ease-in-out infinite alternate;
-  margin-bottom: 18px;
-}
-@keyframes loadingBob {
-  from { transform: translateY(0) scale(1); }
-  to   { transform: translateY(-14px) scale(1.1); }
-}
-#loadingTitle {
-  font-size: 2em;
-  font-weight: bold;
-  text-shadow: 3px 3px #000;
-  color: #ffec8b;
-  margin-bottom: 8px;
-}
-#loadingSubtitle {
-  font-size: 1.1em;
-  opacity: 0.85;
-  text-shadow: 1px 1px #000;
-  border: 2px solid #ffec8b;
-  border-radius: 10px;
-  padding: 8px 20px;
-  background: rgba(0,0,0,0.3);
-  letter-spacing: 1px;
-}
-#loadingBar {
-  margin-top: 22px;
-  width: 220px;
-  height: 10px;
-  background: rgba(255,255,255,0.15);
-  border-radius: 8px;
-  overflow: hidden;
-}
-#loadingBarFill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #ffec8b, #f4c430);
-  border-radius: 8px;
-  animation: loadingBarGrow 2s linear forwards;
-}
-@keyframes loadingBarGrow {
-  from { width: 0%; }
-  to   { width: 100%; }
-}
-
 #ticker {
   background: rgba(0,0,0,0.5);
   padding: 5px 0;
@@ -508,25 +425,17 @@ body.rage-shake {
 </head>
 <body>
 
-<!-- LOADING SCREEN -->
-<div id="loadingScreen">
-  <div id="loadingPoop">💩</div>
-  <div id="loadingTitle">Max Sheffield: Poop Clicker</div>
-  <div id="loadingSubtitle">🕹️ this is lochlan hawkes version for 12 hours 🕹️</div>
-  <div id="loadingBar"><div id="loadingBarFill"></div></div>
-</div>
-
-<div id="ticker"><span id="tickerInner">💩 Welcome to Max Sheffield: Poop Clicker! Click Max to begin your journey... 💩</span></div>
+<div id="ticker"><span id="tickerInner">💩 Welcome to Tom Pearl: Poop Clicker! Click Tom to begin your journey... 💩</span></div>
 
 <div id="main">
 <div id="left">
-  <h1>💩 Max Sheffield 💩</h1>
+  <h1>💩 Tom Pearl 💩</h1>
   <div id="areaLabel"></div>
   <div id="count">0 Poops</div>
   <div id="perSec">0 poops/sec</div>
   <div id="clickVal">+1 per click</div>
   <div id="tomWrap">
-    <img id="tomImg" src="pax1.png" alt="Max Sheffield">
+    <img id="tomImg" src="tomp.jfif" alt="Tom Pearl">
     <div id="goldenPoop">✨💩✨</div>
   </div>
   <div id="milestoneLabel"></div>
@@ -572,7 +481,7 @@ body.rage-shake {
     <div id="janTitle">🎉 YOU BEAT THE GAME! 🎉</div>
     <div id="janSubtitle">All hail</div>
     <div id="janName">JAN</div>
-    <div id="janMessage">Max Sheffield could not have eaten this much poop without Jan.<br>Jan believed in Max from the very first click.<br>This victory belongs to Jan.</div>
+    <div id="janMessage">Tom Pearl could not have eaten this much poop without Jan.<br>Jan believed in Tom from the very first click.<br>This victory belongs to Jan.</div>
     <button id="janCloseBtn" onclick="closeJanCelebration()">Thank you, Jan 🙏</button>
   </div>
 </div>
@@ -593,21 +502,11 @@ body.rage-shake {
 <script>
 
 /* ============================================================
-   LOADING SCREEN — show for 2 seconds, once per session
-============================================================ */
-(function() {
-  const screen = document.getElementById('loadingScreen');
-  setTimeout(function() {
-    screen.classList.add('hidden');
-  }, 2600);
-})();
-
-/* ============================================================
-   AREAS
+   AREAS (themed groups of buildings, unlock progressively)
 ============================================================ */
 const areaData = [
   { id:'backyard', name:'🏡 The Backyard',        unlockAt:0 },
-  { id:'town',     name:'🏘️ Sheffield Town',       unlockAt:50000 },
+  { id:'town',     name:'🏘️ Pearl Town',          unlockAt:50000 },
   { id:'industry', name:'🏭 Industrial District',  unlockAt:50000000 },
   { id:'under',    name:'🕳️ The Underworld',       unlockAt:50000000000 },
   { id:'space',    name:'🚀 Outer Space',          unlockAt:5e13 },
@@ -619,24 +518,24 @@ const areaData = [
 ============================================================ */
 const buildingData = [
   // BACKYARD
-  { id:'finger',    name:'Pointer Finger',     emoji:'👆', area:'backyard', baseCost:15,              baseCps:0.1,        desc:'Max scoops poop with one bare finger.' },
+  { id:'finger',    name:'Pointer Finger',     emoji:'👆', area:'backyard', baseCost:15,              baseCps:0.1,        desc:'Tom scoops poop with one bare finger.' },
   { id:'fly',       name:'Trained Fly',        emoji:'🪰', area:'backyard', baseCost:100,             baseCps:1,          desc:'A fly that sniffs out fresh poop deposits.' },
   { id:'dog',       name:'Poop-Sniffing Dog',  emoji:'🐕', area:'backyard', baseCost:1100,            baseCps:8,          desc:'A loyal hound dedicated to finding poop.' },
   { id:'toddler',   name:'Poop Toddler',       emoji:'👶', area:'backyard', baseCost:8000,            baseCps:35,         desc:'A toddler who produces poop at an alarming rate.' },
-  { id:'garden',    name:'Poop Garden',        emoji:'🌻', area:'backyard', baseCost:45000,           baseCps:140,        desc:'A small garden plot fertilised entirely by Max.' },
+  { id:'garden',    name:'Poop Garden',        emoji:'🌻', area:'backyard', baseCost:45000,           baseCps:140,        desc:'A small garden plot fertilised entirely by Tom.' },
 
   // TOWN
   { id:'farm',      name:'Poop Farm',          emoji:'🚜', area:'town', baseCost:55000,           baseCps:180,         desc:'A farm entirely dedicated to poop cultivation.' },
   { id:'bakery',    name:'Poop Bakery',        emoji:'🥖', area:'town', baseCost:260000,          baseCps:420,         desc:'Bakes poop-scented bread for some reason.' },
   { id:'truck',     name:'Poop Truck',         emoji:'🚛', area:'town', baseCost:1200000,         baseCps:1100,        desc:'Hauls enormous loads of poop across the country.' },
   { id:'mall',      name:'Poop Mall',          emoji:'🏬', area:'town', baseCost:6000000,         baseCps:3600,        desc:'A shopping centre with poop kiosks on every floor.' },
-  { id:'stadium',   name:'Poop Stadium',       emoji:'🏟️', area:'town', baseCost:18000000,        baseCps:9200,        desc:'Sold-out crowds cheer as Max eats on the big screen.' },
+  { id:'stadium',   name:'Poop Stadium',       emoji:'🏟️', area:'town', baseCost:18000000,        baseCps:9200,        desc:'Sold-out crowds cheer as Tom eats on the big screen.' },
 
   // INDUSTRY
   { id:'factory',   name:'Poop Factory',       emoji:'🏭', area:'industry', baseCost:80000000,        baseCps:32000,      desc:'Mass-produces industrial-grade poop.' },
-  { id:'sewer',     name:'Sewer Network',      emoji:'🕸️', area:'industry', baseCost:400000000,       baseCps:140000,     desc:'A vast underground network funnelling poop to Max.' },
+  { id:'sewer',     name:'Sewer Network',      emoji:'🕸️', area:'industry', baseCost:400000000,       baseCps:140000,     desc:'A vast underground network funnelling poop to Tom.' },
   { id:'powerplant',name:'Poop Power Plant',   emoji:'⚡', area:'industry', baseCost:2000000000,      baseCps:620000,     desc:'Burns poop methane to generate electricity, and more poop.' },
-  { id:'skyscraper',name:'Poop Skyscraper',    emoji:'🏙️', area:'industry', baseCost:9500000000,      baseCps:2400000,    desc:'Headquarters of Sheffield Poop Industries Inc.' },
+  { id:'skyscraper',name:'Poop Skyscraper',    emoji:'🏙️', area:'industry', baseCost:9500000000,      baseCps:2400000,    desc:'Headquarters of Pearl Poop Industries Inc.' },
   { id:'mine',      name:'Poop Mine',          emoji:'⛏️', area:'industry', baseCost:42000000000,     baseCps:9800000,    desc:'Deep shaft mining for ancient fossilised poop.' },
 
   // UNDERWORLD
@@ -653,7 +552,7 @@ const buildingData = [
 
   // COSMIC
   { id:'portal',    name:'Poop Portal',        emoji:'🌀', area:'cosmic', baseCost:3e16,            baseCps:2e12,         desc:'Tears open a rift to a dimension made of poop.' },
-  { id:'tomclone',  name:'Max Clone',          emoji:'👥', area:'cosmic', baseCost:1.3e17,          baseCps:7.5e12,       desc:'A cloned Max Sheffield that eats and produces poop endlessly.' },
+  { id:'tomclone',  name:'Tom Clone',          emoji:'👥', area:'cosmic', baseCost:1.3e17,          baseCps:7.5e12,       desc:'A cloned Tom Pearl that eats and produces poop endlessly.' },
   { id:'blackhole', name:'Poop Black Hole',    emoji:'🕳️', area:'cosmic', baseCost:6e17,            baseCps:2.8e13,       desc:'Compresses poop to infinite density. Smells awful.' },
   { id:'universe',  name:'Pocket Universe',    emoji:'🌌', area:'cosmic', baseCost:2.5e18,          baseCps:1e14,         desc:'An entire universe whose physics only produce poop.' },
   { id:'god',       name:'Poop God',           emoji:'🙏', area:'cosmic', baseCost:1e19,            baseCps:4e14,         desc:'An ancient deity who has watched over poop since time began.' },
@@ -675,11 +574,11 @@ const upgradeData = [
   { id:'c9',  name:'Poop Mittens',           desc:'Click power x1.5.',                  cost:20000000000,  type:'clickMult',   value:1.5  },
   { id:'c10', name:'Godly Grip',             desc:'+3% of CPS added to each click.',    cost:400000000000, type:'clickFromCps',value:0.03 },
   { id:'c11', name:'Infinite Arm',           desc:'Click power x2.',                    cost:1.2e13,       type:'clickMult',   value:2    },
-  { id:'c12', name:'Max\u2019s Sixth Finger',desc:'Click +5000.',                       cost:2e14,         type:'click',       value:5000 },
+  { id:'c12', name:'Tom\u2019s Sixth Finger',desc:'Click +5000.',                       cost:2e14,         type:'click',       value:5000 },
   { id:'c13', name:'Cosmic Fingertip',       desc:'+5% of CPS added to each click.',    cost:1.5e16,       type:'clickFromCps',value:0.05 },
   { id:'c14', name:'Hand of the Poop God',   desc:'Click power x2.',                    cost:9e17,         type:'clickMult',   value:2    },
 
-  // --- FINGER ---
+  // --- FINGER (5 buildings worth) ---
   { id:'f1', name:'Extra Finger',            desc:'Pointer Fingers x2.',  cost:200,    type:'building', target:'finger', mult:2, req:{id:'finger',amt:1}  },
   { id:'f2', name:'Carpal Tunnel Cream',     desc:'Pointer Fingers x2.',  cost:1000,   type:'building', target:'finger', mult:2, req:{id:'finger',amt:5}  },
   { id:'f3', name:'Ten Fingers',             desc:'Pointer Fingers x2.',  cost:18000,  type:'building', target:'finger', mult:2, req:{id:'finger',amt:10} },
@@ -816,9 +715,9 @@ const upgradeData = [
   { id:'p3', name:'Interdimensional Treaty', desc:'Poop Portals x3.',    cost:6e18, type:'building',  target:'portal', mult:3, req:{id:'portal',amt:25} },
 
   // --- CLONE ---
-  { id:'cl1', name:'Clone Stabilisation',    desc:'Max Clones x2.',      cost:2.6e17,type:'building', target:'tomclone', mult:2, req:{id:'tomclone',amt:1}  },
-  { id:'cl2', name:'Clone Army',             desc:'Max Clones x2.',      cost:1.3e18,type:'building', target:'tomclone', mult:2, req:{id:'tomclone',amt:5}  },
-  { id:'cl3', name:'Genetic Perfection',     desc:'Max Clones x3.',      cost:2.6e19,type:'building', target:'tomclone', mult:3, req:{id:'tomclone',amt:25} },
+  { id:'cl1', name:'Clone Stabilisation',    desc:'Tom Clones x2.',      cost:2.6e17,type:'building', target:'tomclone', mult:2, req:{id:'tomclone',amt:1}  },
+  { id:'cl2', name:'Clone Army',             desc:'Tom Clones x2.',      cost:1.3e18,type:'building', target:'tomclone', mult:2, req:{id:'tomclone',amt:5}  },
+  { id:'cl3', name:'Genetic Perfection',     desc:'Tom Clones x3.',      cost:2.6e19,type:'building', target:'tomclone', mult:3, req:{id:'tomclone',amt:25} },
 
   // --- BLACK HOLE ---
   { id:'bh1', name:'Event Horizon Tuning',   desc:'Black Holes x2.',     cost:1.2e18,type:'building', target:'blackhole', mult:2, req:{id:'blackhole',amt:1}  },
@@ -837,13 +736,13 @@ const upgradeData = [
   { id:'g4', name:'Ascended Pantheon',       desc:'Poop Gods x5.',       cost:5e22, type:'building',  target:'god', mult:5, req:{id:'god',amt:50} },
 
   // --- GLOBAL MULTIPLIERS ---
-  { id:'gm1',  name:'Max\'s Iron Stomach',   desc:'All production +10%.', cost:60000,        type:'globalMult', mult:1.10 },
-  { id:'gm2',  name:'Max\'s Refined Palate', desc:'All production +10%.', cost:1200000,      type:'globalMult', mult:1.10 },
-  { id:'gm3',  name:'Max\'s Legendary Diet', desc:'All production +20%.', cost:150000000,    type:'globalMult', mult:1.20 },
-  { id:'gm4',  name:'Max Sheffield Statue',  desc:'All production +20%.', cost:12000000000,  type:'globalMult', mult:1.20 },
-  { id:'gm5',  name:'Max Sheffield Religion',desc:'All production x2.',   cost:1.5e12,       type:'globalMult', mult:2    },
-  { id:'gm6',  name:'Max Sheffield Ascension',desc:'All production x2.',  cost:2e14,         type:'globalMult', mult:2    },
-  { id:'gm7',  name:'Max Sheffield Is God',  desc:'All production x2.5.', cost:3e16,         type:'globalMult', mult:2.5  },
+  { id:'gm1',  name:'Toms Iron Stomach',     desc:'All production +10%.', cost:60000,        type:'globalMult', mult:1.10 },
+  { id:'gm2',  name:'Toms Refined Palate',   desc:'All production +10%.', cost:1200000,      type:'globalMult', mult:1.10 },
+  { id:'gm3',  name:'Toms Legendary Diet',   desc:'All production +20%.', cost:150000000,    type:'globalMult', mult:1.20 },
+  { id:'gm4',  name:'Tom Pearl Statue',      desc:'All production +20%.', cost:12000000000,  type:'globalMult', mult:1.20 },
+  { id:'gm5',  name:'Tom Pearl Religion',    desc:'All production x2.',   cost:1.5e12,       type:'globalMult', mult:2    },
+  { id:'gm6',  name:'Tom Pearl Ascension',   desc:'All production x2.',   cost:2e14,         type:'globalMult', mult:2    },
+  { id:'gm7',  name:'Tom Pearl Is God',      desc:'All production x2.5.', cost:3e16,         type:'globalMult', mult:2.5  },
   { id:'gm8',  name:'Universal Poop Law',    desc:'All production x3.',   cost:5e19,         type:'globalMult', mult:3    },
   { id:'gm9',  name:'Poop Singularity',      desc:'All production x5.',   cost:8e22,         type:'globalMult', mult:5    },
 ];
@@ -861,14 +760,14 @@ const achievementData = [
   { id:'a7',  name:'Poop Grand Master',     icon:'🏆', desc:'Collect 1 billion poops.',         req: s => s.totalPoopsEarned >= 1e9 },
   { id:'a8',  name:'Poop Legend',           icon:'🌟', desc:'Collect 1 trillion poops.',        req: s => s.totalPoopsEarned >= 1e12 },
   { id:'a9',  name:'Poop Deity',            icon:'⚡', desc:'Collect 1 quadrillion poops.',     req: s => s.totalPoopsEarned >= 1e15 },
-  { id:'a10', name:'Max Transcends',        icon:'🌌', desc:'Collect 1 quintillion poops.',     req: s => s.totalPoopsEarned >= 1e18 },
+  { id:'a10', name:'Tom Transcends',        icon:'🌌', desc:'Collect 1 quintillion poops.',     req: s => s.totalPoopsEarned >= 1e18 },
   { id:'a11', name:'Beyond Comprehension',  icon:'♾️', desc:'Collect 1 sextillion poops.',      req: s => s.totalPoopsEarned >= 1e21 },
 
-  { id:'ck1', name:'First Click',           icon:'👆', desc:'Click Max once.',                  req: s => s.totalClicks >= 1 },
-  { id:'ck2', name:'Clickaholic',           icon:'🖱️', desc:'Click Max 100 times.',             req: s => s.totalClicks >= 100 },
-  { id:'ck3', name:'Click Maniac',          icon:'💥', desc:'Click Max 1,000 times.',           req: s => s.totalClicks >= 1000 },
-  { id:'ck4', name:'Carpal Tunnel Award',   icon:'🏥', desc:'Click Max 10,000 times.',          req: s => s.totalClicks >= 10000 },
-  { id:'ck5', name:'Click God',             icon:'🙌', desc:'Click Max 100,000 times.',         req: s => s.totalClicks >= 100000 },
+  { id:'ck1', name:'First Click',           icon:'👆', desc:'Click Tom once.',                  req: s => s.totalClicks >= 1 },
+  { id:'ck2', name:'Clickaholic',           icon:'🖱️', desc:'Click Tom 100 times.',             req: s => s.totalClicks >= 100 },
+  { id:'ck3', name:'Click Maniac',          icon:'💥', desc:'Click Tom 1,000 times.',           req: s => s.totalClicks >= 1000 },
+  { id:'ck4', name:'Carpal Tunnel Award',   icon:'🏥', desc:'Click Tom 10,000 times.',          req: s => s.totalClicks >= 10000 },
+  { id:'ck5', name:'Click God',             icon:'🙌', desc:'Click Tom 100,000 times.',         req: s => s.totalClicks >= 100000 },
 
   { id:'b1',  name:'First Employee',        icon:'🤝', desc:'Own your first producer.',         req: s => totalBuildings(s) >= 1 },
   { id:'b2',  name:'Small Business',        icon:'🏪', desc:'Own 10 producers total.',          req: s => totalBuildings(s) >= 10 },
@@ -901,7 +800,7 @@ const achievementData = [
   { id:'up4', name:'Upgrade God',           icon:'🌠', desc:'Buy 50 upgrades.',                 req: s => Object.keys(s.upgradesBought).length >= 50 },
   { id:'up5', name:'Upgrade Completionist', icon:'✅', desc:'Buy 100 upgrades.',                req: s => Object.keys(s.upgradesBought).length >= 100 },
 
-  { id:'ar1', name:'Welcome to Town',       icon:'🏘️', desc:'Unlock Sheffield Town.',           req: s => s.totalPoopsEarned >= 50000 },
+  { id:'ar1', name:'Welcome to Town',       icon:'🏘️', desc:'Unlock Pearl Town.',               req: s => s.totalPoopsEarned >= 50000 },
   { id:'ar2', name:'Industrial Revolution', icon:'🏭', desc:'Unlock the Industrial District.',  req: s => s.totalPoopsEarned >= 50000000 },
   { id:'ar3', name:'Down Under',            icon:'🕳️', desc:'Unlock the Underworld.',           req: s => s.totalPoopsEarned >= 50000000000 },
   { id:'ar4', name:'Final Frontier',        icon:'🚀', desc:'Unlock Outer Space.',              req: s => s.totalPoopsEarned >= 5e13 },
@@ -909,70 +808,50 @@ const achievementData = [
 ];
 
 /* ============================================================
-   MILESTONES
+   MILESTONES (Tom image swaps)
 ============================================================ */
 const tomMilestones = [
-  { threshold:0,           img:'pax1.png',  label:'Max is hungry...' },
-  { threshold:100,         img:'pax1.png',  label:'Max found a small snack 💩' },
-  { threshold:1000,        img:'pax1.png',  label:'Max is getting into it 💩💩' },
-  { threshold:10000,       img:'pax1.png',  label:'Max is a dedicated eater 💩💩💩' },
-  { threshold:100000,      img:'pax1.png',  label:'Max is a poop connoisseur 🏅' },
-  { threshold:1000000,     img:'pax1.png',  label:'Max Sheffield: Poop Master 🏆' },
-  { threshold:10000000,    img:'pax1.png', label:'Max has transcended humanity 🌟' },
-  { threshold:100000000,   img:'pax1.png', label:'Max Sheffield: Poop Legend ⚡' },
-  { threshold:100000000000,img:'pax1.png', label:'Max Sheffield is eternal 🌌' },
+  { threshold:0,           img:'tomp.jfif',  label:'Tom is hungry...' },
+  { threshold:100,         img:'tomp2.png',  label:'Tom found a small snack 💩' },
+  { threshold:1000,        img:'tomp3.png',  label:'Tom is getting into it 💩💩' },
+  { threshold:10000,       img:'tomp4.png',  label:'Tom is a dedicated eater 💩💩💩' },
+  { threshold:100000,      img:'tomp5.png',  label:'Tom is a poop connoisseur 🏅' },
+  { threshold:1000000,     img:'tomp6.png',  label:'Tom Pearl: Poop Master 🏆' },
+  { threshold:10000000,    img:'tomp7.jfif', label:'Tom has transcended humanity 🌟' },
+  { threshold:100000000,   img:'tomp8.jfif', label:'Tom Pearl: Poop Legend ⚡' },
+  { threshold:100000000000,img:'tomp9.jfif', label:'Tom Pearl is eternal 🌌' },
 ];
 
 /* ============================================================
-   NEWS TICKER
+   NEWS TICKER LINES
 ============================================================ */
 const newsLines = [
-  "Local man Max Sheffield eating poop at record rates \u2014 doctors baffled",
-  "Poop prices surge 400% as Max Sheffield corners the market",
-  "Scientists confirm Max Sheffield's stomach is its own ecosystem",
-  "Max Sheffield wins Nobel Prize for Poop Sciences three years running",
-  "Area man claims Max Sheffield personally ate his entire backyard",
-  "Poop portal discovered behind Max Sheffield's shed \u2014 government silent",
-  "Max Sheffield clones now outnumber actual people \u2014 census bureau panicking",
-  "Poop Black Hole detected in Max Sheffield's garage \u2014 NASA concerned",
-  "Max Sheffield's Poop Farm named National Heritage Site",
-  "Max Sheffield spotted eating poop on the moon \u2014 NASA confirms",
-  "Poop Rocket launch successful \u2014 Max Sheffield waves from orbit",
-  "Local fly trainer says working for Max Sheffield changed his life forever",
-  "Max Sheffield's digestive system declared a wonder of the modern world",
-  "Poop prices at all-time high \u2014 Max Sheffield blamed",
-  "Max Sheffield religion growing: 3 million followers and counting",
-  "Breaking: Max Sheffield eats 1 trillion poops \u2014 sets world record",
-  "Poop God confirmed real \u2014 turns out it is Max Sheffield",
-  "Sheffield Town renames Main Street to Poop Boulevard in his honour",
-  "Underworld explorers report finding 'a friendly giant named Max' down there",
-  "Cosmic Realm scientists baffled: 'the whole universe smells like Max'",
+  "Local man Tom Pearl eating poop at record rates \u2014 doctors baffled",
+  "Poop prices surge 400% as Tom Pearl corners the market",
+  "Scientists confirm Tom Pearl's stomach is its own ecosystem",
+  "Tom Pearl wins Nobel Prize for Poop Sciences three years running",
+  "Area man claims Tom Pearl personally ate his entire backyard",
+  "Poop portal discovered behind Tom Pearl's shed \u2014 government silent",
+  "Tom Pearl clones now outnumber actual people \u2014 census bureau panicking",
+  "Poop Black Hole detected in Tom Pearl's garage \u2014 NASA concerned",
+  "Tom Pearl's Poop Farm named National Heritage Site",
+  "Tom Pearl spotted eating poop on the moon \u2014 NASA confirms",
+  "Poop Rocket launch successful \u2014 Tom Pearl waves from orbit",
+  "Local fly trainer says working for Tom Pearl changed his life forever",
+  "Tom Pearl's digestive system declared a wonder of the modern world",
+  "Poop prices at all-time high \u2014 Tom Pearl blamed",
+  "Tom Pearl religion growing: 3 million followers and counting",
+  "Breaking: Tom Pearl eats 1 trillion poops \u2014 sets world record",
+  "Poop God confirmed real \u2014 turns out it is Tom Pearl",
+  "Pearl Town renames Main Street to Poop Boulevard in his honour",
+  "Underworld explorers report finding 'a friendly giant named Tom' down there",
+  "Cosmic Realm scientists baffled: 'the whole universe smells like Tom'",
 ];
 
 /* ============================================================
    CHANGELOG
 ============================================================ */
 const changelogData = [
-  {
-    date: '2026-06-18',
-    title: 'Prestige Cap — Max x100',
-    changes: [
-      'Prestige multiplier is now hard-capped at x100 — no matter how many times you prestige, it will never exceed x100 total',
-      'The Prestige button is now hidden once the x100 cap is reached, with a message informing you that you have hit the maximum',
-      'Existing saves that already exceeded x100 will be clamped down to x100 on next load',
-    ]
-  },
-  {
-    date: '2026-06-18',
-    title: 'Lochlan Hawkes Edition — Loading Screen & Rebrand',
-    changes: [
-      'Added a 2-second loading screen on startup that proudly declares "this is lochlan hawkes version for 12 hours"',
-      'Renamed the protagonist from Tom Pearl to Max Sheffield throughout the entire game',
-      'Updated all producer descriptions, upgrade names, news ticker lines, milestone labels, and achievement text to reflect the new name',
-      'Renamed Pearl Town to Sheffield Town',
-      'Renamed Sheffield Poop Industries Inc. as the Skyscraper headquarters',
-    ]
-  },
   {
     date: '2026-06-17',
     title: 'Anti-Cheat: Clock Manipulation Fix',
@@ -1024,19 +903,45 @@ const changelogData = [
     title: 'The Big Expansion Update',
     changes: [
       'Added 6 new themed Areas (Backyard, Pearl Town, Industrial District, Underworld, Outer Space, Cosmic Realm) that unlock progressively as you earn more poops',
-      'Added 10 new producers, bringing the total to 28',
+      'Added 10 new producers, bringing the total to 28 (Poop Garden, Poop Bakery, Poop Mall, Poop Stadium, Power Plant, Skyscraper, Crystal Cave, Earth Core Tap, Lunar Base, Orbital Station)',
       'Added dozens of new upgrades, bringing the total to over 120',
       'Added 12 new achievements, bringing the total to 47',
       'Added Shift-click "buy max" on producers',
       'Added this Update Log tab',
+      'Nerfed Golden Poops back to their original, simple version (60 sec of CPS or 10% of stash)',
       'Fixed save/load bugs where corrupted numeric fields could turn into NaN',
+      'Fixed export save fallback when clipboard access is unavailable',
+      'Fixed an issue where a single broken achievement check could prevent all others from being checked',
+    ]
+  },
+  {
+    date: '2026-06-16',
+    title: 'Golden Poop Overhaul (later reverted)',
+    changes: [
+      'Golden Poops temporarily became a multi-phase chase mini-game with screen shake, decoys, and stacked effects',
+      'This was reverted in the next update at user request for being too disruptive',
+    ]
+  },
+  {
+    date: '2026-06-16',
+    title: 'Milestone Images Update',
+    changes: [
+      'Tom\u2019s image now changes automatically at 9 lifetime poop milestones (100, 1K, 10K, 100K, 1M, 10M, 100M, 100B)',
+      'Added a milestone label under Tom describing his current state',
+    ]
+  },
+  {
+    date: '2026-06-16',
+    title: 'Bug Fix Update',
+    changes: [
+      'Fixed a critical syntax error from unescaped apostrophes that broke all clicking and tab switching',
     ]
   },
   {
     date: '2026-06-16',
     title: 'Initial Release',
     changes: [
-      'Launched Max Sheffield: Poop Clicker',
+      'Launched Tom Pearl: Poop Clicker',
       '12 producers from Pointer Finger to Pocket Universe',
       'Click and global upgrades',
       'Autosave every 30 seconds plus save on page close',
@@ -1045,11 +950,6 @@ const changelogData = [
     ]
   },
 ];
-
-/* ============================================================
-   PRESTIGE CAP
-============================================================ */
-const PRESTIGE_CAP = 100;
 
 /* ============================================================
    STATE
@@ -1125,10 +1025,7 @@ function calcClickValue() {
   return base * getTempBuffMultiplier();
 }
 
-// Returns the multiplier gain from a prestige, or null if ineligible
-// Also returns null if already at the cap
 function prestigeGain() {
-  if (state.prestigeMultiplier >= PRESTIGE_CAP) return null;
   const gain = Math.floor(state.totalPoopsEarned / 5e12);
   return gain > 0 ? 1 + gain * 0.05 : null;
 }
@@ -1163,7 +1060,7 @@ function updateAreaBackground() {
 /* ============================================================
    SAVE / LOAD
 ============================================================ */
-const SAVE_KEY = 'pax1earlPoopClickerV3';
+const SAVE_KEY = 'tomPearlPoopClickerV3';
 
 function saveGame(silent) {
   try {
@@ -1184,6 +1081,7 @@ function loadGame() {
     if (!loaded || typeof loaded !== 'object') return;
     state = Object.assign(state, loaded);
 
+    // re-merge nested objects safely in case of partial/old saves
     state.buildings = Object.assign({}, state.buildings || {});
     state.buildingMultipliers = Object.assign({}, state.buildingMultipliers || {});
     state.upgradesBought = Object.assign({}, state.upgradesBought || {});
@@ -1194,11 +1092,6 @@ function loadGame() {
       if (typeof state.buildingMultipliers[b.id] !== 'number' || isNaN(state.buildingMultipliers[b.id])) state.buildingMultipliers[b.id]=1;
     });
     if (typeof state.prestigeMultiplier !== 'number' || isNaN(state.prestigeMultiplier)) state.prestigeMultiplier=1;
-    // Clamp any pre-existing saves that exceeded the cap
-    if (state.prestigeMultiplier > PRESTIGE_CAP) {
-      state.prestigeMultiplier = PRESTIGE_CAP;
-      showNotice('\u26a0\ufe0f Prestige multiplier clamped to the x100 cap.', 4000);
-    }
     if (typeof state.goldenPoopsClicked !== 'number' || isNaN(state.goldenPoopsClicked)) state.goldenPoopsClicked=0;
     if (typeof state.gameBeaten !== 'boolean') state.gameBeaten=false;
     if (typeof state.doubleProdUntil !== 'number' || isNaN(state.doubleProdUntil)) state.doubleProdUntil=0;
@@ -1211,20 +1104,36 @@ function loadGame() {
     if (typeof state.totalClicks !== 'number' || isNaN(state.totalClicks)) state.totalClicks=0;
     if (typeof state.prestigeCount !== 'number' || isNaN(state.prestigeCount)) state.prestigeCount=0;
 
+    // offline earnings \u2014 hardened against system clock manipulation.
+    // We cross-check the wall-clock delta (Date.now) against a monotonic
+    // delta (performance.now) saved alongside it. Real elapsed time while
+    // the tab was closed can only be measured by Date.now, but if the
+    // two clocks disagree wildly while the page WAS open (i.e. player
+    // changed the clock mid-session) we will have already caught it via
+    // the periodic clock-skew check below. For the closed-tab case we
+    // simply clamp hard and treat backward jumps as zero.
     const rawSecs = (Date.now() - (state.lastSave || Date.now())) / 1000;
 
     if (rawSecs < -5) {
+      // Clock was moved backwards since last save. Don't reward anything,
+      // and don't let a backward jump corrupt future calculations either.
       showNotice('\u26a0\ufe0f System clock looks like it moved backwards \u2014 no offline bonus awarded.', 4000);
     } else {
+      // Hard cap: no matter how long the claimed gap is, only ever credit
+      // up to 12 hours of offline production per load. This keeps a
+      // legitimate "I was away for the weekend" case feeling rewarding
+      // while making a multi-day clock-forward exploit far less lucrative.
       const MAX_OFFLINE_SECONDS = 12 * 60 * 60;
       const secs = Math.max(0, Math.min(rawSecs, MAX_OFFLINE_SECONDS));
       if (secs > 5) {
+        // Offline production also runs at a reduced rate compared to
+        // active play, further reducing the payoff of clock skipping.
         const OFFLINE_RATE = 0.5;
         const earned = calcCps() * secs * OFFLINE_RATE;
         if (earned > 0 && isFinite(earned)) {
           state.poops += earned;
           state.totalPoopsEarned += earned;
-          setTimeout(()=>showNotice('\ud83d\udc4b Welcome back! Max made '+formatNumber(earned)+' poops while you were away!',4000),500);
+          setTimeout(()=>showNotice('\ud83d\udc4b Welcome back! Tom made '+formatNumber(earned)+' poops while you were away!',4000),500);
         }
       }
       if (rawSecs > MAX_OFFLINE_SECONDS) {
@@ -1280,8 +1189,6 @@ function importSave() {
       if(typeof state.buildings[b.id] !== 'number') state.buildings[b.id]=0;
       if(typeof state.buildingMultipliers[b.id] !== 'number') state.buildingMultipliers[b.id]=1;
     });
-    // Clamp on import too
-    if (state.prestigeMultiplier > PRESTIGE_CAP) state.prestigeMultiplier = PRESTIGE_CAP;
     saveGame(true); renderAll(); showNotice('\u2705 Save imported!');
   } catch(e){ alert('Invalid save string.'); }
 }
@@ -1298,12 +1205,7 @@ function resetGame() {
 function doPrestige() {
   const gain = prestigeGain();
   if (!gain) return;
-
-  // Calculate what the new multiplier would be, clamped to cap
-  const newMult = Math.min(PRESTIGE_CAP, (state.prestigeMultiplier || 1) * gain);
-  const actualGain = newMult / (state.prestigeMultiplier || 1);
-
-  if (!confirm('Prestige? You will lose all poops and producers, but gain a permanent x' + actualGain.toFixed(2) + ' bonus (total: x' + newMult.toFixed(2) + ')' + (newMult >= PRESTIGE_CAP ? ' — THIS IS THE MAXIMUM!' : '') + '!')) return;
+  if (!confirm('Prestige? You will lose all poops and producers, but gain a permanent x'+gain.toFixed(2)+' bonus on top of your current x'+state.prestigeMultiplier.toFixed(2)+'!')) return;
 
   state.poops=0;
   state.totalPoopsEarned=0;
@@ -1315,11 +1217,9 @@ function doPrestige() {
   buildingData.forEach(b=>{ state.buildings[b.id]=0; state.buildingMultipliers[b.id]=1; });
   state.upgradesBought={};
   state.prestigeCount=(state.prestigeCount||0)+1;
-  state.prestigeMultiplier = newMult;
-
+  state.prestigeMultiplier=(state.prestigeMultiplier||1)*gain;
   saveGame(true); renderAll();
-  const capMsg = state.prestigeMultiplier >= PRESTIGE_CAP ? ' \ud83d\udd12 MAX PRESTIGE REACHED!' : '';
-  showNotice('\u2697\ufe0f Prestige! You now have a x'+state.prestigeMultiplier.toFixed(2)+' permanent bonus!'+capMsg, 4000);
+  showNotice('\u2697\ufe0f Prestige! You now have a x'+state.prestigeMultiplier.toFixed(2)+' permanent bonus!',4000);
 }
 
 /* ============================================================
@@ -1334,6 +1234,7 @@ function clickTom(e) {
   const float=document.createElement('div');
   float.className='floatup';
   float.textContent='+'+formatNumber(amount);
+  // randomise position slightly so repeated clicks don't all stack exactly
   float.style.left=(50+(Math.random()*30-15))+'%';
   float.style.top=(50+(Math.random()*20-10))+'%';
   document.getElementById('tomWrap').appendChild(float);
@@ -1356,6 +1257,7 @@ function buyBuilding(b) {
 function buyMaxBuilding(b) {
   if (!isAreaUnlocked(b.area)) return;
   let bought = 0;
+  // iteratively buy while affordable, capped to avoid runaway loops
   while (bought < 10000) {
     const cost = buildingCost(b);
     if (state.poops < cost) break;
@@ -1395,6 +1297,7 @@ let doubleProdActive=false;
 let doubleProdInterval=null;
 
 function scheduleGoldenPoop() {
+  // Much rarer now: 2 to 5 minutes between spawns
   const delay = 120000 + Math.random() * 180000;
   setTimeout(spawnGoldenPoop, delay);
 }
@@ -1408,6 +1311,7 @@ function spawnGoldenPoop() {
   el.style.top=Math.max(0,Math.random()*(wh-40))+'px';
   el.style.display='block';
   goldenActive=true;
+  // disappears after 12 seconds if not clicked
   goldenTimeout=setTimeout(()=>{ el.style.display='none'; goldenActive=false; scheduleGoldenPoop(); },12000);
 }
 
@@ -1424,6 +1328,7 @@ function setupGoldenPoopHandler() {
   });
 }
 
+/* --- Minigame: click 8 fleeting poop targets within the time limit --- */
 let minigameState = null;
 
 function openGoldenMinigame() {
@@ -1472,6 +1377,7 @@ function spawnMinigameTarget() {
     if (minigameState.targetsHit >= minigameState.targetsNeeded) endMinigame(true);
   });
   field.appendChild(target);
+  // each target only stays for a couple seconds before vanishing
   setTimeout(() => { if (target.parentNode) target.remove(); }, 2200);
 }
 
@@ -1506,6 +1412,7 @@ function endMinigame(won) {
 
 function activateDoubleProduction() {
   const now = Date.now();
+  // extend if already active, otherwise start fresh
   const base = (state.doubleProdUntil && state.doubleProdUntil > now) ? state.doubleProdUntil : now;
   state.doubleProdUntil = base + 300000;
   doubleProdActive = true;
@@ -1638,6 +1545,7 @@ function triggerInfinityOverflow() {
     if (count >= 35) {
       clearInterval(spamInterval);
       document.body.classList.remove('rage-shake');
+      // The almighty reset
       state.poops = 0;
       state.totalPoopsEarned = 0;
       infinityEventRunning = false;
@@ -1671,6 +1579,7 @@ function renderBuildings() {
     if (!buildingsInArea.length) return;
 
     if (!unlocked) {
+      // show a locked teaser only if the previous area is unlocked (avoid wall of locked content)
       const prevIndex = areaData.indexOf(area)-1;
       const prevUnlocked = prevIndex<0 || isAreaUnlocked(areaData[prevIndex].id);
       if (!prevUnlocked) return;
@@ -1783,7 +1692,7 @@ function renderStats() {
     ['Achievements', Object.keys(state.achievementsUnlocked).length+' / '+achievementData.length],
     ['Golden Poops Clicked', state.goldenPoopsClicked],
     ['Global Multiplier', 'x'+state.globalMultiplier.toFixed(2)],
-    ['Prestige Multiplier', 'x'+state.prestigeMultiplier.toFixed(2) + (state.prestigeMultiplier >= PRESTIGE_CAP ? ' (MAXED)' : '')],
+    ['Prestige Multiplier', 'x'+state.prestigeMultiplier.toFixed(2)],
     ['Prestige Count', state.prestigeCount],
     ['Current Area', currentArea().name],
     ['Session Time', formatTime(Date.now()-sessionStart)],
@@ -1820,7 +1729,14 @@ function formatTime(ms) {
 }
 
 /* ============================================================
-   CLOCK TAMPER DETECTION
+   CLOCK TAMPER DETECTION (mid-session)
+   Date.now() reflects the OS wall clock, which the player can
+   freely change. performance.now() is monotonic and unaffected
+   by system clock changes, so we use it as a trusted reference.
+   If the two clocks drift apart by more than a small tolerance
+   while the tab is open, we resync lastSave to "now" so the
+   skipped time can never be cashed in as offline progress, and
+   we do NOT grant any retroactive bonus for the jump.
 ============================================================ */
 let lastWallClock = Date.now();
 let lastMonotonic = performance.now();
@@ -1830,9 +1746,12 @@ function checkClockTamper() {
   const nowMono = performance.now();
   const wallDelta = nowWall - lastWallClock;
   const monoDelta = nowMono - lastMonotonic;
+  // Allow a little slack for normal timer jitter / tab throttling.
   const driftMs = wallDelta - monoDelta;
 
   if (Math.abs(driftMs) > 5000) {
+    // Wall clock moved very differently from real elapsed time:
+    // the system date/time was changed while the page was open.
     state.lastSave = nowWall;
     saveGame(true);
     showNotice('\u26a0\ufe0f Clock change detected \u2014 no bonus poops awarded for it.', 4000);
@@ -1874,30 +1793,22 @@ function updateDisplay() {
   document.getElementById('perSec').textContent=formatNumber(calcCps())+' poops/sec';
   document.getElementById('clickVal').textContent='+'+formatNumber(calcClickValue())+' per click';
   document.getElementById('globalMult').textContent='x'+(state.globalMultiplier).toFixed(2);
-  document.getElementById('prestigeBonus').textContent='x'+(state.prestigeMultiplier).toFixed(2)+(state.prestigeMultiplier >= PRESTIGE_CAP ? ' (MAX)' : '');
-
+  document.getElementById('prestigeBonus').textContent='x'+(state.prestigeMultiplier).toFixed(2);
   document.getElementById('stats').innerHTML=
     'Total: '+formatNumber(state.totalPoopsEarned)+' \ud83d\udca9<br>'+
     'Clicks: '+formatNumber(state.totalClicks)+' | Prestige: '+state.prestigeCount;
 
   const pg=prestigeGain();
   const pbtn=document.getElementById('prestigeBtn');
-  const pcountEl=document.getElementById('prestigeCount');
-
-  if (state.prestigeMultiplier >= PRESTIGE_CAP) {
-    // Cap reached — hide button, show message
-    pbtn.style.display='none';
-    pcountEl.textContent='\ud83d\udd12 Max prestige reached! Bonus: x'+state.prestigeMultiplier.toFixed(2)+' | Prestiges: '+state.prestigeCount;
-  } else if (pg && state.totalPoopsEarned>=1e12) {
-    const newMult = Math.min(PRESTIGE_CAP, (state.prestigeMultiplier||1)*pg);
+  if (pg && state.totalPoopsEarned>=1e12) {
     pbtn.style.display='inline-block';
-    document.getElementById('prestigeMult').textContent=newMult.toFixed(2);
-    pcountEl.textContent=state.prestigeCount>0?'Prestiges: '+state.prestigeCount+' | Bonus: x'+state.prestigeMultiplier.toFixed(2):'Reach 5 trillion total poops to prestige!';
+    document.getElementById('prestigeMult').textContent=pg.toFixed(2);
   } else {
     pbtn.style.display='none';
-    pcountEl.textContent=state.prestigeCount>0?'Prestiges: '+state.prestigeCount+' | Bonus: x'+state.prestigeMultiplier.toFixed(2):'Reach 5 trillion total poops to prestige!';
+    document.getElementById('prestigeCount').textContent=state.prestigeCount>0?'Prestiges: '+state.prestigeCount+' | Bonus: x'+state.prestigeMultiplier.toFixed(2):'Reach 5 trillion total poops to prestige!';
   }
 
+  // refresh affordability without a full re-render
   document.querySelectorAll('#buildings .building[data-bid]').forEach(el=>{
     const b=buildingData.find(bb=>bb.id===el.dataset.bid);
     if (b) el.classList.toggle('disabled', state.poops<buildingCost(b));
@@ -1944,7 +1855,7 @@ setInterval(()=>{
   checkInfinityOverflow();
 }, 100);
 
-// re-render panels: 1/sec
+// re-render panels: 1/sec (also catches newly-unlocked areas/buildings)
 setInterval(()=>{
   renderBuildings();
   renderUpgrades();
