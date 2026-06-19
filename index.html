@@ -523,47 +523,17 @@ if(!myUsername){myUsername=generateUsername();localStorage.setItem(USERNAME_KEY,
 /* ---- SHARED LEADERBOARD STORAGE ---- */
 const LB_KEY='leaderboard';
 const KICK_KEY='kicks';
+async function lbGet(){try{const r=await window.storage.get(LB_KEY,true);return r?JSON.parse(r.value):{};} catch(e){return {};}}
+async function lbSet(data){try{await window.storage.set(LB_KEY,JSON.stringify(data),true);}catch(e){}}
+async function kickGet(){try{const r=await window.storage.get(KICK_KEY,true);return r?JSON.parse(r.value):{};} catch(e){return {};}}
+async function kickSet(data){try{await window.storage.set(KICK_KEY,JSON.stringify(data),true);}catch(e){}}
 
-const firebaseConfig = {
-  databaseURL: "https://tompearlclicker-default-rtdb.asia-southeast1.firebasedatabase.app/"
-};
-
-if(!window.firebaseApp){
-  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js");
-  const { getDatabase, ref, get, set } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js");
-
-  window.firebaseApp = initializeApp(firebaseConfig);
-  window.firebaseDB = getDatabase(window.firebaseApp);
-  window.firebaseRef = ref;
-  window.firebaseGet = get;
-  window.firebaseSet = set;
+async function pushLeaderboard(){
+  const lb=await lbGet();
+  lb[myUsername]={score:state.totalPoopsEarned,ts:Date.now()};
+  await lbSet(lb);
 }
 
-async function lbGet(){
-  try{
-    const r=await window.firebaseGet(window.firebaseRef(window.firebaseDB,LB_KEY));
-    return r.exists()?r.val():{};
-  }catch(e){return {};}
-}
-
-async function lbSet(data){
-  try{
-    await window.firebaseSet(window.firebaseRef(window.firebaseDB,LB_KEY),data);
-  }catch(e){}
-}
-
-async function kickGet(){
-  try{
-    const r=await window.firebaseGet(window.firebaseRef(window.firebaseDB,KICK_KEY));
-    return r.exists()?r.val():{};
-  }catch(e){return {};}
-}
-
-async function kickSet(data){
-  try{
-    await window.firebaseSet(window.firebaseRef(window.firebaseDB,KICK_KEY),data);
-  }catch(e){}
-}
 /* ---- KICK SYSTEM ---- */
 let kickCheckInterval=null;
 async function checkIfKicked(){
