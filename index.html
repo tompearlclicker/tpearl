@@ -570,7 +570,7 @@ function buildLeaderboardShell(){
 function lbApplyFilter(){
   const search=(document.getElementById('lbSearch')||{value:''}).value.toLowerCase();
   const now=Date.now();
-  const entries=Object.entries(lbCache).sort((a,b)=>b[1].score-a[1].score);
+  const entries=Object.entries(lbCache).sort((a,b)=>(b[1].prestige||0)-(a[1].prestige||0)||b[1].score-a[1].score);
   const filtered=search?entries.filter(([u])=>u.toLowerCase().includes(search)):entries;
   const status=document.getElementById('lbStatus');
   const list=document.getElementById('lbList');
@@ -606,7 +606,7 @@ async function renderKickList(){
     const lb=await lbGet();
     const kicks=await kickGet();
     const now=Date.now();
-    const entries=Object.entries(lb).sort((a,b)=>b[1].score-a[1].score);
+    const entries=Object.entries(lb).sort((a,b)=>(b[1].prestige||0)-(a[1].prestige||0)||b[1].score-a[1].score);
     const filtered=search?entries.filter(([u])=>u.toLowerCase().includes(search)):entries;
     if(!filtered.length){ct.innerHTML='<div style="font-size:.75em;opacity:.5;padding:4px">No players found.</div>';return;}
     ct.innerHTML=filtered.slice(0,20).map(([u,d])=>{
@@ -614,7 +614,7 @@ async function renderKickList(){
       const cooldown=kicks[u]&&kicks[u].kickedAt&&(now-kicks[u].kickedAt)<3600000;
       const cantKick=kicked||cooldown||u===myUsername;
       const btnLabel=kicked?'Kicked':(cooldown?'Cooldown':'Kick');
-      return `<div class="kick-player-row"><span style="flex:1">${u}</span><span style="color:#aef;margin-right:8px">${formatNumber(d.score)}</span><button class="kick-btn" ${cantKick?'disabled':''} onclick="adminKickPlayer('${u}')">${btnLabel}</button></div>`;
+      const kp=d.prestige||0;return `<div class="kick-player-row"><span style="flex:1">${u}${kp>0?' <span style="font-size:.7em;opacity:.6">⚗️'+kp+'</span>':''}</span><span style="color:#aef;margin-right:8px">${formatNumber(d.score)}</span><button class="kick-btn" ${cantKick?'disabled':''} onclick="adminKickPlayer('${u}')">${btnLabel}</button></div>`;
     }).join('');
   }catch(e){ct.innerHTML='<div style="font-size:.75em;color:#f88;padding:4px">Error loading players.</div>';}
 }
