@@ -559,28 +559,41 @@ async function kickPlayer(username){
 }
 
 /* ---- LEADERBOARD RENDER ---- */
-let lbCache={};
-async function renderLeaderboard(){
+let lbCache={},lbKickCache={},lbInited=false;
+
+function buildLeaderboardShell(){
   const ct=document.getElementById('leaderboardTab');
+  ct.innerHTML=`<div class="secLabel">🏅 Global Leaderboard</div><input id="lbSearch" placeholder="🔍 Search username..." oninput="lbApplyFilter()" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,236,139,.3);border-radius:6px;color:#fff;font-size:.85em;padding:7px 10px;outline:none;margin-bottom:8px;font-family:inherit"><div id="lbStatus" style="font-size:.75em;opacity:.6;margin-bottom:6px;text-align:center">Loading...</div><div id="lbList"></div>`;
+  lbInited=true;
+}
+
+function lbApplyFilter(){
   const search=(document.getElementById('lbSearch')||{value:''}).value.toLowerCase();
-  ct.innerHTML=`<div class="secLabel">🏅 Global Leaderboard</div><input id="lbSearch" class="lbSearch" placeholder="🔍 Search username..." oninput="renderLeaderboard()" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,236,139,.3);border-radius:6px;color:#fff;font-size:.85em;padding:7px 10px;outline:none;margin-bottom:8px;font-family:inherit" value="${search}"><div id="lbStatus">Loading...</div><div id="lbList"></div>`;
+  const now=Date.now();
+  const entries=Object.entries(lbCache).sort((a,b)=>b[1].score-a[1].score);
+  const filtered=search?entries.filter(([u])=>u.toLowerCase().includes(search)):entries;
+  const status=document.getElementById('lbStatus');
+  const list=document.getElementById('lbList');
+  if(!status||!list)return;
+  status.textContent=entries.length+' player'+(entries.length===1?'':'s')+' on the board';
+  if(!filtered.length){list.innerHTML='<div class="desc" style="padding:12px;text-align:center">No players found.</div>';return;}
+  const newHtml=filtered.map(([u,d])=>{
+    const rank=entries.findIndex(([uu])=>uu===u)+1;
+    const kicked=lbKickCache[u]&&now<lbKickCache[u].until;
+    const isMe=u===myUsername;
+    const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
+    return `<div class="lb-row${isMe?' lb-me':''}"><span class="lb-rank">${medal||('#'+rank)}</span><span class="lb-name${kicked?' lb-kicked':''}">${u}${isMe?' <span class="lb-badge">YOU</span>':''}</span><span class="lb-score">${formatNumber(d.score)} 💩</span></div>`;
+  }).join('');
+  if(list.innerHTML!==newHtml)list.innerHTML=newHtml;
+}
+
+async function renderLeaderboard(){
+  if(!lbInited)buildLeaderboardShell();
   try{
     lbCache=await lbGet();
-    const kicks=await kickGet();
-    const now=Date.now();
-    const entries=Object.entries(lbCache).sort((a,b)=>b[1].score-a[1].score);
-    const filtered=search?entries.filter(([u])=>u.toLowerCase().includes(search)):entries;
-    document.getElementById('lbStatus').textContent=entries.length+' players on the board';
-    const list=document.getElementById('lbList');
-    if(!filtered.length){list.innerHTML='<div class="desc" style="padding:12px;text-align:center">No players found.</div>';return;}
-    list.innerHTML=filtered.map(([u,d],i)=>{
-      const rank=entries.findIndex(([uu])=>uu===u)+1;
-      const kicked=kicks[u]&&now<kicks[u].until;
-      const isMe=u===myUsername;
-      const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
-      return `<div class="lb-row${isMe?' lb-me':''}"><span class="lb-rank">${medal||('#'+rank)}</span><span class="lb-name${kicked?' lb-kicked':''}">${u}${isMe?' <span class="lb-badge">YOU</span>':''}</span><span class="lb-score">${formatNumber(d.score)} 💩</span></div>`;
-    }).join('');
-  }catch(e){document.getElementById('lbStatus').textContent='Could not load leaderboard.';}
+    lbKickCache=await kickGet();
+    lbApplyFilter();
+  }catch(e){const s=document.getElementById('lbStatus');if(s)s.textContent='Could not load leaderboard.';}
 }
 
 /* ---- ADMIN KICK LIST ---- */
@@ -719,7 +732,7 @@ const rageMessages=['I HATE YOU','ALL HAIL JAN','JAN WARNED YOU','TOO MUCH POOP'
 function checkInfinityOverflow(){if(infinityEventRunning)return;if(!isFinite(state.poops)||!isFinite(state.totalPoopsEarned)||state.poops>=1e300||state.totalPoopsEarned>=1e300)triggerInfinityOverflow();}
 function triggerInfinityOverflow(){infinityEventRunning=true;document.body.classList.add('rage-shake');let n=0;const iv=setInterval(()=>{for(let i=0;i<2;i++){const m=document.createElement('div');m.className='rage-message';m.textContent=rageMessages[Math.floor(Math.random()*rageMessages.length)];m.style.cssText=`left:${Math.random()*80}vw;top:${Math.random()*80}vh;font-size:${1.2+Math.random()*2.2}em;transform:rotate(${Math.random()*60-30}deg)`;document.body.appendChild(m);setTimeout(()=>m.remove(),2200);}n++;if(n>=35){clearInterval(iv);document.body.classList.remove('rage-shake');state.poops=0;state.totalPoopsEarned=0;infinityEventRunning=false;updateDisplay();renderAll();saveGame(true);showNotice('💢 Jan punished your greed. Poops reset.',5000);}},120);showNotice('⚠️ SOMETHING HAS GONE TERRIBLY WRONG ⚠️',3000);}
 
-function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));document.querySelectorAll('.tabContent').forEach(c=>c.classList.toggle('active',c.id===tab));if(tab==='achievements')renderAchievements();if(tab==='statsTab')renderStats();if(tab==='changelogTab')renderChangelog();if(tab==='leaderboardTab')renderLeaderboard();}
+function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));document.querySelectorAll('.tabContent').forEach(c=>c.classList.toggle('active',c.id===tab));if(tab==='achievements')renderAchievements();if(tab==='statsTab')renderStats();if(tab==='changelogTab')renderChangelog();if(tab==='leaderboardTab'){if(!lbInited)buildLeaderboardShell();renderLeaderboard();}}
 
 function renderBuildings(){const ct=document.getElementById('buildings');ct.innerHTML='';areaData.forEach(area=>{const unlocked=isAreaUnlocked(area.id);const blds=buildingData.filter(b=>b.area===area.id);if(!blds.length)return;if(!unlocked){const pi=areaData.indexOf(area)-1;if(pi>=0&&!isAreaUnlocked(areaData[pi].id))return;const h=document.createElement('div');h.className='areaHeader';h.style.opacity='.5';h.textContent=area.name+' 🔒 (unlocks at '+formatNumber(area.unlockAt)+' total poops)';ct.appendChild(h);return;}const h=document.createElement('div');h.className='areaHeader';h.textContent=area.name;ct.appendChild(h);blds.forEach(b=>{const cost=buildingCost(b),owned=state.buildings[b.id]||0,cps=buildingCps(b)*state.globalMultiplier*state.prestigeMultiplier;const d=document.createElement('div');d.className='building'+(state.poops>=cost?'':' disabled');d.dataset.bid=b.id;d.title='Shift-click to buy max';d.onclick=e=>{if(e.shiftKey)buyMaxBuilding(b);else buyBuilding(b);};d.innerHTML=`<div style="flex:1"><div class="name">${b.emoji} ${b.name}</div><div class="desc">${b.desc}</div><div class="desc" style="color:#aef">Producing: ${formatNumber(cps)}/s total</div></div><div style="display:flex;align-items:center;gap:4px"><div class="price">${formatNumber(cost)}<br><small>poops</small></div><div class="owned">${owned}</div></div>`;ct.appendChild(d);});});}
 
@@ -828,8 +841,8 @@ scheduleGoldenPoop();
 const newsEl=document.getElementById('tickerInner');
 setInterval(()=>{newsEl.textContent='💩 '+newsLines[Math.floor(Math.random()*newsLines.length)]+' 💩';},22000);
 setInterval(()=>{const c=calcCps()/10;if(isFinite(c)&&c>0){state.poops+=c;state.totalPoopsEarned+=c;}updateDisplay();checkAchievements();checkInfinityOverflow();},100);
-setInterval(()=>{renderBuildings();renderUpgrades();const at=document.querySelector('.tab.active');if(at){if(at.dataset.tab==='statsTab')renderStats();if(at.dataset.tab==='achievements')renderAchievements();if(at.dataset.tab==='leaderboardTab')renderLeaderboard();}},1000);
-setInterval(async()=>{saveGame(true);await pushLeaderboard();const kicked=await checkIfKicked();if(kicked)document.getElementById('kickBanner').classList.add('show');},30000);
+setInterval(()=>{renderBuildings();renderUpgrades();const at=document.querySelector('.tab.active');if(at){if(at.dataset.tab==='statsTab')renderStats();if(at.dataset.tab==='achievements')renderAchievements();if(at.dataset.tab==='leaderboardTab')lbApplyFilter();}},1000);
+setInterval(async()=>{saveGame(true);await pushLeaderboard();const kicked=await checkIfKicked();if(kicked)document.getElementById('kickBanner').classList.add('show');const at=document.querySelector('.tab.active');if(at&&at.dataset.tab==='leaderboardTab'){lbCache=await lbGet();lbKickCache=await kickGet();lbApplyFilter();}},30000);
 window.addEventListener('beforeunload',()=>{if(!resetInProgress)saveGame(true);});
 </script>
 </body>
