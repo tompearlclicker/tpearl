@@ -639,7 +639,7 @@ function calcCps(){return calcRawCps()*getTempBuff();}
 function calcClickValue(){return((state.clickValue+calcRawCps()*state.clickFromCpsRate)*state.clickMultiplier*state.globalMultiplier*state.prestigeMultiplier)*getTempBuff();}
 
 /* Prestige: bonus = 1 + 0.5 * (0.75^n), so each run gives less than the last. At n=1: +37.5%, n=5: +8.9%, n=10: +2.8%, n=20: +0.28%, approaches 0 asymptotically. No cap. */
-function prestigeGainBonus(n){return 1+0.5*Math.pow(0.75,n);}
+function prestigeGainBonus(n){return 1+(0.5/Math.pow(1+n*0.15,0.8))/4;}
 function prestigeGain(){
   const req=5e12*Math.pow(8,state.prestigeCount||0);
   if(state.totalPoopsEarned<req)return null;
