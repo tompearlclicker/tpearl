@@ -582,7 +582,8 @@ function lbApplyFilter(){
     const kicked=lbKickCache[u]&&now<lbKickCache[u].until;
     const isMe=u===myUsername;
     const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
-    return `<div class="lb-row${isMe?' lb-me':''}"><span class="lb-rank">${medal||('#'+rank)}</span><span class="lb-name${kicked?' lb-kicked':''}">${u}${isMe?' <span class="lb-badge">YOU</span>':''}</span><span class="lb-score">${formatNumber(d.score)} 💩</span></div>`;
+    const prestige=d.prestige||0;
+    return `<div class="lb-row${isMe?' lb-me':''}"><span class="lb-rank">${medal||('#'+rank)}</span><span class="lb-name${kicked?' lb-kicked':''}">${u}${isMe?' <span class="lb-badge">YOU</span>':''}</span><span class="lb-score">${formatNumber(d.score)} 💩${prestige>0?' <span class="lb-badge">⚗️'+prestige+'</span>':''}</span></div>`;
   }).join('');
   if(list.innerHTML!==newHtml)list.innerHTML=newHtml;
 }
@@ -774,7 +775,7 @@ setInterval(()=>{const nw=Date.now(),nm=performance.now();if(Math.abs((nw-lastWa
 
 /* ---- ADMIN CONSOLE ---- */
 function adminHashStr(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return(h>>>0).toString(16).padStart(8,'0');}
-const ADMIN_CODE_HASH=adminHashStr('dashdan6942091169');
+const ADMIN_CODE_HASH=adminHashStr('dashdan69420911');
 let adminAuthed=false;
 function openAdmin(){document.getElementById('adminOverlay').classList.add('show');if(!adminAuthed){document.getElementById('adminAuthWrap').style.display='flex';document.getElementById('adminPanel').style.display='none';setTimeout(()=>document.getElementById('adminAuthInput').focus(),100);}else{renderKickList();}}
 function closeAdmin(){document.getElementById('adminOverlay').classList.remove('show');}
