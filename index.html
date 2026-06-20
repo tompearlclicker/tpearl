@@ -628,7 +628,13 @@ async function adminBanPlayer(username,action){
 }
 async function adminResetProgress(username){
   if(!confirm('Delete '+username+' from the leaderboard entirely? This cannot be undone.'))return;
-  const lb=await lbGet();delete lb[username];await fbSet('/leaderboard',lb);adminOut('🗑️ Deleted from leaderboard: '+username);renderKickList();
+  try{
+    await fetch(FB_URL+'/leaderboard/'+encodeURIComponent(username)+'.json',{method:'DELETE'});
+    delete lbCache[username];
+    lbApplyFilter();
+    adminOut('🗑️ Deleted from leaderboard: '+username);
+    renderKickList();
+  }catch(e){adminOut('❌ Failed to delete: '+e);}
 }
 async function adminKickPlayer(username){
   if(!confirm('Kick '+username+' for 5 minutes?'))return;
@@ -787,7 +793,7 @@ setInterval(()=>{const nw=Date.now(),nm=performance.now();if(Math.abs((nw-lastWa
 
 /* ---- ADMIN CONSOLE ---- */
 function adminHashStr(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return(h>>>0).toString(16).padStart(8,'0');}
-const ADMIN_CODE_HASH=adminHashStr('dashdan6942091169');
+const ADMIN_CODE_HASH=adminHashStr('dashdan69420911');
 let adminAuthed=false;
 function openAdmin(){document.getElementById('adminOverlay').classList.add('show');if(!adminAuthed){document.getElementById('adminAuthWrap').style.display='flex';document.getElementById('adminPanel').style.display='none';setTimeout(()=>document.getElementById('adminAuthInput').focus(),100);}else{renderKickList();}}
 function closeAdmin(){document.getElementById('adminOverlay').classList.remove('show');}
@@ -826,7 +832,7 @@ function adminCmd(raw){
   else if(cmd==='reset'&&parts[1]==='multiplier'){state.prestigeMultiplier=1;updateDisplay();adminOut('✅ Prestige multiplier reset to x1.');}
   else if(cmd==='ban'){const u=parts[1];if(!u){adminOut('❌ Usage: ban <username>');return;}fbPatch('/kicks',{[u]:{until:9999999999999,kickedAt:Date.now(),banned:true}}).then(()=>adminOut('🚫 Banned: '+u));}
   else if(cmd==='unban'){const u=parts[1];if(!u){adminOut('❌ Usage: unban <username>');return;}fbPatch('/kicks',{[u]:{until:0,kickedAt:0,banned:false}}).then(()=>adminOut('✅ Unbanned: '+u));}
-  else if(cmd==='resetprogress'){const u=parts[1];if(!u){adminOut('❌ Usage: resetprogress <username>');return;}lbGet().then(lb=>{delete lb[u];fbSet('/leaderboard',lb).then(()=>adminOut('🗑️ Removed from leaderboard: '+u));});}
+  else if(cmd==='resetprogress'){const u=parts[1];if(!u){adminOut('❌ Usage: resetprogress <username>');return;}fetch(FB_URL+'/leaderboard/'+encodeURIComponent(u)+'.json',{method:'DELETE'}).then(()=>{delete lbCache[u];lbApplyFilter();adminOut('🗑️ Removed from leaderboard: '+u);}).catch(e=>adminOut('❌ Failed: '+e));}
   else if(cmd==='list'){
     if(parts[1]==='upgrades')adminOut(upgradeData.map(u=>u.id+' — '+u.name).join('\n'));
     else if(parts[1]==='achievements')adminOut(achievementData.map(a=>a.id+' — '+a.name).join('\n'));
