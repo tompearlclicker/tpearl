@@ -530,7 +530,7 @@ async function kickGet(){return await fbGet('/kicks');}
 async function kickSet(data){await fbSet('/kicks',data);}
 
 async function pushLeaderboard(){
-  await fbPatch('/leaderboard',{[myUsername]:{score:state.totalPoopsEarned,ts:Date.now()}});
+  await fbPatch('/leaderboard',{[myUsername]:{score:state.totalPoopsEarned,prestige:state.prestigeCount||0,ts:Date.now()}});
 }
 
 /* ---- KICK SYSTEM ---- */
