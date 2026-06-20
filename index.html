@@ -520,18 +520,17 @@ const USERNAME_KEY='tomPearlUsername';
 let myUsername=localStorage.getItem(USERNAME_KEY);
 if(!myUsername){myUsername=generateUsername();localStorage.setItem(USERNAME_KEY,myUsername);}
 
-/* ---- SHARED LEADERBOARD STORAGE ---- */
-const LB_KEY='leaderboard';
-const KICK_KEY='kicks';
-async function lbGet(){try{const r=await window.storage.get(LB_KEY,true);return r?JSON.parse(r.value):{};} catch(e){return {};}}
-async function lbSet(data){try{await window.storage.set(LB_KEY,JSON.stringify(data),true);}catch(e){}}
-async function kickGet(){try{const r=await window.storage.get(KICK_KEY,true);return r?JSON.parse(r.value):{};} catch(e){return {};}}
-async function kickSet(data){try{await window.storage.set(KICK_KEY,JSON.stringify(data),true);}catch(e){}}
+/* ---- FIREBASE REALTIME DATABASE ---- */
+const FB_URL='https://tompearlclicker-default-rtdb.asia-southeast1.firebasedatabase.app';
+async function fbGet(path){try{const r=await fetch(FB_URL+path+'.json');if(!r.ok)return{};const d=await r.json();return d||{};}catch(e){return{};}}
+async function fbSet(path,data){try{await fetch(FB_URL+path+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});}catch(e){}}
+async function fbPatch(path,data){try{await fetch(FB_URL+path+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});}catch(e){}}
+async function lbGet(){return await fbGet('/leaderboard');}
+async function kickGet(){return await fbGet('/kicks');}
+async function kickSet(data){await fbSet('/kicks',data);}
 
 async function pushLeaderboard(){
-  const lb=await lbGet();
-  lb[myUsername]={score:state.totalPoopsEarned,ts:Date.now()};
-  await lbSet(lb);
+  await fbPatch('/leaderboard',{[myUsername]:{score:state.totalPoopsEarned,ts:Date.now()}});
 }
 
 /* ---- KICK SYSTEM ---- */
@@ -556,9 +555,7 @@ function showKickBanner(until){
   },500);
 }
 async function kickPlayer(username){
-  const kicks=await kickGet();
-  kicks[username]={until:Date.now()+300000,kickedAt:Date.now()};
-  await kickSet(kicks);
+  await fbPatch('/kicks',{[username]:{until:Date.now()+300000,kickedAt:Date.now()}});
 }
 
 /* ---- LEADERBOARD RENDER ---- */
@@ -764,7 +761,7 @@ setInterval(()=>{const nw=Date.now(),nm=performance.now();if(Math.abs((nw-lastWa
 
 /* ---- ADMIN CONSOLE ---- */
 function adminHashStr(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return(h>>>0).toString(16).padStart(8,'0');}
-const ADMIN_CODE_HASH=adminHashStr('dashdan6942091169');
+const ADMIN_CODE_HASH=adminHashStr('dashdan69420911');
 let adminAuthed=false;
 function openAdmin(){document.getElementById('adminOverlay').classList.add('show');if(!adminAuthed){document.getElementById('adminAuthWrap').style.display='flex';document.getElementById('adminPanel').style.display='none';setTimeout(()=>document.getElementById('adminAuthInput').focus(),100);}else{renderKickList();}}
 function closeAdmin(){document.getElementById('adminOverlay').classList.remove('show');}
