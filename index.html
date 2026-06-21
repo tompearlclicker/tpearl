@@ -793,7 +793,7 @@ setInterval(()=>{const nw=Date.now(),nm=performance.now();if(Math.abs((nw-lastWa
 
 /* ---- ADMIN CONSOLE ---- */
 function adminHashStr(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return(h>>>0).toString(16).padStart(8,'0');}
-const ADMIN_CODE_HASH=adminHashStr('ihateliam6942091169');
+const ADMIN_CODE_HASH=adminHashStr('kiwisaver69420911');
 let adminAuthed=false;
 function openAdmin(){document.getElementById('adminOverlay').classList.add('show');if(!adminAuthed){document.getElementById('adminAuthWrap').style.display='flex';document.getElementById('adminPanel').style.display='none';setTimeout(()=>document.getElementById('adminAuthInput').focus(),100);}else{renderKickList();}}
 function closeAdmin(){document.getElementById('adminOverlay').classList.remove('show');}
