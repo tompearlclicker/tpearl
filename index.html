@@ -498,16 +498,16 @@ const achievementData=[
 ];
 /* ---- GOLDEN SHOP DATA ---- */
 const goldenShopData=[
-  {id:'gs1',name:'Gilded Fingers',icon:'✨',desc:'Start every prestige with +10 click power (stacks).',cost:3,effect:'clickBonus',value:10},
-  {id:'gs2',name:'Poop Heirloom',icon:'👑',desc:'Start every prestige with 5% of your best-ever CPS.',cost:5,effect:'cpsCarry',value:0.05},
-  {id:'gs3',name:'Golden Memory',icon:'🧠',desc:'Retain 10% of your global multiplier upgrades after prestige.',cost:8,effect:'multRetain',value:0.10},
-  {id:'gs4',name:'Shimmering Aura',icon:'🌟',desc:'Golden poop minigame timer +3 seconds permanently.',cost:4,effect:'minigameTime',value:3},
-  {id:'gs5',name:'Lucky Streak',icon:'🍀',desc:'Winning the minigame also gives a bonus 10% of current poops.',cost:6,effect:'minigameBonus',value:0.10},
-  {id:'gs6',name:'Eternal Glitter',icon:'💛',desc:'All production permanently +15% (survives prestige).',cost:10,effect:'permanentMult',value:1.15},
-  {id:'gs7',name:'Double Yolk',icon:'🥚',desc:'2x production events last twice as long.',cost:7,effect:'doubleTime',value:2},
-  {id:'gs8',name:'Golden Legacy',icon:'🏺',desc:'Start every prestige with 1 of each of the first 5 producers.',cost:12,effect:'startBuildings',value:1},
-  {id:'gs9',name:'Poop Alchemy',icon:'⚗️',desc:'Each prestige permanently boosts golden poop earn rate +20%.',cost:15,effect:'goldenEarnRate',value:0.20},
-  {id:'gs10',name:'Cosmic Gilding',icon:'🌌',desc:'All production permanently x2 (survives prestige).',cost:25,effect:'permanentMult',value:2},
+  {id:'gs1',name:'Gilded Fingers',icon:'✨',desc:'Start every prestige with +10 click power (stacks).',cost:10,effect:'clickBonus',value:10},
+  {id:'gs2',name:'Poop Heirloom',icon:'👑',desc:'Start every prestige with 5% of your best-ever CPS.',cost:20,effect:'cpsCarry',value:0.05},
+  {id:'gs3',name:'Golden Memory',icon:'🧠',desc:'Retain 10% of your global multiplier upgrades after prestige.',cost:30,effect:'multRetain',value:0.10},
+  {id:'gs4',name:'Shimmering Aura',icon:'🌟',desc:'Golden poop minigame timer +3 seconds permanently.',cost:40,effect:'minigameTime',value:3},
+  {id:'gs5',name:'Lucky Streak',icon:'🍀',desc:'Winning the minigame also gives a bonus 10% of current poops.',cost:50,effect:'minigameBonus',value:0.10},
+  {id:'gs6',name:'Eternal Glitter',icon:'💛',desc:'All production permanently +15% (survives prestige).',cost:60,effect:'permanentMult',value:1.15},
+  {id:'gs7',name:'Double Yolk',icon:'🥚',desc:'2x production events last twice as long.',cost:70,effect:'doubleTime',value:2},
+  {id:'gs8',name:'Golden Legacy',icon:'🏺',desc:'Start every prestige with 1 of each of the first 5 producers.',cost:80,effect:'startBuildings',value:1},
+  {id:'gs9',name:'Poop Alchemy',icon:'⚗️',desc:'Each prestige permanently boosts golden poop earn rate +20%.',cost:90,effect:'goldenEarnRate',value:0.20},
+  {id:'gs10',name:'Cosmic Gilding',icon:'🌌',desc:'All production permanently x2 (survives prestige).',cost:100,effect:'permanentMult',value:2},
 ];
 
 function calcGoldenShopMult(){
@@ -1033,6 +1033,8 @@ function adminCmd(raw){
     else adminOut('❌ Unknown event. Try: golden, double, jan, infinity');
   }
   else if(cmd==='reset'&&parts[1]==='multiplier'){state.prestigeMultiplier=1;updateDisplay();adminOut('✅ Prestige multiplier reset to x1.');}
+  else if(cmd==='givegolden'){const n=parseInt(parts[1]);if(isNaN(n)||n<=0){adminOut('❌ Usage: givegolden <amount>');return;}state.goldenPoopCurrency=(state.goldenPoopCurrency||0)+n;updateDisplay();renderGoldenShop();adminOut('✅ Gave '+n+' golden poops. Total: '+(state.goldenPoopCurrency||0));}
+  else if(cmd==='announce'){const msg=parts.slice(1).join(' ');if(!msg){adminOut('❌ Usage: announce <message>');return;}fbSet('/announcement',{msg,until:Date.now()+60000});adminOut('✅ Announcement sent: "'+msg+'"');}
   else if(cmd==='ban'){const u=parts[1];if(!u){adminOut('❌ Usage: ban <username>');return;}fbPatch('/kicks',{[u]:{until:9999999999999,kickedAt:Date.now(),banned:true}}).then(()=>adminOut('🚫 Banned: '+u));}
   else if(cmd==='unban'){const u=parts[1];if(!u){adminOut('❌ Usage: unban <username>');return;}fbPatch('/kicks',{[u]:{until:0,kickedAt:0,banned:false}}).then(()=>adminOut('✅ Unbanned: '+u));}
   else if(cmd==='resetprogress'){const u=parts[1];if(!u){adminOut('❌ Usage: resetprogress <username>');return;}fetch(FB_URL+'/leaderboard/'+encodeURIComponent(u)+'.json',{method:'DELETE'}).then(()=>{delete lbCache[u];lbApplyFilter();adminOut('🗑️ Removed from leaderboard: '+u);}).catch(e=>adminOut('❌ Failed: '+e));}
@@ -1076,13 +1078,35 @@ scheduleGoldenPoop();
   const kicked=await checkIfKicked();
   if(!kicked){
     await pushLeaderboard();
+    const ann=await fbGet('/announcement');
+    if(ann&&ann.msg&&ann.until&&Date.now()<ann.until){
+      const el=document.createElement('div');
+      el.id='adminAnnouncement';
+      el.style.cssText='position:fixed;top:0;left:0;width:100%;background:linear-gradient(135deg,#b8860b,#8b6914);color:#fff;text-align:center;padding:10px 16px;font-weight:bold;font-size:1em;z-index:99990;border-bottom:3px solid #ffec8b;box-shadow:0 4px 20px rgba(0,0,0,.5)';
+      el.textContent='📢 '+ann.msg;
+      document.body.appendChild(el);
+      setTimeout(()=>{const e=document.getElementById('adminAnnouncement');if(e)e.remove();},ann.until-Date.now());
+    }
   }
 })();
-
 const newsEl=document.getElementById('tickerInner');
 setInterval(()=>{newsEl.textContent='💩 '+newsLines[Math.floor(Math.random()*newsLines.length)]+' 💩';},22000);
 setInterval(()=>{const c=calcCps()/10;if(isFinite(c)&&c>0){state.poops+=c;state.totalPoopsEarned+=c;}updateDisplay();checkAchievements();checkInfinityOverflow();},100);
 setInterval(()=>{renderBuildings();renderUpgrades();const at=document.querySelector('.tab.active');if(at){if(at.dataset.tab==='statsTab'&&!document.getElementById('usernameInput'))renderStats();if(at.dataset.tab==='achievements')renderAchievements();if(at.dataset.tab==='leaderboardTab')lbApplyFilter();}},1000);
+setInterval(async()=>{
+  const ann=await fbGet('/announcement');
+  if(ann&&ann.msg&&ann.until&&Date.now()<ann.until){
+    const existing=document.getElementById('adminAnnouncement');
+    if(!existing){
+      const el=document.createElement('div');
+      el.id='adminAnnouncement';
+      el.style.cssText='position:fixed;top:0;left:0;width:100%;background:linear-gradient(135deg,#b8860b,#8b6914);color:#fff;text-align:center;padding:10px 16px;font-weight:bold;font-size:1em;z-index:99990;border-bottom:3px solid #ffec8b;box-shadow:0 4px 20px rgba(0,0,0,.5)';
+      el.textContent='📢 '+ann.msg;
+      document.body.appendChild(el);
+      setTimeout(()=>{const e=document.getElementById('adminAnnouncement');if(e)e.remove();},ann.until-Date.now());
+    }
+  }
+}, 10000);
 setInterval(async()=>{saveGame(true);await pushLeaderboard();const kicked=await checkIfKicked();if(kicked)document.getElementById('kickBanner').classList.add('show');const at=document.querySelector('.tab.active');if(at&&at.dataset.tab==='leaderboardTab'){lbCache=await lbGet();lbKickCache=await kickGet();lbApplyFilter();}},30000);
 window.addEventListener('beforeunload',()=>{if(!resetInProgress)saveGame(true);});
 </script>
