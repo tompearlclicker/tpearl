@@ -717,12 +717,15 @@ function doPrestige(){
   const g=prestigeGain();if(!g)return;
   const newMult=(state.prestigeMultiplier||1)*g;
   const nextBonus=prestigeGainBonus(state.prestigeCount+1);
-  if(!confirm('Prestige #'+(state.prestigeCount+1)+'?\nLose all poops/producers.\nNew total multiplier: x'+newMult.toFixed(4)+'\n\nNext prestige bonus: +'+((nextBonus-1)*100).toFixed(2)+'% (gets smaller each time)\nNext prestige requires: '+formatNumber(prestigeRequirement()*8)+' total poops.'))return;
-  state.poops=0;state.totalPoopsEarned=0;state.totalClicks=0;state.clickValue=1;state.clickMultiplier=1;state.clickFromCpsRate=0;state.globalMultiplier=1;
-  buildingData.forEach(b=>{state.buildings[b.id]=0;state.buildingMultipliers[b.id]=1;});
-  state.upgradesBought={};state.prestigeCount=(state.prestigeCount||0)+1;state.prestigeMultiplier=newMult;
-  saveGame(true);renderAll();showNotice('⚗️ Prestige #'+state.prestigeCount+'! Multiplier: x'+state.prestigeMultiplier.toFixed(4),4000);
-}
+
+  if(!confirm(
+    'Prestige #'+(state.prestigeCount+1)+
+    '?\nLose all poops/producers.'+
+    '\nNew total multiplier: x'+newMult.toFixed(4)+
+    '\n\nNext prestige bonus: +'+((nextBonus-1)*100).toFixed(2)+
+    '% (gets smaller each time)'+
+    '\nNext prestige requires: '+formatNumber(prestigeRequirement()*8)+' total poops.'
+  ))return;
 
 function clickTom(){const a=calcClickValue();state.poops+=a;state.totalPoopsEarned+=a;state.totalClicks++;const f=document.createElement('div');f.className='floatup';f.textContent='+'+formatNumber(a);f.style.left=(50+(Math.random()*30-15))+'%';f.style.top=(50+(Math.random()*20-10))+'%';document.getElementById('tomWrap').appendChild(f);setTimeout(()=>f.remove(),1000);updateDisplay();checkAchievements();checkInfinityOverflow();}
 function buyBuilding(b){if(!isAreaUnlocked(b.area))return;const c=buildingCost(b);if(state.poops<c)return;state.poops-=c;state.buildings[b.id]++;renderBuildings();renderUpgrades();updateDisplay();checkAchievements();}
