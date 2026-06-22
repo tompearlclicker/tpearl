@@ -1082,7 +1082,7 @@ scheduleGoldenPoop();
 const newsEl=document.getElementById('tickerInner');
 setInterval(()=>{newsEl.textContent='💩 '+newsLines[Math.floor(Math.random()*newsLines.length)]+' 💩';},22000);
 setInterval(()=>{const c=calcCps()/10;if(isFinite(c)&&c>0){state.poops+=c;state.totalPoopsEarned+=c;}updateDisplay();checkAchievements();checkInfinityOverflow();},100);
-setInterval(()=>{renderBuildings();renderUpgrades();const at=document.querySelector('.tab.active');if(at){if(at.dataset.tab==='statsTab')renderStats();if(at.dataset.tab==='achievements')renderAchievements();if(at.dataset.tab==='leaderboardTab')lbApplyFilter();}},1000);
+setInterval(()=>{renderBuildings();renderUpgrades();const at=document.querySelector('.tab.active');if(at){if(at.dataset.tab==='statsTab'&&!document.getElementById('usernameInput'))renderStats();if(at.dataset.tab==='achievements')renderAchievements();if(at.dataset.tab==='leaderboardTab')lbApplyFilter();}},1000);
 setInterval(async()=>{saveGame(true);await pushLeaderboard();const kicked=await checkIfKicked();if(kicked)document.getElementById('kickBanner').classList.add('show');const at=document.querySelector('.tab.active');if(at&&at.dataset.tab==='leaderboardTab'){lbCache=await lbGet();lbKickCache=await kickGet();lbApplyFilter();}},30000);
 window.addEventListener('beforeunload',()=>{if(!resetInProgress)saveGame(true);});
 </script>
