@@ -794,28 +794,41 @@ setInterval(()=>{const nw=Date.now(),nm=performance.now();if(Math.abs((nw-lastWa
 (function(){
   const ls = document.getElementById('loadScreen');
   const fill = document.getElementById('loadBarFill');
-  let p = 0;
-  const iv = setInterval(() => {
-    p += 2 + Math.random() * 4;
-    fill.style.width = Math.min(p, 95) + '%';
-  }, 60);
 
-  function finishLoad() {
+  if(!ls || !fill) return;
+
+  let p = 0;
+
+  const iv = setInterval(()=>{
+    p += Math.random() * 5;
+    fill.style.width = Math.min(p,95) + '%';
+  },80);
+
+  function finishLoad(){
     clearInterval(iv);
+
     fill.style.width = '100%';
-    setTimeout(() => {
+
+    setTimeout(()=>{
       ls.classList.add('fade');
-      setTimeout(() => ls.style.display = 'none', 750);
-    }, 400);
+
+      setTimeout(()=>{
+        ls.remove();
+      },800);
+
+    },300);
   }
 
-  if (document.readyState === 'complete') {
+  // Start finishing once the page is usable
+  if(document.readyState === "complete"){
     finishLoad();
   } else {
-    window.addEventListener('load', finishLoad);
-    // Fallback: force dismiss after 5 seconds no matter what
-    setTimeout(finishLoad, 5000);
+    window.addEventListener("load",finishLoad);
   }
+
+  // Backup so it can never get stuck
+  setTimeout(finishLoad,6000);
+
 })();
 /* ---- ADMIN CONSOLE ---- */
 function adminHashStr(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return(h>>>0).toString(16).padStart(8,'0');}
