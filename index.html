@@ -150,7 +150,7 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
 .lb-score{color:#aef;font-size:.82em;white-space:nowrap}
 .lb-badge{font-size:.7em;background:rgba(255,236,139,.2);border-radius:4px;padding:1px 5px;color:#ffec8b;margin-left:3px}
 #lbStatus{font-size:.75em;opacity:.6;margin-bottom:6px;text-align:center}
-#kickBanner{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,.92);z-index:9999999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+#kickBanner{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,.96);z-index:9999999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
 #kickBanner.show{display:flex}
 #kickMsg{font-size:2em;font-weight:bold;color:#ff4444;text-shadow:0 0 20px red;text-align:center}
 #kickTimer{font-size:1.2em;color:#ffaaaa}
@@ -164,8 +164,8 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
   <div id="loadBar"><div id="loadBarFill"></div></div>
 </div>
 <div id="kickBanner">
-  <div id="kickMsg">🚫 YOU HAVE BEEN KICKED</div>
-  <div id="kickTimer">You may rejoin in: <b id="kickCountdown">5:00</b></div>
+  <div id="kickMsg">🚫 YOU HAVE BEEN BANNED</div>
+  <div id="kickTimer">This ban is permanent.</div>
   <div style="font-size:.85em;opacity:.6">Contact admin if you think this was a mistake.</div>
 </div>
 <div id="adminOverlay">
@@ -202,6 +202,7 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
         <b>ban &lt;username&gt;</b> — permanently ban a player (removed from leaderboard + kicked forever)<br>
         <b>unban &lt;username&gt;</b> — lift a permanent ban<br>
         <b>resetprogress &lt;username&gt;</b> — wipe a player from the leaderboard<br>
+        <b>wipeall</b> — wipe EVERYONE's progress from the leaderboard<br>
         <b>list upgrades</b> — print all upgrade IDs<br>
         <b>list achievements</b> — print all achievement IDs<br>
         <b>list buildings</b> — print all building IDs<br>
@@ -236,7 +237,6 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
     <button class="ctrl" onclick="exportSave()">📤 Export</button>
     <button class="ctrl" onclick="importSave()">📥 Import</button>
     <button class="ctrl" onclick="resetGame()">🔄 Reset</button>
-    <button class="ctrl" onclick="openAdmin()">💻 Admin</button>
   </div>
 </div>
 <div id="right">
@@ -506,6 +506,7 @@ const tomMilestones=[
 ];
 const newsLines=['Local man Tom Pearl eating poop at record rates — doctors baffled','Poop prices surge 400% as Tom Pearl corners the market','Scientists confirm Tom Pearl\'s stomach is its own ecosystem','Tom Pearl wins Nobel Prize for Poop Sciences three years running','Area man claims Tom Pearl personally ate his entire backyard','Poop portal discovered behind Tom Pearl\'s shed — government silent','Tom Pearl clones now outnumber actual people — census bureau panicking','Poop Black Hole detected in Tom Pearl\'s garage — NASA concerned','Tom Pearl\'s Poop Farm named National Heritage Site','Tom Pearl spotted eating poop on the moon — NASA confirms','Poop Rocket launch successful — Tom Pearl waves from orbit','Local fly trainer says working for Tom Pearl changed his life forever','Tom Pearl\'s digestive system declared a wonder of the modern world','Poop prices at all-time high — Tom Pearl blamed','Tom Pearl religion growing: 3 million followers and counting','Breaking: Tom Pearl eats 1 trillion poops — sets world record','Poop God confirmed real — turns out it is Tom Pearl','Pearl Town renames Main Street to Poop Boulevard in his honour','Underworld explorers report finding a friendly giant named Tom down there','Cosmic Realm scientists baffled: the whole universe smells like Tom'];
 const changelogData=[
+  {date:'2026-06-22',title:'Hidden Admin & Permanent Bans',changes:['Removed the visible Admin button — the console is now opened with a secret key phrase typed anywhere on the page','Kick/ban screen is now a permanent full-screen block instead of a countdown banner','Added a "wipeall" admin command to wipe every player from the leaderboard','All player progress on the leaderboard has been reset']},
   {date:'2026-06-19',title:'Usernames, Leaderboard & Admin Kick',changes:['Every player is now assigned a unique permanent username on first visit (cannot be changed)','Added a Leaderboard tab showing all players ranked by total poops collected, with live search','Leaderboard syncs automatically every 30 seconds using shared storage','Admin console now has a dedicated Kick section: search players and kick them for 5 minutes','Kicked players see a full-screen ban screen with a live countdown; admin has a 1-hour cooldown per player between kicks','Prestige multiplier now degrades progressively — each prestige gives a smaller bonus than the last, approaching zero (no level cap)']},
   {date:'2026-06-17',title:'Anti-Cheat: Clock Manipulation Fix',changes:['Closed the "change your system clock forward" exploit','Offline progress hard-capped at 12 hours per session','Offline production runs at 0.5x rate','Added backward clock jump detection (awards zero bonus)','Added live clock-tamper check while game is open']},
   {date:'2026-06-17',title:'Click Upgrade Nerf & Reset Button Fix',changes:['Fixed Reset button instantly restoring save on reload','Nerfed click multiplier upgrades to x1.5/x1.5/x1.5/x2/x2','Nerfed % of CPS added to click to a combined 10%','Increased cost of several click upgrades']},
@@ -537,25 +538,17 @@ async function pushLeaderboard(){
 }
 
 /* ---- KICK SYSTEM ---- */
-let kickCheckInterval=null;
 async function checkIfKicked(){
   const kicks=await kickGet();
   const k=kicks[myUsername];
   if(k&&Date.now()<k.until){
-    showKickBanner(k.until);
+    showKickBanner();
     return true;
   }
   return false;
 }
-function showKickBanner(until){
+function showKickBanner(){
   document.getElementById('kickBanner').classList.add('show');
-  if(kickCheckInterval)clearInterval(kickCheckInterval);
-  kickCheckInterval=setInterval(()=>{
-    const left=Math.max(0,Math.ceil((until-Date.now())/1000));
-    const m=Math.floor(left/60),s=left%60;
-    document.getElementById('kickCountdown').textContent=m+':'+(s<10?'0':'')+s;
-    if(left<=0){clearInterval(kickCheckInterval);document.getElementById('kickBanner').classList.remove('show');showNotice('✅ You have been unkicked. Welcome back!',4000);}
-  },500);
 }
 async function kickPlayer(username){
   await fbPatch('/kicks',{[username]:{until:Date.now()+300000,kickedAt:Date.now()}});
@@ -635,6 +628,16 @@ async function adminResetProgress(username){
     adminOut('🗑️ Deleted from leaderboard: '+username);
     renderKickList();
   }catch(e){adminOut('❌ Failed to delete: '+e);}
+}
+async function adminWipeAll(){
+  if(!confirm('Wipe EVERYONE\\'s progress from the leaderboard? This cannot be undone.'))return;
+  try{
+    await fetch(FB_URL+'/leaderboard.json',{method:'DELETE'});
+    lbCache={};
+    lbApplyFilter();
+    adminOut('💥 Wiped the entire leaderboard. Everyone starts fresh.');
+    renderKickList();
+  }catch(e){adminOut('❌ Failed to wipe: '+e);}
 }
 async function adminKickPlayer(username){
   if(!confirm('Kick '+username+' for 5 minutes?'))return;
@@ -804,6 +807,7 @@ function adminCmd(raw){
   const parts=raw.trim().split(/\s+/),cmd=parts[0].toLowerCase();
   if(cmd==='help'){adminOut(document.getElementById('adminHelp').innerHTML);return;}
   if(cmd==='clear'){adminOut('');return;}
+  if(cmd==='wipeall'){adminWipeAll();return;}
   if(cmd==='give'){
     if(parts[1]==='all'){state.poops+=1e21;state.totalPoopsEarned+=1e21;updateDisplay();checkAchievements();adminOut('✅ Gave 1 sextillion poops.');}
     else{const n=parseFloat(parts[1]);if(!isFinite(n)||n<=0){adminOut('❌ Invalid amount.');return;}state.poops+=n;state.totalPoopsEarned+=n;updateDisplay();checkAchievements();checkInfinityOverflow();adminOut('✅ Gave '+formatNumber(n)+' poops. Total: '+formatNumber(state.poops));}
@@ -844,6 +848,18 @@ function adminCmd(raw){
 document.getElementById('adminInput').addEventListener('keydown',e=>{if(e.key==='Enter'){const v=e.target.value.trim();if(v){adminCmd(v);e.target.value='';}}});
 document.getElementById('adminOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('adminOverlay'))closeAdmin();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAdmin();});
+
+/* Secret key-phrase listener: type this anywhere on the page to open the admin console */
+const ADMIN_SECRET_PHRASE='nixonwingerazdgpoopghop2';
+let secretBuffer='';
+document.addEventListener('keydown',e=>{
+  if(e.key.length!==1)return;
+  const active=document.activeElement;
+  const typingInField=active&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA');
+  if(typingInField)return;
+  secretBuffer=(secretBuffer+e.key.toLowerCase()).slice(-ADMIN_SECRET_PHRASE.length);
+  if(secretBuffer===ADMIN_SECRET_PHRASE){secretBuffer='';openAdmin();}
+});
 
 /* ---- INIT ---- */
 document.getElementById('tomImg').addEventListener('click',clickTom);
