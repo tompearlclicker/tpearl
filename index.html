@@ -791,9 +791,32 @@ function renderAll(){renderBuildings();renderUpgrades();updateDisplay();}
 let lastWallClock=Date.now(),lastMonotonic=performance.now();
 setInterval(()=>{const nw=Date.now(),nm=performance.now();if(Math.abs((nw-lastWallClock)-(nm-lastMonotonic))>5000){state.lastSave=nw;saveGame(true);showNotice('⚠️ Clock change detected — no bonus awarded.',4000);}lastWallClock=nw;lastMonotonic=nm;},5000);
 
-/* ---- LOADING SCREEN ---- */
-(function(){const ls=document.getElementById('loadScreen'),fill=document.getElementById('loadBarFill');let p=0;const iv=setInterval(()=>{p+=2+Math.random()*4;fill.style.width=Math.min(p,95)+'%';},60);window.addEventListener('load',()=>{clearInterval(iv);fill.style.width='100%';setTimeout(()=>{ls.classList.add('fade');setTimeout(()=>ls.style.display='none',750);},400);});})();
+(function(){
+  const ls = document.getElementById('loadScreen');
+  const fill = document.getElementById('loadBarFill');
+  let p = 0;
+  const iv = setInterval(() => {
+    p += 2 + Math.random() * 4;
+    fill.style.width = Math.min(p, 95) + '%';
+  }, 60);
 
+  function finishLoad() {
+    clearInterval(iv);
+    fill.style.width = '100%';
+    setTimeout(() => {
+      ls.classList.add('fade');
+      setTimeout(() => ls.style.display = 'none', 750);
+    }, 400);
+  }
+
+  if (document.readyState === 'complete') {
+    finishLoad();
+  } else {
+    window.addEventListener('load', finishLoad);
+    // Fallback: force dismiss after 5 seconds no matter what
+    setTimeout(finishLoad, 5000);
+  }
+})();
 /* ---- ADMIN CONSOLE ---- */
 function adminHashStr(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return(h>>>0).toString(16).padStart(8,'0');}
 const ADMIN_CODE_HASH=adminHashStr('kiwisaver69420911');
