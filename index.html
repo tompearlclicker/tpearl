@@ -703,8 +703,7 @@ async function adminKickPlayer(username){
 }
 
 /* ---- GAME STATE ---- */
-let state={poops:0,totalPoopsEarned:0,totalClicks:0,clickValue:1,clickMultiplier:1,clickFromCpsRate:0,globalMultiplier:1,prestigeCount:0,prestigeMultiplier:1,buildings:{},buildingMultipliers:{},upgradesBought:{},achievementsUnlocked:{},goldenPoopsClicked:0,gameBeaten:false,doubleProdUntil:0,lastSave:Date.now()};
-buildingData.forEach(b=>{state.buildings[b.id]=0;state.buildingMultipliers[b.id]=1;});
+let state={poops:0,totalPoopsEarned:0,totalClicks:0,clickValue:1,clickMultiplier:1,clickFromCpsRate:0,globalMultiplier:1,prestigeCount:0,prestigeMultiplier:1,buildings:{},buildingMultipliers:{},upgradesBought:{},achievementsUnlocked:{},goldenPoopsClicked:0,goldenPoopCurrency:0,goldenShopBought:{},gameBeaten:false,doubleProdUntil:0,lastSave:Date.now()};
 
 function totalBuildings(s){return Object.values(s.buildings).reduce((a,b)=>a+b,0);}
 function formatNumber(n){if(typeof n!=='number'||isNaN(n)||!isFinite(n))return '0';if(n<0)return '-'+formatNumber(-n);if(n<1000)return Math.floor(n).toString();const u=['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc','Ud','Dd','Td'];let i=0;while(n>=1000&&i<u.length-1){n/=1000;i++;}return n.toFixed(2)+u[i];}
