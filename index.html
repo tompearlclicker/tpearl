@@ -630,7 +630,7 @@ async function adminResetProgress(username){
   }catch(e){adminOut('❌ Failed to delete: '+e);}
 }
 async function adminWipeAll(){
-  if(!confirm('Wipe EVERYONE\\'s progress from the leaderboard? This cannot be undone.'))return;
+if(!confirm("Wipe EVERYONE's progress from the leaderboard? This cannot be undone."))return;
   try{
     await fetch(FB_URL+'/leaderboard.json',{method:'DELETE'});
     lbCache={};
