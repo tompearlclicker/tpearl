@@ -219,6 +219,7 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
   <div id="count">0 Poops</div>
   <div id="perSec">0 poops/sec</div>
   <div id="clickVal">+1 per click</div>
+  <div id="goldenCurrencyDisplay" style="font-size:.8em;color:gold;margin-bottom:3px">✨ 0 Golden Poops</div>
   <div id="playerTag">👤 ...</div>
   <div id="tomWrap">
     <img id="tomImg" src="tomp.jfif" alt="Tom Pearl">
@@ -246,6 +247,7 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
     <div class="tab" data-tab="achievements" onclick="switchTab('achievements')">🏆 Achv</div>
     <div class="tab" data-tab="leaderboardTab" onclick="switchTab('leaderboardTab')">🏅 Board</div>
     <div class="tab" data-tab="statsTab" onclick="switchTab('statsTab')">📊 Stats</div>
+    <div class="tab" data-tab="goldenShopTab" onclick="switchTab('goldenShopTab')">✨ Gold</div>    
     <div class="tab" data-tab="changelogTab" onclick="switchTab('changelogTab')">📜 Log</div>
   </div>
   <div id="tabBody">
@@ -255,6 +257,7 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
     <div class="tabContent" id="leaderboardTab"></div>
     <div class="tabContent" id="statsTab"></div>
     <div class="tabContent" id="changelogTab"></div>
+    <div class="tabContent" id="goldenShopTab"></div>
   </div>
 </div>
 </div>
@@ -493,6 +496,125 @@ const achievementData=[
   {id:'ar4',name:'Final Frontier',icon:'🚀',desc:'Unlock Outer Space.',req:s=>s.totalPoopsEarned>=5e13},
   {id:'ar5',name:'Cosmic Awakening',icon:'🌌',desc:'Unlock The Cosmic Realm.',req:s=>s.totalPoopsEarned>=5e18},
 ];
+/* ---- GOLDEN SHOP DATA ---- */
+const goldenShopData=[
+  {id:'gs1',name:'Gilded Fingers',icon:'✨',desc:'Start every prestige with +10 click power (stacks).',cost:3,effect:'clickBonus',value:10},
+  {id:'gs2',name:'Poop Heirloom',icon:'👑',desc:'Start every prestige with 5% of your best-ever CPS.',cost:5,effect:'cpsCarry',value:0.05},
+  {id:'gs3',name:'Golden Memory',icon:'🧠',desc:'Retain 10% of your global multiplier upgrades after prestige.',cost:8,effect:'multRetain',value:0.10},
+  {id:'gs4',name:'Shimmering Aura',icon:'🌟',desc:'Golden poop minigame timer +3 seconds permanently.',cost:4,effect:'minigameTime',value:3},
+  {id:'gs5',name:'Lucky Streak',icon:'🍀',desc:'Winning the minigame also gives a bonus 10% of current poops.',cost:6,effect:'minigameBonus',value:0.10},
+  {id:'gs6',name:'Eternal Glitter',icon:'💛',desc:'All production permanently +15% (survives prestige).',cost:10,effect:'permanentMult',value:1.15},
+  {id:'gs7',name:'Double Yolk',icon:'🥚',desc:'2x production events last twice as long.',cost:7,effect:'doubleTime',value:2},
+  {id:'gs8',name:'Golden Legacy',icon:'🏺',desc:'Start every prestige with 1 of each of the first 5 producers.',cost:12,effect:'startBuildings',value:1},
+  {id:'gs9',name:'Poop Alchemy',icon:'⚗️',desc:'Each prestige permanently boosts golden poop earn rate +20%.',cost:15,effect:'goldenEarnRate',value:0.20},
+  {id:'gs10',name:'Cosmic Gilding',icon:'🌌',desc:'All production permanently x2 (survives prestige).',cost:25,effect:'permanentMult',value:2},
+];
+
+function calcGoldenShopMult(){
+  let m=1;
+  goldenShopData.forEach(g=>{
+    if(state.goldenShopBought&&state.goldenShopBought[g.id]&&g.effect==='permanentMult')m*=g.value;
+  });
+  return m;
+}
+function goldenShopClickBonus(){
+  let b=0;
+  goldenShopData.forEach(g=>{if(state.goldenShopBought&&state.goldenShopBought[g.id]&&g.effect==='clickBonus')b+=g.value;});
+  return b;
+}
+function goldenShopMinigameTimeBonus(){
+  let b=0;
+  goldenShopData.forEach(g=>{if(state.goldenShopBought&&state.goldenShopBought[g.id]&&g.effect==='minigameTime')b+=g.value;});
+  return b;
+}
+function goldenShopDoubleTimeMult(){
+  let m=1;
+  goldenShopData.forEach(g=>{if(state.goldenShopBought&&state.goldenShopBought[g.id]&&g.effect==='doubleTime')m*=g.value;});
+  return m;
+}
+
+function buyGoldenShopItem(g){
+  if(state.goldenShopBought&&state.goldenShopBought[g.id])return;
+  if((state.goldenPoopCurrency||0)<g.cost){showNotice('⚠️ Not enough Golden Poops!');return;}
+  state.goldenPoopCurrency-=g.cost;
+  if(!state.goldenShopBought)state.goldenShopBought={};
+  state.goldenShopBought[g.id]=true;
+
+  // Apply immediate start-building effect on purchase (for new prestiges, applied in doPrestige)
+  showNotice('✨ Unlocked: '+g.name,3000);
+  saveGame(true);
+  renderGoldenShop();
+  updateDisplay();
+}
+
+function renderGoldenShop(){
+  const ct=document.getElementById('goldenShopTab');
+  if(!ct)return;
+  const currency=state.goldenPoopCurrency||0;
+  ct.innerHTML=`<div class="secLabel">✨ Golden Poop Shop</div>
+<div style="background:rgba(255,200,0,.12);border:2px solid gold;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:.95em;text-align:center">
+  <span style="font-size:1.4em">✨</span> <b style="color:gold">${currency}</b> Golden Poops available<br>
+  <small style="opacity:.7">Earned by clicking Golden Poops & winning minigames. Survive prestige.</small>
+</div>`;
+  goldenShopData.forEach(g=>{
+    const owned=state.goldenShopBought&&state.goldenShopBought[g.id];
+    const canAfford=(state.goldenPoopCurrency||0)>=g.cost;
+    const d=document.createElement('div');
+    d.className='upgrade'+(owned?' disabled':(canAfford?'':' disabled'));
+    d.style.opacity=owned?'.5':'1';
+    d.onclick=()=>{if(!owned)buyGoldenShopItem(g);};
+    d.innerHTML=`<div><div class="name">${g.icon} ${g.name}${owned?' <span style="color:gold;font-size:.8em">✔ OWNED</span>':''}</div><div class="desc">${g.desc}</div><div class="desc" style="color:gold;margin-top:2px">Persists through prestige</div></div><div class="price" style="color:gold;white-space:nowrap">${owned?'Owned':'✨ '+g.cost}<br><small style="color:gold">G.Poops</small></div>`;
+    ct.appendChild(d);
+  });
+}
+
+/* ---- ONE-TIME USERNAME CHANGE ---- */
+const USERNAME_CHANGED_KEY='tomPearlUsernameChanged';
+function renderUsernameChangeUI(){
+  const alreadyChanged=localStorage.getItem(USERNAME_CHANGED_KEY)==='1';
+  const container=document.getElementById('usernameChangeArea');
+  if(!container)return;
+  if(alreadyChanged){
+    container.innerHTML=`<div class="desc" style="margin-top:6px;opacity:.6">👤 Username locked: <b>${myUsername}</b> (one change already used)</div>`;
+    return;
+  }
+  container.innerHTML=`
+    <div style="margin-top:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,236,139,.25);border-radius:8px;padding:8px 10px">
+      <div class="secLabel" style="margin:0 0 5px">✏️ Change Username <span style="font-size:.8em;color:#f88">(one time only)</span></div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input id="usernameInput" maxlength="24" placeholder="New username..." style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,236,139,.4);border-radius:6px;color:#fff;padding:5px 8px;font-family:inherit;font-size:.85em;outline:none">
+        <button class="ctrl" onclick="applyUsernameChange()">Set</button>
+      </div>
+      <div id="usernameErr" style="font-size:.75em;color:#f88;min-height:1em;margin-top:3px"></div>
+    </div>`;
+}
+
+async function applyUsernameChange(){
+  const input=document.getElementById('usernameInput');
+  const err=document.getElementById('usernameErr');
+  if(!input)return;
+  const newName=input.value.trim().replace(/\s+/g,'_');
+  if(!newName||newName.length<3){err.textContent='⚠️ At least 3 characters.';return;}
+  if(newName.length>24){err.textContent='⚠️ Max 24 characters.';return;}
+  if(!/^[a-zA-Z0-9_]+$/.test(newName)){err.textContent='⚠️ Letters, numbers, underscores only.';return;}
+  if(!confirm('Change username to "'+newName+'"? This can only be done ONCE and cannot be undone.'))return;
+
+  // Remove old entry, set new one
+  try{
+    await fetch(FB_URL+'/leaderboard/'+encodeURIComponent(myUsername)+'.json',{method:'DELETE'});
+  }catch(e){}
+
+  const oldName=myUsername;
+  myUsername=newName;
+  localStorage.setItem(USERNAME_KEY,myUsername);
+  localStorage.setItem(USERNAME_CHANGED_KEY,'1');
+
+  await pushLeaderboard();
+  showNotice('✅ Username changed to: '+myUsername,4000);
+  renderStats(); // re-render stats tab so it shows new name
+  renderUsernameChangeUI();
+  document.getElementById('playerTag').textContent='👤 '+myUsername;
+}
 const tomMilestones=[
   {threshold:0,img:'tomp.jfif',label:'Tom is hungry...'},
   {threshold:100,img:'tomp2.png',label:'Tom found a small snack 💩'},
@@ -710,9 +832,9 @@ function formatNumber(n){if(typeof n!=='number'||isNaN(n)||!isFinite(n))return '
 function buildingCost(b){return Math.ceil(b.baseCost*Math.pow(1.19,state.buildings[b.id]||0));}
 function buildingCps(b){return b.baseCps*(state.buildings[b.id]||0)*(state.buildingMultipliers[b.id]||1);}
 function getTempBuff(){return(state.doubleProdUntil&&Date.now()<state.doubleProdUntil)?2:1;}
-function calcRawCps(){let t=0;buildingData.forEach(b=>t+=buildingCps(b));return t*state.globalMultiplier*state.prestigeMultiplier;}
+function calcRawCps(){let t=0;buildingData.forEach(b=>t+=buildingCps(b));return t*state.globalMultiplier*state.prestigeMultiplier*calcGoldenShopMult();}
 function calcCps(){return calcRawCps()*getTempBuff();}
-function calcClickValue(){return((state.clickValue+calcRawCps()*state.clickFromCpsRate)*state.clickMultiplier*state.globalMultiplier*state.prestigeMultiplier)*getTempBuff();}
+function calcClickValue(){return((state.clickValue+goldenShopClickBonus()+calcRawCps()*state.clickFromCpsRate)*state.clickMultiplier*state.globalMultiplier*state.prestigeMultiplier*calcGoldenShopMult())*getTempBuff();}
 
 /* Prestige: bonus = 1 + 0.5 * (0.75^n), so each run gives less than the last. At n=1: +37.5%, n=5: +8.9%, n=10: +2.8%, n=20: +0.28%, approaches 0 asymptotically. No cap. */
 function prestigeGainBonus(n){return 1+0.25/Math.pow(1+n*0.08,0.6);}
@@ -776,7 +898,7 @@ function doPrestige(){
   state.poops=0;state.totalPoopsEarned=0;state.totalClicks=0;state.clickValue=1;state.clickMultiplier=1;state.clickFromCpsRate=0;state.globalMultiplier=1;
   buildingData.forEach(b=>{state.buildings[b.id]=0;state.buildingMultipliers[b.id]=1;});
   state.upgradesBought={};state.prestigeCount=(state.prestigeCount||0)+1;state.prestigeMultiplier=newMult;
-  saveGame(true);renderAll();showNotice('⚗️ Prestige #'+state.prestigeCount+'! Multiplier: x'+state.prestigeMultiplier.toFixed(4),4000);
+  if(state.goldenShopBought&&state.goldenShopBought['gs8']){     ['finger','fly','dog','toddler','garden'].forEach(id=>{state.buildings[id]=Math.max(state.buildings[id]||0,1);});   }   saveGame(true);renderAll();showNotice('⚗️ Prestige #'+state.prestigeCount+'! Multiplier: x'+state.prestigeMultiplier.toFixed(4),4000);
 }
 
 function clickTom(){
@@ -808,12 +930,12 @@ function buyUpgrade(u){if(state.upgradesBought[u.id]||state.poops<u.cost)return;
 let goldenActive=false,goldenTimeout=null,doubleProdInterval=null;
 function scheduleGoldenPoop(){setTimeout(spawnGoldenPoop,120000+Math.random()*180000);}
 function spawnGoldenPoop(){if(goldenActive||infinityEventRunning){scheduleGoldenPoop();return;}const el=document.getElementById('goldenPoop'),wrap=document.getElementById('tomWrap');el.style.left=Math.max(0,Math.random()*((wrap.offsetWidth||200)-40))+'px';el.style.top=Math.max(0,Math.random()*((wrap.offsetHeight||200)-40))+'px';el.style.display='block';goldenActive=true;goldenTimeout=setTimeout(()=>{el.style.display='none';goldenActive=false;scheduleGoldenPoop();},12000);}
-function setupGoldenPoopHandler(){document.getElementById('goldenPoop').addEventListener('click',e=>{e.stopPropagation();if(!goldenActive)return;clearTimeout(goldenTimeout);document.getElementById('goldenPoop').style.display='none';goldenActive=false;state.goldenPoopsClicked++;openGoldenMinigame();});}
+function setupGoldenPoopHandler(){document.getElementById('goldenPoop').addEventListener('click',e=>{e.stopPropagation();if(!goldenActive)return;clearTimeout(goldenTimeout);document.getElementById('goldenPoop').style.display='none';goldenActive=false;state.goldenPoopsClicked++;   const earnRate=1+((state.goldenShopBought&&state.goldenShopBought['gs9'])?(state.prestigeCount||0)*0.20:0);   state.goldenPoopCurrency=(state.goldenPoopCurrency||0)+Math.max(1,Math.floor(earnRate));   showNotice('✨ +'+Math.max(1,Math.floor(earnRate))+' Golden Poop!',1800);   openGoldenMinigame();});}
 
 let minigameState=null;
 function openGoldenMinigame(){const ov=document.getElementById('minigameOverlay');ov.classList.add('show');minigameState={targetsHit:0,targetsNeeded:8,timeLeft:10,active:true,spawnTimer:null,countdownTimer:null};document.getElementById('minigameProgress').textContent='0 / 8';document.getElementById('minigameTimer').textContent='10.0s';document.getElementById('minigameField').innerHTML='';document.getElementById('minigameResult').style.display='none';spawnMinigameTarget();minigameState.spawnTimer=setInterval(spawnMinigameTarget,900);minigameState.countdownTimer=setInterval(()=>{if(!minigameState||!minigameState.active)return;minigameState.timeLeft-=.1;document.getElementById('minigameTimer').textContent=Math.max(0,minigameState.timeLeft).toFixed(1)+'s';if(minigameState.timeLeft<=0)endMinigame(false);},100);}
 function spawnMinigameTarget(){if(!minigameState||!minigameState.active)return;const field=document.getElementById('minigameField');const t=document.createElement('div');t.className='minigame-target';t.textContent='💩';t.style.left=Math.max(0,Math.random()*((field.offsetWidth||400)-50))+'px';t.style.top=Math.max(0,Math.random()*((field.offsetHeight||240)-50))+'px';t.addEventListener('click',e=>{e.stopPropagation();if(!minigameState||!minigameState.active)return;t.remove();minigameState.targetsHit++;document.getElementById('minigameProgress').textContent=minigameState.targetsHit+' / '+minigameState.targetsNeeded;if(minigameState.targetsHit>=minigameState.targetsNeeded)endMinigame(true);});field.appendChild(t);setTimeout(()=>{if(t.parentNode)t.remove();},2200);}
-function endMinigame(won){if(!minigameState||!minigameState.active)return;minigameState.active=false;clearInterval(minigameState.spawnTimer);clearInterval(minigameState.countdownTimer);document.getElementById('minigameField').innerHTML='';const r=document.getElementById('minigameResult');r.style.display='block';if(won){r.innerHTML='🎉 You caught them all! <b>2x production for 5 minutes!</b>';activateDoubleProduction();const b=Math.max(calcCps()*30,state.poops*.05);state.poops+=b;state.totalPoopsEarned+=b;}else{r.innerHTML='⏰ Too slow! Caught '+minigameState.targetsHit+' / '+minigameState.targetsNeeded+'.';}updateDisplay();checkAchievements();checkInfinityOverflow();setTimeout(()=>{document.getElementById('minigameOverlay').classList.remove('show');scheduleGoldenPoop();},2600);}
+function endMinigame(won){if(!minigameState||!minigameState.active)return;minigameState.active=false;clearInterval(minigameState.spawnTimer);clearInterval(minigameState.countdownTimer);document.getElementById('minigameField').innerHTML='';const r=document.getElementById('minigameResult');r.style.display='block';if(won){ const earnRate=1+((state.goldenShopBought&&state.goldenShopBought['gs9'])?(state.prestigeCount||0)*0.20:0);   const gpWon=Math.max(2,Math.floor(2*earnRate));   state.goldenPoopCurrency=(state.goldenPoopCurrency||0)+gpWon;   const doubleLen=300000*goldenShopDoubleTimeMult();   r.innerHTML='🎉 You caught them all! <b>2x production for '+(doubleLen/60000).toFixed(0)+' minutes! +'+gpWon+' ✨</b>';   state.doubleProdUntil=((state.doubleProdUntil&&state.doubleProdUntil>Date.now())?state.doubleProdUntil:Date.now())+doubleLen;   if(doubleProdInterval)clearInterval(doubleProdInterval);doubleProdInterval=setInterval(refreshDoubleProdLabel,1000);refreshDoubleProdLabel();   const b=Math.max(calcCps()*30,state.poops*((state.goldenShopBought&&state.goldenShopBought['gs5'])?0.10+0.10:0.05));   state.poops+=b;state.totalPoopsEarned+=b; }else{r.innerHTML='⏰ Too slow! Caught '+minigameState.targetsHit+' / '+minigameState.targetsNeeded+'.';}updateDisplay();checkAchievements();checkInfinityOverflow();setTimeout(()=>{document.getElementById('minigameOverlay').classList.remove('show');scheduleGoldenPoop();},2600);}
 function activateDoubleProduction(){const now=Date.now();state.doubleProdUntil=((state.doubleProdUntil&&state.doubleProdUntil>now)?state.doubleProdUntil:now)+300000;if(doubleProdInterval)clearInterval(doubleProdInterval);doubleProdInterval=setInterval(refreshDoubleProdLabel,1000);refreshDoubleProdLabel();}
 function refreshDoubleProdLabel(){const s=state.doubleProdUntil?Math.max(0,Math.round((state.doubleProdUntil-Date.now())/1000)):0;const el=document.getElementById('doubleProdLabel');if(s>0){const m=Math.floor(s/60);el.style.display='block';el.textContent='⚡ 2x PRODUCTION: '+m+':'+(s%60<10?'0':'')+s%60;}else{el.style.display='none';if(doubleProdInterval){clearInterval(doubleProdInterval);doubleProdInterval=null;}updateDisplay();}}
 
@@ -830,7 +952,7 @@ const rageMessages=['I HATE YOU','ALL HAIL JAN','JAN WARNED YOU','TOO MUCH POOP'
 function checkInfinityOverflow(){if(infinityEventRunning)return;if(!isFinite(state.poops)||!isFinite(state.totalPoopsEarned)||state.poops>=1e300||state.totalPoopsEarned>=1e300)triggerInfinityOverflow();}
 function triggerInfinityOverflow(){infinityEventRunning=true;document.body.classList.add('rage-shake');let n=0;const iv=setInterval(()=>{for(let i=0;i<2;i++){const m=document.createElement('div');m.className='rage-message';m.textContent=rageMessages[Math.floor(Math.random()*rageMessages.length)];m.style.cssText=`left:${Math.random()*80}vw;top:${Math.random()*80}vh;font-size:${1.2+Math.random()*2.2}em;transform:rotate(${Math.random()*60-30}deg)`;document.body.appendChild(m);setTimeout(()=>m.remove(),2200);}n++;if(n>=35){clearInterval(iv);document.body.classList.remove('rage-shake');state.poops=0;state.totalPoopsEarned=0;infinityEventRunning=false;updateDisplay();renderAll();saveGame(true);showNotice('💢 Jan punished your greed. Poops reset.',5000);}},120);showNotice('⚠️ SOMETHING HAS GONE TERRIBLY WRONG ⚠️',3000);}
 
-function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));document.querySelectorAll('.tabContent').forEach(c=>c.classList.toggle('active',c.id===tab));if(tab==='achievements')renderAchievements();if(tab==='statsTab')renderStats();if(tab==='changelogTab')renderChangelog();if(tab==='leaderboardTab'){if(!lbInited)buildLeaderboardShell();renderLeaderboard();}}
+function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));document.querySelectorAll('.tabContent').forEach(c=>c.classList.toggle('active',c.id===tab));if(tab==='achievements')renderAchievements();if(tab==='statsTab')renderStats();if(tab==='changelogTab')renderChangelog();if(tab==='goldenShopTab')renderGoldenShop();if(tab==='leaderboardTab'){if(!lbInited)buildLeaderboardShell();renderLeaderboard();}}
 
 function renderBuildings(){const ct=document.getElementById('buildings');ct.innerHTML='';areaData.forEach(area=>{const unlocked=isAreaUnlocked(area.id);const blds=buildingData.filter(b=>b.area===area.id);if(!blds.length)return;if(!unlocked){const pi=areaData.indexOf(area)-1;if(pi>=0&&!isAreaUnlocked(areaData[pi].id))return;const h=document.createElement('div');h.className='areaHeader';h.style.opacity='.5';h.textContent=area.name+' 🔒 (unlocks at '+formatNumber(area.unlockAt)+' total poops)';ct.appendChild(h);return;}const h=document.createElement('div');h.className='areaHeader';h.textContent=area.name;ct.appendChild(h);blds.forEach(b=>{const cost=buildingCost(b),owned=state.buildings[b.id]||0,cps=buildingCps(b)*state.globalMultiplier*state.prestigeMultiplier;const d=document.createElement('div');d.className='building'+(state.poops>=cost?'':' disabled');d.dataset.bid=b.id;d.title='Shift-click to buy max';d.onclick=e=>{if(e.shiftKey)buyMaxBuilding(b);else buyBuilding(b);};d.innerHTML=`<div style="flex:1"><div class="name">${b.emoji} ${b.name}</div><div class="desc">${b.desc}</div><div class="desc" style="color:#aef">Producing: ${formatNumber(cps)}/s total</div></div><div style="display:flex;align-items:center;gap:4px"><div class="price">${formatNumber(cost)}<br><small>poops</small></div><div class="owned">${owned}</div></div>`;ct.appendChild(d);});});}
 
@@ -840,7 +962,7 @@ function renderAchievements(){const ct=document.getElementById('achievements');c
 
 const sessionStart=Date.now();
 function formatTime(ms){const s=Math.floor(ms/1000),m=Math.floor(s/60),h=Math.floor(m/60);return h?`${h}h ${m%60}m`:`${m}m ${s%60}s`;}
-function renderStats(){const ct=document.getElementById('statsTab');ct.innerHTML='<div class="secLabel">📊 Statistics</div>'+[['Username',myUsername],['Total Poops Collected',formatNumber(state.totalPoopsEarned)],['Current Poops',formatNumber(state.poops)],['Poops Per Second',formatNumber(calcCps())],['Poops Per Click',formatNumber(calcClickValue())],['Total Clicks',formatNumber(state.totalClicks)],['Total Producers',formatNumber(totalBuildings(state))],['Upgrades Bought',Object.keys(state.upgradesBought).length+' / '+upgradeData.length],['Achievements',Object.keys(state.achievementsUnlocked).length+' / '+achievementData.length],['Golden Poops Clicked',state.goldenPoopsClicked],['Global Multiplier','x'+state.globalMultiplier.toFixed(2)],['Prestige Multiplier','x'+state.prestigeMultiplier.toFixed(4)],['Prestige Count',state.prestigeCount],['Next Prestige Bonus',state.prestigeCount>0?'+'+((prestigeGainBonus(state.prestigeCount)-1)*100).toFixed(3)+'%':'—'],['Current Area',currentArea().name],['Session Time',formatTime(Date.now()-sessionStart)]].map(([l,v])=>`<div class="stat-row"><span>${l}</span><span class="stat-val">${v}</span></div>`).join('');}
+function renderStats(){const ct=document.getElementById('statsTab');ct.innerHTML='<div class="secLabel">📊 Statistics</div>'+[['Username',myUsername],['Total Poops Collected',formatNumber(state.totalPoopsEarned)],['Current Poops',formatNumber(state.poops)],['Poops Per Second',formatNumber(calcCps())],['Poops Per Click',formatNumber(calcClickValue())],['Total Clicks',formatNumber(state.totalClicks)],['Total Producers',formatNumber(totalBuildings(state))],['Upgrades Bought',Object.keys(state.upgradesBought).length+' / '+upgradeData.length],['Achievements',Object.keys(state.achievementsUnlocked).length+' / '+achievementData.length],['Golden Poops Clicked',state.goldenPoopsClicked],['Global Multiplier','x'+state.globalMultiplier.toFixed(2)],['Prestige Multiplier','x'+state.prestigeMultiplier.toFixed(4)],['Prestige Count',state.prestigeCount],['Next Prestige Bonus',state.prestigeCount>0?'+'+((prestigeGainBonus(state.prestigeCount)-1)*100).toFixed(3)+'%':'—'],['Current Area',currentArea().name],['Session Time',formatTime(Date.now()-sessionStart)]].map(([l,v])=>`<div class="stat-row"><span>${l}</span><span class="stat-val">${v}</span></div>`).join(''); ct.innerHTML+='<div id="usernameChangeArea"></div>'; renderUsernameChangeUI();}
 
 function renderChangelog(){const ct=document.getElementById('changelogTab');ct.innerHTML='<div class="secLabel">📜 Update Log</div>'+changelogData.map(e=>`<div class="changelog-entry"><div class="changelog-date">${e.date}</div><div class="changelog-title">${e.title}</div><ul class="changelog-list">${e.changes.map(c=>`<li>${c}</li>`).join('')}</ul></div>`).join('');}
 
@@ -853,6 +975,7 @@ function updateDisplay(){
   document.getElementById('perSec').textContent=formatNumber(calcCps())+' poops/sec';
   document.getElementById('clickVal').textContent='+'+formatNumber(calcClickValue())+' per click';
   document.getElementById('playerTag').textContent='👤 '+myUsername;
+  const gpd=document.getElementById('goldenCurrencyDisplay');if(gpd)gpd.textContent='✨ '+(state.goldenPoopCurrency||0)+' Golden Poops';
   document.getElementById('globalMult').textContent='x'+state.globalMultiplier.toFixed(2);
   document.getElementById('prestigeBonus').textContent='x'+state.prestigeMultiplier.toFixed(4);
   document.getElementById('stats').innerHTML='Total: '+formatNumber(state.totalPoopsEarned)+' 💩<br>Clicks: '+formatNumber(state.totalClicks)+' | Prestige: '+state.prestigeCount;
