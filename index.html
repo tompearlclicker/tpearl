@@ -1052,7 +1052,6 @@ document.getElementById('adminInput').addEventListener('keydown',e=>{if(e.key===
 document.getElementById('adminOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('adminOverlay'))closeAdmin();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAdmin();});
 
-/* Secret key-phrase listener: type this anywhere on the page to open the admin console */
 const ADMIN_SECRET_PHRASE='nixonwingerazdgpoopghop2';
 let secretBuffer='';
 document.addEventListener('keydown',e=>{
