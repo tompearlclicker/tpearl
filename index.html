@@ -696,7 +696,22 @@ async function applyUsernameChange(){
   if(/^[_\-]|[_\-]$/.test(newName)){err.textContent='⚠️ Cannot start or end with _ or -.';return;}
   if(/[_\-]{2,}/.test(newName)){err.textContent='⚠️ No consecutive special characters.';return;}
   const nameLower=newName.toLowerCase().replace(/[_\-]/g,'');
-  if(BANNED_NAMES.some(b=>nameLower===b.toLowerCase()||nameLower.includes(b.toLowerCase()))){err.textContent='⚠️ That username is not allowed.';return;}
+  function levenshtein(a,b){const m=a.length,n=b.length;const dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>j===0?i:0));for(let j=1;j<=n;j++)dp[0][j]=j;for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);return dp[m][n];}
+  const FUZZ = 2; // how many character differences to allow (1=very strict, 2=catches most typos, 3=very aggressive)
+  const isBanned=BANNED_NAMES.some(b=>{
+    const bn=b.toLowerCase();
+    if(nameLower===bn||nameLower.includes(bn))return true;
+    if(levenshtein(nameLower,bn)<=FUZZ)return true;
+    // also check if the banned word appears fuzzily inside a longer name
+    if(nameLower.length>=bn.length){
+      for(let i=0;i<=nameLower.length-bn.length+FUZZ;i++){
+        const slice=nameLower.slice(i,i+bn.length);
+        if(slice.length===bn.length&&levenshtein(slice,bn)<=1)return true;
+      }
+    }
+    return false;
+  });
+  if(isBanned){err.textContent='⚠️ That username is not allowed.';return;}
   // Remove old entry, set new one
   try{
     await fetch(FB_URL+'/leaderboard/'+encodeURIComponent(myUsername)+'.json',{method:'DELETE'});
