@@ -1192,9 +1192,11 @@ else if(cmd==='givegolden'){if(parts[1]==='player'){const target=parts[2];const 
 }
 else if(cmd==='approverequest'){
   const u=parts[1];if(!u){adminOut('❌ Usage: approverequest <username>');return;}
+  const newName=generateUsername();
   fbPatch('/kicks',{[u]:{until:0,kickedAt:0,banned:false}}).then(async()=>{
     await fetch(FB_URL+'/unbanRequests/'+encodeURIComponent(u)+'.json',{method:'DELETE'});
-    adminOut('✅ Unbanned and request cleared: '+u);
+    await fbPatch('/pendingCommands/'+encodeURIComponent(u),{['rename_'+Date.now()]:{type:'rename',value:newName}});
+    adminOut('✅ Unbanned: '+u+' → new username will be: '+newName);
     renderKickList();
   }).catch(e=>adminOut('❌ Failed: '+e));
 }
@@ -1234,6 +1236,7 @@ document.addEventListener('keydown',e=>{
     else if(cmd.type==='achieve'){if(cmd.value==='all'){achievementData.forEach(a=>state.achievementsUnlocked[a.id]=true);}else{state.achievementsUnlocked[cmd.value]=true;}renderAchievements();}
     else if(cmd.type==='upgrade'){if(cmd.value==='all'){upgradeData.forEach(u=>{if(!state.upgradesBought[u.id]){state.upgradesBought[u.id]=true;if(u.type==='click')state.clickValue+=u.value;else if(u.type==='clickMult')state.clickMultiplier*=u.value;else if(u.type==='clickFromCps')state.clickFromCpsRate+=u.value;else if(u.type==='building')state.buildingMultipliers[u.target]=(state.buildingMultipliers[u.target]||1)*u.mult;else if(u.type==='globalMult')state.globalMultiplier*=u.mult;}});}else{const u=upgradeData.find(x=>x.id===cmd.value);if(u&&!state.upgradesBought[u.id]){state.upgradesBought[u.id]=true;if(u.type==='click')state.clickValue+=u.value;else if(u.type==='clickMult')state.clickMultiplier*=u.value;else if(u.type==='clickFromCps')state.clickFromCpsRate+=u.value;else if(u.type==='building')state.buildingMultipliers[u.target]=(state.buildingMultipliers[u.target]||1)*u.mult;else if(u.type==='globalMult')state.globalMultiplier*=u.mult;}}renderAll();}
     else if(cmd.type==='building'){const b=buildingData.find(x=>x.id===cmd.target);if(b){state.buildings[b.id]=cmd.value;renderAll();}}
+    else if(cmd.type==='rename'){myUsername=cmd.value;localStorage.setItem(USERNAME_KEY,myUsername);localStorage.removeItem(USERNAME_CHANGED_KEY);document.getElementById('playerTag').textContent='👤 '+myUsername;pushLeaderboard();}
   });
   saveGame(true);
   await fetch(FB_URL+'/pendingCommands/'+encodeURIComponent(myUsername)+'.json',{method:'DELETE'});
