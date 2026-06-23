@@ -15,6 +15,7 @@ body.area-industry{background:linear-gradient(135deg,#1c1c1f,#3a3a40,#5a4a2a)}
 body.area-under{background:linear-gradient(135deg,#1a0505,#4a0f0f,#6a1a0a)}
 body.area-space{background:linear-gradient(135deg,#02040f,#0a1530,#160a35)}
 body.area-cosmic{background:linear-gradient(135deg,#1a0030,#4a0a6a,#7a1a8a,#2a0a4a)}
+body.area-omnipotent{background:linear-gradient(135deg,#000510,#001a3a,#0a0a20,#1a0a30,#000510)}
 #ticker{background:rgba(0,0,0,.5);padding:5px 0;overflow:hidden;white-space:nowrap;font-size:.85em;border-bottom:2px solid #ffec8b;flex-shrink:0}
 #tickerInner{display:inline-block;padding-left:100%;animation:ticker 22s linear infinite}
 @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-100%)}}
@@ -250,6 +251,7 @@ const areaData=[
   {id:'under',name:'🕳️ The Underworld',unlockAt:50000000000},
   {id:'space',name:'🚀 Outer Space',unlockAt:5e13},
   {id:'cosmic',name:'🌌 The Cosmic Realm',unlockAt:5e18},
+  {id:'omnipotent',name:'🌠 The Omnipotent Realm',unlockAt:5e24},
 ];
 const buildingData=[
   {id:'finger',name:'Pointer Finger',emoji:'👆',area:'backyard',baseCost:15,baseCps:.1,desc:'Tom scoops poop with one bare finger.'},
@@ -280,6 +282,16 @@ const buildingData=[
   {id:'blackhole',name:'Poop Black Hole',emoji:'🕳️',area:'cosmic',baseCost:6e17,baseCps:2.8e13,desc:'Compresses poop to infinite density. Smells awful.'},
   {id:'universe',name:'Pocket Universe',emoji:'🌌',area:'cosmic',baseCost:2.5e18,baseCps:1e14,desc:'An entire universe whose physics only produce poop.'},
   {id:'god',name:'Poop God',emoji:'🙏',area:'cosmic',baseCost:1e19,baseCps:4e14,desc:'An ancient deity who has watched over poop since time began.'},
+  {id:'omegaclone',name:'Omega Clone',emoji:'🧬',area:'omnipotent',baseCost:4e19,baseCps:1.5e15,desc:'A perfect clone of Tom, upgraded beyond mortal limits.'},
+  {id:'dreamweaver',name:'Dream Weaver',emoji:'🌙',area:'omnipotent',baseCost:1.5e20,baseCps:5.5e15,desc:'Harvests poop from the dreams of sleeping civilisations.'},
+  {id:'timefarm',name:'Time Farm',emoji:'⏳',area:'omnipotent',baseCost:6e20,baseCps:2e16,desc:'Grows poop backwards through time, collecting it before it even existed.'},
+  {id:'realityeater',name:'Reality Eater',emoji:'🌀',area:'omnipotent',baseCost:2.5e21,baseCps:7e16,desc:'Consumes entire realities and converts them to poop.'},
+  {id:'omnipoop',name:'Omnipoop Engine',emoji:'♾️',area:'omnipotent',baseCost:1e22,baseCps:2.5e17,desc:'An engine powered by the concept of poop itself.'},
+  {id:'paradox',name:'Paradox Reactor',emoji:'🔁',area:'omnipotent',baseCost:4e22,baseCps:8e17,desc:'Poop that creates itself by consuming itself. Scientists wept.'},
+  {id:'thoughtform',name:'Thoughtform Harvester',emoji:'🧠',area:'omnipotent',baseCost:1.5e23,baseCps:2.8e18,desc:'Converts pure thought into poop. Philosophers are horrified.'},
+  {id:'voidcore',name:'Void Core',emoji:'🕳️',area:'omnipotent',baseCost:6e23,baseCps:1e19,desc:'A core of absolute nothingness that somehow produces infinite poop.'},
+  {id:'infinitygut',name:'Infinity Gut',emoji:'💫',area:'omnipotent',baseCost:2.5e24,baseCps:3.5e19,desc:'Tom\'s gut, expanded to cosmic scale. It digests everything.'},
+  {id:'tomegod',name:'The JAN',emoji:'👁️',area:'omnipotent',baseCost:1e25,baseCps:1.2e20,desc:'Tom Pearl has become something beyond comprehension. All is poop.'},
 ];
 const upgradeData=[
   {id:'c1',name:'Bigger Hands',desc:'Click +1.',cost:75,type:'click',value:1},
@@ -406,6 +418,56 @@ const upgradeData=[
   {id:'gm7',name:'Tom Pearl Is God',desc:'All production x2.5.',cost:3e16,type:'globalMult',mult:2.5},
   {id:'gm8',name:'Universal Poop Law',desc:'All production x3.',cost:5e19,type:'globalMult',mult:3},
   {id:'gm9',name:'Poop Singularity',desc:'All production x5.',cost:8e22,type:'globalMult',mult:5},
+{id:'c15',name:'Poop Magnet Hands',desc:'Click +20,000.',cost:8e15,type:'click',value:20000},
+{id:'c16',name:'Omnipotent Grip',desc:'Click power x2.',cost:6e17,type:'clickMult',value:2},
+{id:'c17',name:'Reality-Bending Slap',desc:'+8% of CPS added to each click.',cost:5e19,type:'clickFromCps',value:.08},
+{id:'c18',name:'Void Fingertips',desc:'Click +500,000.',cost:4e21,type:'click',value:500000},
+{id:'c19',name:'Temporal Click',desc:'Click power x3.',cost:3e23,type:'clickMult',value:3},
+{id:'c20',name:'The Final Finger',desc:'+10% of CPS added to each click.',cost:2e25,type:'clickFromCps',value:.10},
+{id:'gm10',name:'Tom Pearl Monument',desc:'All production x2.',cost:8e21,type:'globalMult',mult:2},
+{id:'gm11',name:'Poop Omniversal Law',desc:'All production x3.',cost:5e24,type:'globalMult',mult:3},
+{id:'gm12',name:'Tom Is Everything',desc:'All production x5.',cost:3e27,type:'globalMult',mult:5},
+{id:'gm13',name:'The Poop Absolute',desc:'All production x10.',cost:2e30,type:'globalMult',mult:10},
+{id:'t5',name:'Infinite Diaper',desc:'Poop Toddlers x3.',cost:2e9,type:'building',target:'toddler',mult:3,req:{id:'toddler',amt:50}},
+{id:'gd4',name:'Poop Megafarm',desc:'Poop Gardens x3.',cost:8e7,type:'building',target:'garden',mult:3,req:{id:'garden',amt:50}},
+{id:'bk4',name:'Poop Bakery Franchise',desc:'Poop Bakeries x3.',cost:5e9,type:'building',target:'bakery',mult:3,req:{id:'bakery',amt:50}},
+{id:'ml4',name:'Poop Megamall',desc:'Poop Malls x3.',cost:2e10,type:'building',target:'mall',mult:3,req:{id:'mall',amt:50}},
+{id:'st4',name:'Poop World Cup',desc:'Poop Stadiums x3.',cost:5e10,type:'building',target:'stadium',mult:3,req:{id:'stadium',amt:50}},
+{id:'sk4',name:'Dyson Poop Tower',desc:'Skyscrapers x3.',cost:1.5e13,type:'building',target:'skyscraper',mult:3,req:{id:'skyscraper',amt:50}},
+{id:'v4',name:'Poop Supervolcano Chain',desc:'Poop Volcanoes x3.',cost:3e14,type:'building',target:'volcano',mult:3,req:{id:'volcano',amt:50}},
+{id:'lb5',name:'God Particle Poop',desc:'Poop Labs x5.',cost:5e17,type:'building',target:'lab',mult:5,req:{id:'lab',amt:50}},
+{id:'co4',name:'Planetary Poop Core',desc:'Earth Core Taps x3.',cost:2e16,type:'building',target:'core',mult:3,req:{id:'core',amt:50}},
+{id:'oc1',name:'Stabilised Genome',desc:'Omega Clones x2.',cost:8e19,type:'building',target:'omegaclone',mult:2,req:{id:'omegaclone',amt:1}},
+{id:'oc2',name:'Omega Hive Network',desc:'Omega Clones x2.',cost:4e20,type:'building',target:'omegaclone',mult:2,req:{id:'omegaclone',amt:5}},
+{id:'oc3',name:'Omega Transcendence',desc:'Omega Clones x3.',cost:8e21,type:'building',target:'omegaclone',mult:3,req:{id:'omegaclone',amt:25}},
+{id:'dw1',name:'Lucid Channels',desc:'Dream Weavers x2.',cost:3e20,type:'building',target:'dreamweaver',mult:2,req:{id:'dreamweaver',amt:1}},
+{id:'dw2',name:'Collective Unconscious',desc:'Dream Weavers x2.',cost:1.5e21,type:'building',target:'dreamweaver',mult:2,req:{id:'dreamweaver',amt:5}},
+{id:'dw3',name:'Nightmare Farms',desc:'Dream Weavers x3.',cost:3e22,type:'building',target:'dreamweaver',mult:3,req:{id:'dreamweaver',amt:25}},
+{id:'tf1',name:'Temporal Irrigation',desc:'Time Farms x2.',cost:1.2e21,type:'building',target:'timefarm',mult:2,req:{id:'timefarm',amt:1}},
+{id:'tf2',name:'Paradox Crops',desc:'Time Farms x2.',cost:6e21,type:'building',target:'timefarm',mult:2,req:{id:'timefarm',amt:5}},
+{id:'tf3',name:'Chrono-Fertilizer',desc:'Time Farms x3.',cost:1.2e23,type:'building',target:'timefarm',mult:3,req:{id:'timefarm',amt:25}},
+{id:'re1',name:'Expanded Jaw',desc:'Reality Eaters x2.',cost:5e21,type:'building',target:'realityeater',mult:2,req:{id:'realityeater',amt:1}},
+{id:'re2',name:'Multiverse Hunger',desc:'Reality Eaters x2.',cost:2.5e22,type:'building',target:'realityeater',mult:2,req:{id:'realityeater',amt:5}},
+{id:'re3',name:'Omnivorousness',desc:'Reality Eaters x3.',cost:5e23,type:'building',target:'realityeater',mult:3,req:{id:'realityeater',amt:25}},
+{id:'op1',name:'Infinite Fuel Loop',desc:'Omnipoop Engines x2.',cost:2e22,type:'building',target:'omnipoop',mult:2,req:{id:'omnipoop',amt:1}},
+{id:'op2',name:'Poop Perpetual Motion',desc:'Omnipoop Engines x2.',cost:1e23,type:'building',target:'omnipoop',mult:2,req:{id:'omnipoop',amt:5}},
+{id:'op3',name:'Beyond Physics',desc:'Omnipoop Engines x3.',cost:2e24,type:'building',target:'omnipoop',mult:3,req:{id:'omnipoop',amt:25}},
+{id:'px1',name:'Stable Paradox',desc:'Paradox Reactors x2.',cost:8e22,type:'building',target:'paradox',mult:2,req:{id:'paradox',amt:1}},
+{id:'px2',name:'Recursive Loop',desc:'Paradox Reactors x2.',cost:4e23,type:'building',target:'paradox',mult:2,req:{id:'paradox',amt:5}},
+{id:'px3',name:'Ouroboros Protocol',desc:'Paradox Reactors x3.',cost:8e24,type:'building',target:'paradox',mult:3,req:{id:'paradox',amt:25}},
+{id:'th1',name:'Amplified Consciousness',desc:'Thoughtform Harvesters x2.',cost:3e23,type:'building',target:'thoughtform',mult:2,req:{id:'thoughtform',amt:1}},
+{id:'th2',name:'Collective Intelligence Tap',desc:'Thoughtform Harvesters x2.',cost:1.5e24,type:'building',target:'thoughtform',mult:2,req:{id:'thoughtform',amt:5}},
+{id:'th3',name:'Omniscient Pipeline',desc:'Thoughtform Harvesters x3.',cost:3e25,type:'building',target:'thoughtform',mult:3,req:{id:'thoughtform',amt:25}},
+{id:'vc1',name:'Void Stabiliser',desc:'Void Cores x2.',cost:1.2e24,type:'building',target:'voidcore',mult:2,req:{id:'voidcore',amt:1}},
+{id:'vc2',name:'Nothingness Amplifier',desc:'Void Cores x2.',cost:6e24,type:'building',target:'voidcore',mult:2,req:{id:'voidcore',amt:5}},
+{id:'vc3',name:'Absolute Zero Poop',desc:'Void Cores x3.',cost:1.2e26,type:'building',target:'voidcore',mult:3,req:{id:'voidcore',amt:25}},
+{id:'ig1',name:'Gut Flora Megacolony',desc:'Infinity Guts x2.',cost:5e24,type:'building',target:'infinitygut',mult:2,req:{id:'infinitygut',amt:1}},
+{id:'ig2',name:'Infinite Peristalsis',desc:'Infinity Guts x2.',cost:2.5e25,type:'building',target:'infinitygut',mult:2,req:{id:'infinitygut',amt:5}},
+{id:'ig3',name:'Cosmic Digestion',desc:'Infinity Guts x3.',cost:5e26,type:'building',target:'infinitygut',mult:3,req:{id:'infinitygut',amt:25}},
+{id:'tg1',name:'First Commandment',desc:'Tom-e-Gods x2.',cost:2e25,type:'building',target:'tomegod',mult:2,req:{id:'tomegod',amt:1}},
+{id:'tg2',name:'Divine Pantheon',desc:'Tom-e-Gods x2.',cost:1e26,type:'building',target:'tomegod',mult:2,req:{id:'tomegod',amt:5}},
+{id:'tg3',name:'Poop Scripture Vol. II',desc:'Tom-e-Gods x3.',cost:2e27,type:'building',target:'tomegod',mult:3,req:{id:'tomegod',amt:25}},
+{id:'tg4',name:'Tom Is All',desc:'Tom-e-Gods x5.',cost:5e28,type:'building',target:'tomegod',mult:5,req:{id:'tomegod',amt:50}},
 ];
 const achievementData=[
   {id:'a1',name:'First Poop',icon:'💩',desc:'Collect 1 poop.',req:s=>s.totalPoopsEarned>=1},
@@ -455,6 +517,16 @@ const achievementData=[
   {id:'ar3',name:'Down Under',icon:'🕳️',desc:'Unlock the Underworld.',req:s=>s.totalPoopsEarned>=50000000000},
   {id:'ar4',name:'Final Frontier',icon:'🚀',desc:'Unlock Outer Space.',req:s=>s.totalPoopsEarned>=5e13},
   {id:'ar5',name:'Cosmic Awakening',icon:'🌌',desc:'Unlock The Cosmic Realm.',req:s=>s.totalPoopsEarned>=5e18},
+  {id:'a12',name:'Poop Infinite',icon:'🌠',desc:'Collect 1 septillion poops.',req:s=>s.totalPoopsEarned>=1e24},
+  {id:'a13',name:'Tom Becomes All',icon:'👁️',desc:'Collect 1 octillion poops.',req:s=>s.totalPoopsEarned>=1e27},
+  {id:'ck6',name:'Repetitive Strain Legend',icon:'⚡',desc:'Click Tom 1,000,000 times.',req:s=>s.totalClicks>=1000000},
+  {id:'b8',name:'Poop Multiverse',icon:'🌌',desc:'Own 2000 producers total.',req:s=>totalBuildings(s)>=2000},
+  {id:'b9',name:'Poop Omnipotence',icon:'👁️',desc:'Own 5000 producers total.',req:s=>totalBuildings(s)>=5000},
+  {id:'cps8',name:'Poop Heat Death',icon:'🌠',desc:'Reach 1 quintillion poops/sec.',req:()=>calcCps()>=1e18},
+  {id:'cps9',name:'Poop Eternity',icon:'👁️',desc:'Reach 1 sextillion poops/sec.',req:()=>calcCps()>=1e21},
+  {id:'ar6',name:'Omnipotent Arrival',icon:'🌠',desc:'Unlock The Omnipotent Realm.',req:s=>s.totalPoopsEarned>=5e24},
+  {id:'up6',name:'Upgrade Omnipotent',icon:'🌠',desc:'Buy 150 upgrades.',req:s=>Object.keys(s.upgradesBought).length>=150},
+  {id:'gp4',name:'Golden God',icon:'🌟',desc:'Click 100 golden poops.',req:s=>s.goldenPoopsClicked>=100},
 ];
 /* ---- GOLDEN SHOP DATA ---- */
 const goldenShopData=[
@@ -588,6 +660,7 @@ const tomMilestones=[
 ];
 const newsLines=['Local man Tom Pearl eating poop at record rates — doctors baffled','Poop prices surge 400% as Tom Pearl corners the market','Scientists confirm Tom Pearl\'s stomach is its own ecosystem','Tom Pearl wins Nobel Prize for Poop Sciences three years running','Area man claims Tom Pearl personally ate his entire backyard','Poop portal discovered behind Tom Pearl\'s shed — government silent','Tom Pearl clones now outnumber actual people — census bureau panicking','Poop Black Hole detected in Tom Pearl\'s garage — NASA concerned','Tom Pearl\'s Poop Farm named National Heritage Site','Tom Pearl spotted eating poop on the moon — NASA confirms','Poop Rocket launch successful — Tom Pearl waves from orbit','Local fly trainer says working for Tom Pearl changed his life forever','Tom Pearl\'s digestive system declared a wonder of the modern world','Poop prices at all-time high — Tom Pearl blamed','Tom Pearl religion growing: 3 million followers and counting','Breaking: Tom Pearl eats 1 trillion poops — sets world record','Poop God confirmed real — turns out it is Tom Pearl','Pearl Town renames Main Street to Poop Boulevard in his honour','Underworld explorers report finding a friendly giant named Tom down there','Cosmic Realm scientists baffled: the whole universe smells like Tom'];
 const changelogData=[
+  {date:'2026-06-24',title:'The Omnipotent Expansion',changes:['Added 10 new endgame buildings in the new Omnipotent Realm area (unlocks at 5 septillion total poops)','New buildings: Omega Clone, Dream Weaver, Time Farm, Reality Eater, Omnipoop Engine, Paradox Reactor, Thoughtform Harvester, Void Core, Infinity Gut, and The Tom-e-God','Added 80+ new upgrades across all buildings, including deeper upgrade chains for previously under-upgraded producers','Added 4 new click upgrades including The Final Finger and Temporal Click','Added 4 new global multipliers including The Poop Absolute (x10)','Added 12 new achievements including Poop Infinite, Tom Becomes All, and Omnipotent Arrival','The game is now significantly longer — good luck reaching The Tom-e-God']},
   {date:'2026-06-23',title:'Hacking Patch, Golden poops revamp, and prestige buffs',changes:['Deleted the save button','Deleted the import button','Deleted the export button','basically just vaulted exporting saves until I come up with a new system','Added new golden poop shop, with upgrades persisting through prestiges','Added a golden poop counter to show your current golden poops, and added a stat that allows you to view how many golden poops you have collected','Buffed prestiging, making it easier to prestige with better bonuses']},
   {date:'2026-06-22',title:'Hidden Admin & Permanent Bans',changes:['Kick/ban screen is now a permanent full-screen block instead of a countdown banner','Added a "wipeall" admin command to wipe every player from the leaderboard','All player progress on the leaderboard has been reset']},
   {date:'2026-06-19',title:'Usernames, Leaderboard & Admin Kick',changes:['Every player is now assigned a unique permanent username on first visit (cannot be changed)','Added a Leaderboard tab showing all players ranked by total poops collected, with live search','Leaderboard syncs automatically every 30 seconds using shared storage','Admin console now has a dedicated Kick section: search players and kick them for 5 minutes','Kicked players see a full-screen ban screen with a live countdown; admin has a 1-hour cooldown per player between kicks','Prestige multiplier now degrades progressively — each prestige gives a smaller bonus than the last, approaching zero (no level cap)']},
