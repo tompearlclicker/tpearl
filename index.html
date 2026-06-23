@@ -167,53 +167,7 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
   <div id="kickTimer">This ban is permanent.</div>
   <div style="font-size:.85em;opacity:.6">Contact admin if you think this was a mistake.</div>
 </div>
-<div id="adminOverlay">
-  <div id="adminBox">
-    <div id="adminTitle">💻 ADMIN CONSOLE</div>
-    <button id="adminClose" onclick="closeAdmin()">✕ Close</button>
-    <div id="adminSub">Tom Pearl Dev Panel — authorised personnel only</div>
-    <div id="adminAuthWrap">
-      <div style="color:#00ff88;font-size:.9em;margin-bottom:4px">Enter access code:</div>
-      <input id="adminAuthInput" type="password" placeholder="••••••••" autocomplete="off">
-      <button id="adminAuthBtn" onclick="adminAuth()">Authenticate</button>
-      <div id="adminAuthErr"></div>
-    </div>
-    <div id="adminPanel" style="display:none">
-      <div id="adminKickSection">
-  <div class="secLabel">🚫 KICK PLAYER (5 min, 1hr cooldown)</div>
-  <button onclick="adminCmd('unbanall')" style="width:100%;margin-bottom:6px;background:linear-gradient(135deg,#2e7d32,#1b5e20);border:1px solid #66bb6a;color:#fff;font-weight:bold;padding:7px 12px;border-radius:7px;cursor:pointer;font-size:.85em">🔓 Unban Everyone</button>
-  <input id="kickSearchInput" placeholder="Search player to kick..." oninput="renderKickList()">
-  <div id="kickPlayerList"></div>
-</div>
-      <input id="adminInput" placeholder="Type a command and press Enter..." autocomplete="off" spellcheck="false">
-      <div id="adminOutput">Ready. Type help for commands.</div>
-      <div id="adminHelp">
-        <b>give &lt;amount&gt;</b> — add poops (e.g. give 1e15)<br>
-        <b>give all</b> — give 1 sextillion poops<br>
-        <b>upgrade &lt;id|all&gt;</b> — unlock upgrade(s)<br>
-        <b>achieve &lt;id|all&gt;</b> — unlock achievement(s)<br>
-        <b>building &lt;id&gt; &lt;amount&gt;</b> — set building count<br>
-        <b>prestige &lt;count&gt;</b> — set prestige count &amp; recalc multiplier<br>
-        <b>event golden</b> — spawn a golden poop now<br>
-        <b>event double</b> — activate 2x production (5 min)<br>
-        <b>event jan</b> — trigger Jan celebration<br>
-        <b>event infinity</b> — trigger the infinity overflow event<br>
-        <b>reset multiplier</b> — reset prestige multiplier to x1<br>
-        <b>ban &lt;username&gt;</b> — permanently ban a player (removed from leaderboard + kicked forever)<br>
-        <b>unban &lt;username&gt;</b> — lift a permanent ban<br>
-        <b>unbanall</b> — lift all permanent bans<br>
-        <b>resetprogress &lt;username&gt;</b> — wipe a player from the leaderboard<br>
-        <b>wipeall</b> — wipe EVERYONE's progress from the leaderboard<br>
-        <b>list upgrades</b> — print all upgrade IDs<br>
-        <b>list achievements</b> — print all achievement IDs<br>
-        <b>list buildings</b> — print all building IDs<br>
-        <b>clear</b> — clear output
-        <b>givegolden &lt;amount&gt;</b> — give yourself golden poops<br>
-        <b>announce &lt;message&gt;</b> — broadcast a message to all players for 1 minute<br>
-      </div>
-    </div>
-  </div>
-</div>
+
 <div id="ticker"><span id="tickerInner">💩 Welcome to Tom Pearl: Poop Clicker! Click Tom to begin... 💩</span></div>
 <div id="main">
 <div id="left">
@@ -1014,8 +968,59 @@ async function sha256(msg){
   const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
-function openAdmin(){document.getElementById('adminOverlay').classList.add('show');if(!adminAuthed){document.getElementById('adminAuthWrap').style.display='flex';document.getElementById('adminPanel').style.display='none';setTimeout(()=>document.getElementById('adminAuthInput').focus(),100);}else{renderKickList();}}
-function closeAdmin(){document.getElementById('adminOverlay').classList.remove('show');}
+function closeAdmin(){const ov=document.getElementById('adminOverlay');if(ov)ov.remove();adminAuthed=false;}
+function openAdmin(){
+  const pwd=prompt('Access code:');
+  if(!pwd)return;
+  sha256(pwd).then(hash=>{
+    fbGet('/config/adminHash').then(stored=>{
+      if(!stored||typeof stored!=='string'){alert('Auth config missing.');return;}
+      if(hash===stored){
+        adminAuthed=true;
+        const ov=document.createElement('div');
+        ov.id='adminOverlay';
+        ov.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,.82);z-index:99998;display:flex;align-items:center;justify-content:center';
+        ov.innerHTML=`<div style="background:linear-gradient(135deg,#0a0a12,#1a1030);border:2px solid #00ff88;border-radius:14px;padding:22px 26px;width:600px;max-width:95vw;max-height:92vh;overflow-y:auto;box-shadow:0 0 40px rgba(0,255,136,.3);font-family:'Courier New',monospace">
+          <div style="color:#00ff88;font-size:1.2em;font-weight:bold;margin-bottom:4px">💻 ADMIN CONSOLE</div>
+          <button onclick="closeAdmin()" style="float:right;background:none;border:1px solid #555;color:#aaa;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.8em;margin-top:-34px">✕ Close</button>
+          <div style="font-size:.75em;opacity:.6;margin-bottom:14px;color:#aaa">Tom Pearl Dev Panel</div>
+          <div style="margin:10px 0;padding:10px;background:rgba(255,0,0,.08);border:1px solid rgba(255,80,80,.3);border-radius:8px">
+            <div class="secLabel" style="color:#ff6666">🚫 PLAYER MANAGEMENT</div>
+            <button onclick="adminCmd('unbanall')" style="width:100%;margin-bottom:6px;background:linear-gradient(135deg,#2e7d32,#1b5e20);border:1px solid #66bb6a;color:#fff;font-weight:bold;padding:7px 12px;border-radius:7px;cursor:pointer;font-size:.85em">🔓 Unban Everyone</button>
+            <input id="kickSearchInput" placeholder="Search player..." oninput="renderKickList()" style="width:100%;background:rgba(255,80,80,.07);border:1px solid #ff6666;border-radius:6px;color:#ffaaaa;font-family:'Courier New',monospace;font-size:.85em;padding:6px 8px;outline:none;margin-bottom:6px">
+            <div id="kickPlayerList" style="max-height:120px;overflow-y:auto"></div>
+          </div>
+          <input id="adminInput" placeholder="Type a command and press Enter..." autocomplete="off" spellcheck="false" style="width:100%;background:rgba(0,255,136,.07);border:1px solid #00ff88;border-radius:6px;color:#00ff88;font-family:'Courier New',monospace;font-size:.92em;padding:8px 10px;outline:none;margin-bottom:8px">
+          <div id="adminOutput" style="font-size:.78em;color:#aaffcc;min-height:32px;padding:6px 8px;background:rgba(0,0,0,.4);border-radius:6px;margin-bottom:12px;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto">Ready.</div>
+          <div style="font-size:.71em;color:#888;line-height:1.8">
+            <b style="color:#00ff88">give &lt;amount&gt;</b> — add poops<br>
+            <b style="color:#00ff88">give all</b> — give 1 sextillion<br>
+            <b style="color:#00ff88">ban &lt;username&gt;</b> — permanent ban<br>
+            <b style="color:#00ff88">unban &lt;username&gt;</b> — lift ban<br>
+            <b style="color:#00ff88">unbanall</b> — lift all bans<br>
+            <b style="color:#00ff88">resetprogress &lt;username&gt;</b> — wipe + ban<br>
+            <b style="color:#00ff88">wipeall</b> — wipe everyone<br>
+            <b style="color:#00ff88">announce &lt;message&gt;</b> — broadcast<br>
+            <b style="color:#00ff88">event golden|double|jan|infinity</b><br>
+            <b style="color:#00ff88">prestige &lt;n&gt;</b> — set prestige count<br>
+            <b style="color:#00ff88">building &lt;id&gt; &lt;n&gt;</b> — set building count<br>
+            <b style="color:#00ff88">upgrade &lt;id|all&gt;</b> — unlock upgrade<br>
+            <b style="color:#00ff88">achieve &lt;id|all&gt;</b> — unlock achievement<br>
+            <b style="color:#00ff88">givegolden &lt;n&gt;</b> — give golden poops<br>
+            <b style="color:#00ff88">clear</b> — clear output<br>
+          </div>
+        </div>`;
+        document.body.appendChild(ov);
+        ov.addEventListener('click',e=>{if(e.target===ov)closeAdmin();});
+        document.getElementById('adminInput').addEventListener('keydown',e=>{if(e.key==='Enter'){const v=e.target.value.trim();if(v){adminCmd(v);e.target.value='';}}}); 
+        renderKickList();
+      }else{
+        setTimeout(()=>alert('❌ Wrong code.'),50);
+      }
+    });
+  });
+}
+
 async function adminAuth(){
   const v=document.getElementById('adminAuthInput').value;
   const e=document.getElementById('adminAuthErr');
