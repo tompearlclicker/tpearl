@@ -1088,8 +1088,6 @@ function adminCmd(raw){
   }
   else{adminOut('❌ Unknown command: "'+raw+'". Type help for commands.');}
 }
-document.getElementById('adminInput').addEventListener('keydown',e=>{if(e.key==='Enter'){const v=e.target.value.trim();if(v){adminCmd(v);e.target.value='';}}});
-document.getElementById('adminOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('adminOverlay'))closeAdmin();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAdmin();});
 
 const ADMIN_SECRET_PHRASE='nixonwingerazdgpoopghop2';
