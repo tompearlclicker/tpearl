@@ -993,12 +993,34 @@ setInterval(()=>{const nw=Date.now(),nm=performance.now();if(Math.abs((nw-lastWa
 (function(){const ls=document.getElementById('loadScreen'),fill=document.getElementById('loadBarFill');let p=0;const iv=setInterval(()=>{p+=2+Math.random()*4;fill.style.width=Math.min(p,95)+'%';},60);window.addEventListener('load',()=>{clearInterval(iv);fill.style.width='100%';setTimeout(()=>{ls.classList.add('fade');setTimeout(()=>ls.style.display='none',750);},400);});})();
 
 /* ---- ADMIN CONSOLE ---- */
-function adminHashStr(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return(h>>>0).toString(16).padStart(8,'0');}
-const ADMIN_CODE_HASH=adminHashStr('sussyboss2026');
 let adminAuthed=false;
+async function sha256(msg){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
 function openAdmin(){document.getElementById('adminOverlay').classList.add('show');if(!adminAuthed){document.getElementById('adminAuthWrap').style.display='flex';document.getElementById('adminPanel').style.display='none';setTimeout(()=>document.getElementById('adminAuthInput').focus(),100);}else{renderKickList();}}
 function closeAdmin(){document.getElementById('adminOverlay').classList.remove('show');}
-function adminAuth(){const v=document.getElementById('adminAuthInput').value;if(adminHashStr(v)===ADMIN_CODE_HASH){adminAuthed=true;document.getElementById('adminAuthWrap').style.display='none';document.getElementById('adminPanel').style.display='block';adminOut('✅ Authenticated. Welcome, developer.');document.getElementById('adminInput').focus();renderKickList();}else{const e=document.getElementById('adminAuthErr');e.textContent='❌ Wrong code. Try again.';document.getElementById('adminAuthInput').value='';setTimeout(()=>e.textContent='',2500);}}
+async function adminAuth(){
+  const v=document.getElementById('adminAuthInput').value;
+  const e=document.getElementById('adminAuthErr');
+  try{
+    const result=await fbGet('/config/adminHash');
+    if(!result||typeof result!=='string'){e.textContent='❌ Auth config missing.';return;}
+    const inputHash=await sha256(v);
+    if(inputHash===result){
+      adminAuthed=true;
+      document.getElementById('adminAuthWrap').style.display='none';
+      document.getElementById('adminPanel').style.display='block';
+      adminOut('✅ Authenticated. Welcome, developer.');
+      document.getElementById('adminInput').focus();
+      renderKickList();
+    }else{
+      e.textContent='❌ Wrong code. Try again.';
+      document.getElementById('adminAuthInput').value='';
+      setTimeout(()=>e.textContent='',2500);
+    }
+  }catch(err){e.textContent='❌ Auth error. Try again.';}
+}
 document.getElementById('adminAuthInput').addEventListener('keydown',e=>{if(e.key==='Enter')adminAuth();});
 function adminOut(msg){document.getElementById('adminOutput').innerHTML=msg;}
 function adminCmd(raw){
