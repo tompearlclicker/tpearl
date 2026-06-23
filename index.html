@@ -815,11 +815,12 @@ async function adminResetProgress(username){
   if(!confirm('Delete '+username+' from the leaderboard entirely? This cannot be undone.'))return;
   try{
     await fetch(FB_URL+'/leaderboard/'+encodeURIComponent(username)+'.json',{method:'DELETE'});
+    await fbPatch('/kicks',{[username]:{until:9999999999999,kickedAt:Date.now(),banned:true}});
     delete lbCache[username];
     lbApplyFilter();
-    adminOut('🗑️ Deleted from leaderboard: '+username);
+    adminOut('🗑️ Deleted and banned: '+username);
     renderKickList();
-  }catch(e){adminOut('❌ Failed to delete: '+e);}
+  }catch(e){adminOut('❌ Failed: '+e);}
 }
 async function adminWipeAll(){
 if(!confirm("Wipe EVERYONE's progress from the leaderboard? This cannot be undone."))return;
