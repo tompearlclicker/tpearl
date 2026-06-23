@@ -1072,7 +1072,7 @@ function openAdmin(){
           <input id="adminInput" placeholder="Type a command and press Enter..." autocomplete="off" spellcheck="false" style="width:100%;background:rgba(0,255,136,.07);border:1px solid #00ff88;border-radius:6px;color:#00ff88;font-family:'Courier New',monospace;font-size:.92em;padding:8px 10px;outline:none;margin-bottom:8px">
           <div id="adminOutput" style="font-size:.78em;color:#aaffcc;min-height:32px;padding:6px 8px;background:rgba(0,0,0,.4);border-radius:6px;margin-bottom:12px;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto">Ready.</div>
           <div style="font-size:.71em;color:#888;line-height:1.8">
-            <b style="color:#00ff88">give &lt;amount&gt;</b> — add poops<br>
+            <b style="color:#00ff88">give player &lt;username&gt; &lt;amount|all&gt;</b> — give poops to a player<br>
             <b style="color:#00ff88">give all</b> — give 1 sextillion<br>
             <b style="color:#00ff88">ban &lt;username&gt;</b> — permanent ban<br>
             <b style="color:#00ff88">unban &lt;username&gt;</b> — lift ban<br>
@@ -1081,11 +1081,11 @@ function openAdmin(){
             <b style="color:#00ff88">wipeall</b> — wipe everyone<br>
             <b style="color:#00ff88">announce &lt;message&gt;</b> — broadcast<br>
             <b style="color:#00ff88">event golden|double|jan|infinity</b><br>
-            <b style="color:#00ff88">prestige &lt;n&gt;</b> — set prestige count<br>
-            <b style="color:#00ff88">building &lt;id&gt; &lt;n&gt;</b> — set building count<br>
-            <b style="color:#00ff88">upgrade &lt;id|all&gt;</b> — unlock upgrade<br>
-            <b style="color:#00ff88">achieve &lt;id|all&gt;</b> — unlock achievement<br>
-            <b style="color:#00ff88">givegolden &lt;n&gt;</b> — give golden poops<br>
+            <b style="color:#00ff88">prestige player &lt;username&gt; &lt;count&gt;</b> — set a player's prestige<br>
+            <b style="color:#00ff88">building player &lt;username&gt; &lt;id&gt; &lt;amount&gt;</b> — set a player's building count<br>
+            <b style="color:#00ff88">upgrade player &lt;username&gt; &lt;id|all&gt;</b> — unlock upgrade for a player<br>
+            <b style="color:#00ff88">achieve player &lt;username&gt; &lt;id|all&gt;</b> — unlock achievement for a player<br>
+            <b style="color:#00ff88">givegolden player &lt;username&gt; &lt;amount&gt;</b> — give golden poops to a player<br>
             <b style="color:#00ff88">clear</b> — clear output<br>
             <b style="color:#00ff88">listrequests</b> — view unban requests<br>
             <b style="color:#00ff88">approverequest &lt;username&gt;</b> — approve unban<br>
@@ -1119,18 +1119,36 @@ function adminCmd(raw){
     else{const n=parseFloat(parts[1]);if(!isFinite(n)||n<=0){adminOut('❌ Invalid amount.');return;}state.poops+=n;state.totalPoopsEarned+=n;updateDisplay();checkAchievements();checkInfinityOverflow();adminOut('✅ Gave '+formatNumber(n)+' poops. Total: '+formatNumber(state.poops));}
     return;
   }
-  if(cmd==='upgrade'){
-    if(parts[1]==='all'){let c=0;upgradeData.forEach(u=>{if(!state.upgradesBought[u.id]){state.upgradesBought[u.id]=true;if(u.type==='click')state.clickValue+=u.value;else if(u.type==='clickMult')state.clickMultiplier*=u.value;else if(u.type==='clickFromCps')state.clickFromCpsRate+=u.value;else if(u.type==='building')state.buildingMultipliers[u.target]=(state.buildingMultipliers[u.target]||1)*u.mult;else if(u.type==='globalMult')state.globalMultiplier*=u.mult;c++;}});renderAll();adminOut('✅ Unlocked '+c+' upgrades.');}
+ if(cmd==='upgrade'){
+    if(parts[1]==='player'){
+      const target=parts[2];const uid=parts[3];
+      if(!target||!uid){adminOut('❌ Usage: upgrade player <username> <upgradeId|all>');return;}
+      const cur=await fbGet('/leaderboard/'+encodeURIComponent(target));
+      if(!cur){adminOut('❌ Player "'+target+'" not found.');return;}
+      const upgrades=cur.upgrades||{};
+      if(uid==='all'){upgradeData.forEach(u=>upgrades[u.id]=true);await fbPatch('/leaderboard',{[target]:{...cur,upgrades}});lbCache[target]={...cur,upgrades};adminOut('✅ Unlocked all upgrades for '+target+'.');}
+      else{const u=upgradeData.find(x=>x.id===uid);if(!u){adminOut('❌ Unknown upgrade: '+uid);return;}upgrades[u.id]=true;await fbPatch('/leaderboard',{[target]:{...cur,upgrades}});lbCache[target]={...cur,upgrades};adminOut('✅ Unlocked '+u.name+' for '+target+'.');}
+    }
+    else if(parts[1]==='all'){let c=0;upgradeData.forEach(u=>{if(!state.upgradesBought[u.id]){state.upgradesBought[u.id]=true;if(u.type==='click')state.clickValue+=u.value;else if(u.type==='clickMult')state.clickMultiplier*=u.value;else if(u.type==='clickFromCps')state.clickFromCpsRate+=u.value;else if(u.type==='building')state.buildingMultipliers[u.target]=(state.buildingMultipliers[u.target]||1)*u.mult;else if(u.type==='globalMult')state.globalMultiplier*=u.mult;c++;}});renderAll();adminOut('✅ Unlocked '+c+' upgrades.');}
     else{const u=upgradeData.find(x=>x.id===parts[1]);if(!u){adminOut('❌ Unknown upgrade: '+parts[1]);return;}if(state.upgradesBought[u.id]){adminOut('⚠️ Already owned: '+u.name);return;}state.upgradesBought[u.id]=true;if(u.type==='click')state.clickValue+=u.value;else if(u.type==='clickMult')state.clickMultiplier*=u.value;else if(u.type==='clickFromCps')state.clickFromCpsRate+=u.value;else if(u.type==='building')state.buildingMultipliers[u.target]=(state.buildingMultipliers[u.target]||1)*u.mult;else if(u.type==='globalMult')state.globalMultiplier*=u.mult;renderAll();adminOut('✅ Unlocked: '+u.name);}
     return;
   }
-  if(cmd==='achieve'){
-    if(parts[1]==='all'){let c=0;achievementData.forEach(a=>{if(!state.achievementsUnlocked[a.id]){state.achievementsUnlocked[a.id]=true;c++;}});renderAchievements();adminOut('✅ Unlocked '+c+' achievements.');}
+ if(cmd==='achieve'){
+    if(parts[1]==='player'){
+      const target=parts[2];const aid=parts[3];
+      if(!target||!aid){adminOut('❌ Usage: achieve player <username> <achievementId|all>');return;}
+      const cur=await fbGet('/leaderboard/'+encodeURIComponent(target));
+      if(!cur){adminOut('❌ Player "'+target+'" not found.');return;}
+      const achievements=cur.achievements||{};
+      if(aid==='all'){achievementData.forEach(a=>achievements[a.id]=true);await fbPatch('/leaderboard',{[target]:{...cur,achievements}});lbCache[target]={...cur,achievements};adminOut('✅ Unlocked all achievements for '+target+'.');}
+      else{const a=achievementData.find(x=>x.id===aid);if(!a){adminOut('❌ Unknown achievement: '+aid);return;}achievements[a.id]=true;await fbPatch('/leaderboard',{[target]:{...cur,achievements}});lbCache[target]={...cur,achievements};adminOut('✅ Unlocked '+a.name+' for '+target+'.');}
+    }
+    else if(parts[1]==='all'){let c=0;achievementData.forEach(a=>{if(!state.achievementsUnlocked[a.id]){state.achievementsUnlocked[a.id]=true;c++;}});renderAchievements();adminOut('✅ Unlocked '+c+' achievements.');}
     else{const a=achievementData.find(x=>x.id===parts[1]);if(!a){adminOut('❌ Unknown achievement: '+parts[1]);return;}state.achievementsUnlocked[a.id]=true;renderAchievements();adminOut('✅ Unlocked: '+a.name);}
     return;
   }
-  if(cmd==='building'){const b=buildingData.find(x=>x.id===parts[1]);if(!b){adminOut('❌ Unknown building: '+parts[1]);return;}const n=parseInt(parts[2]);if(isNaN(n)||n<0){adminOut('❌ Invalid amount.');return;}state.buildings[b.id]=n;renderAll();adminOut('✅ Set '+b.name+' to '+n+'.');}
-  else if(cmd==='prestige'){const n=parseInt(parts[1]);if(isNaN(n)||n<0){adminOut('❌ Invalid count.');return;}state.prestigeCount=n;state.prestigeMultiplier=calcPrestigeMultiplierAfterN(n);updateDisplay();adminOut('✅ Set prestige to '+n+', multiplier x'+state.prestigeMultiplier.toFixed(4)+'.');}
+  if(cmd==='building'){     if(parts[1]==='player'){       const target=parts[2];const b=buildingData.find(x=>x.id===parts[3]);const n=parseInt(parts[4]);       if(!target||!b||isNaN(n)||n<0){adminOut('❌ Usage: building player <username> <buildingId> <amount>');return;}       const cur=await fbGet('/leaderboard/'+encodeURIComponent(target));       if(!cur){adminOut('❌ Player "'+target+'" not found.');return;}       const buildings=cur.buildings||{};buildings[b.id]=n;       await fbPatch('/leaderboard',{[target]:{...cur,buildings}});       lbCache[target]={...cur,buildings};       adminOut('✅ Set '+target+'\'s '+b.name+' to '+n+'.');     }else{const b=buildingData.find(x=>x.id===parts[1]);if(!b){adminOut('❌ Unknown building: '+parts[1]);return;}const n=parseInt(parts[2]);if(isNaN(n)||n<0){adminOut('❌ Invalid amount.');return;}state.buildings[b.id]=n;renderAll();adminOut('✅ Set '+b.name+' to '+n+'.');}   }
+  else if(cmd==='prestige'){     if(parts[1]==='player'){       const target=parts[2];const n=parseInt(parts[3]);       if(!target||isNaN(n)||n<0){adminOut('❌ Usage: prestige player <username> <count>');return;}       const cur=await fbGet('/leaderboard/'+encodeURIComponent(target));       if(!cur){adminOut('❌ Player "'+target+'" not found.');return;}       await fbPatch('/leaderboard',{[target]:{...cur,prestige:n}});       lbCache[target]={...cur,prestige:n};lbApplyFilter();       adminOut('✅ Set '+target+'\'s prestige to '+n+' on the leaderboard.');     }else{const n=parseInt(parts[1]);if(isNaN(n)||n<0){adminOut('❌ Invalid count.');return;}state.prestigeCount=n;state.prestigeMultiplier=calcPrestigeMultiplierAfterN(n);updateDisplay();adminOut('✅ Set prestige to '+n+', multiplier x'+state.prestigeMultiplier.toFixed(4)+'.');}   }
   else if(cmd==='event'){
     const ev=parts[1];
     if(ev==='golden'){if(goldenActive){adminOut('⚠️ Already active.');return;}spawnGoldenPoop();adminOut('✅ Spawned golden poop.');}
