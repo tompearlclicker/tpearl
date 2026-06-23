@@ -1021,27 +1021,7 @@ function openAdmin(){
   });
 }
 
-async function adminAuth(){
-  const v=document.getElementById('adminAuthInput').value;
-  const e=document.getElementById('adminAuthErr');
-  try{
-    const result=await fbGet('/config/adminHash');
-    if(!result||typeof result!=='string'){e.textContent='❌ Auth config missing.';return;}
-    const inputHash=await sha256(v);
-    if(inputHash===result){
-      adminAuthed=true;
-      document.getElementById('adminAuthWrap').style.display='none';
-      document.getElementById('adminPanel').style.display='block';
-      adminOut('✅ Authenticated. Welcome, developer.');
-      document.getElementById('adminInput').focus();
-      renderKickList();
-    }else{
-      e.textContent='❌ Wrong code. Try again.';
-      document.getElementById('adminAuthInput').value='';
-      setTimeout(()=>e.textContent='',2500);
-    }
-  }catch(err){e.textContent='❌ Auth error. Try again.';}
-}
+
 function adminOut(msg){document.getElementById('adminOutput').innerHTML=msg;}
 function adminCmd(raw){
   const parts=raw.trim().split(/\s+/),cmd=parts[0].toLowerCase();
