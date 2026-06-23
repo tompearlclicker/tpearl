@@ -180,10 +180,11 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
     </div>
     <div id="adminPanel" style="display:none">
       <div id="adminKickSection">
-        <div class="secLabel">🚫 KICK PLAYER (5 min, 1hr cooldown)</div>
-        <input id="kickSearchInput" placeholder="Search player to kick..." oninput="renderKickList()">
-        <div id="kickPlayerList"></div>
-      </div>
+  <div class="secLabel">🚫 KICK PLAYER (5 min, 1hr cooldown)</div>
+  <button onclick="adminCmd('unbanall')" style="width:100%;margin-bottom:6px;background:linear-gradient(135deg,#2e7d32,#1b5e20);border:1px solid #66bb6a;color:#fff;font-weight:bold;padding:7px 12px;border-radius:7px;cursor:pointer;font-size:.85em">🔓 Unban Everyone</button>
+  <input id="kickSearchInput" placeholder="Search player to kick..." oninput="renderKickList()">
+  <div id="kickPlayerList"></div>
+</div>
       <input id="adminInput" placeholder="Type a command and press Enter..." autocomplete="off" spellcheck="false">
       <div id="adminOutput">Ready. Type help for commands.</div>
       <div id="adminHelp">
@@ -656,7 +657,12 @@ async function kickGet(){return await fbGet('/kicks');}
 async function kickSet(data){await fbSet('/kicks',data);}
 
 async function pushLeaderboard(){
-  await fbPatch('/leaderboard',{[myUsername]:{score:state.totalPoopsEarned,prestige:state.prestigeCount||0,ts:Date.now()}});
+  try{
+    const kicks=await kickGet();
+    const k=kicks[myUsername];
+    if(k&&(k.banned||Date.now()<k.until))return;
+    await fbPatch('/leaderboard',{[myUsername]:{score:state.totalPoopsEarned,prestige:state.prestigeCount||0,ts:Date.now()}});
+  }catch(e){}
 }
 
 /* ---- KICK SYSTEM ---- */
@@ -793,8 +799,16 @@ async function renderKickList(){
   }catch(e){ct.innerHTML='<div style="font-size:.75em;color:#f88;padding:4px">Error loading players.</div>';}
 }
 async function adminBanPlayer(username,action){
-  if(action==='ban'){if(!confirm('Permanently ban '+username+'? They will be kicked forever until unbanned.'))return;await fbPatch('/kicks',{[username]:{until:9999999999999,kickedAt:Date.now(),banned:true}});adminOut('🚫 Permanently banned: '+username);}
-  else{if(!confirm('Unban '+username+'?'))return;await fbPatch('/kicks',{[username]:{until:0,kickedAt:0,banned:false}});adminOut('✅ Unbanned: '+username);}
+  if(action==='ban'){
+    if(!confirm('Permanently ban '+username+'? They will be kicked forever until unbanned.'))return;
+    await fbPatch('/kicks',{[username]:{until:9999999999999,kickedAt:Date.now(),banned:true}});
+    await fetch(FB_URL+'/leaderboard/'+encodeURIComponent(username)+'.json',{method:'DELETE'});
+    adminOut('🚫 Permanently banned and removed from leaderboard: '+username);
+  }else{
+    if(!confirm('Unban '+username+'?'))return;
+    await fbPatch('/kicks',{[username]:{until:0,kickedAt:0,banned:false}});
+    adminOut('✅ Unbanned: '+username);
+  }
   renderKickList();
 }
 async function adminResetProgress(username){
@@ -1057,7 +1071,7 @@ function adminCmd(raw){
   else if(cmd==='reset'&&parts[1]==='multiplier'){state.prestigeMultiplier=1;updateDisplay();adminOut('✅ Prestige multiplier reset to x1.');}
   else if(cmd==='givegolden'){const n=parseInt(parts[1]);if(isNaN(n)||n<=0){adminOut('❌ Usage: givegolden <amount>');return;}state.goldenPoopCurrency=(state.goldenPoopCurrency||0)+n;updateDisplay();renderGoldenShop();adminOut('✅ Gave '+n+' golden poops. Total: '+(state.goldenPoopCurrency||0));}
   else if(cmd==='announce'){const msg=parts.slice(1).join(' ');if(!msg){adminOut('❌ Usage: announce <message>');return;}fbSet('/announcement',{msg,until:Date.now()+60000});adminOut('✅ Announcement sent: "'+msg+'"');}
-  else if(cmd==='ban'){const u=parts[1];if(!u){adminOut('❌ Usage: ban <username>');return;}fbPatch('/kicks',{[u]:{until:9999999999999,kickedAt:Date.now(),banned:true}}).then(()=>adminOut('🚫 Banned: '+u));}
+  else if(cmd==='ban'){   const u=parts[1];if(!u){adminOut('❌ Usage: ban <username>');return;}   fbPatch('/kicks',{[u]:{until:9999999999999,kickedAt:Date.now(),banned:true}}).then(async()=>{     await fetch(FB_URL+'/leaderboard/'+encodeURIComponent(u)+'.json',{method:'DELETE'});     delete lbCache[u];lbApplyFilter();     adminOut('🚫 Banned and removed from leaderboard: '+u);   }); }
   else if(cmd==='unban'){const u=parts[1];if(!u){adminOut('❌ Usage: unban <username>');return;}fbPatch('/kicks',{[u]:{until:0,kickedAt:0,banned:false}}).then(()=>adminOut('✅ Unbanned: '+u));}
   else if(cmd==='resetprogress'){const u=parts[1];if(!u){adminOut('❌ Usage: resetprogress <username>');return;}fetch(FB_URL+'/leaderboard/'+encodeURIComponent(u)+'.json',{method:'DELETE'}).then(()=>{delete lbCache[u];lbApplyFilter();adminOut('🗑️ Removed from leaderboard: '+u);}).catch(e=>adminOut('❌ Failed: '+e));}
   else if(cmd==='list'){
