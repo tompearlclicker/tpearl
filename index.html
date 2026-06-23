@@ -165,7 +165,13 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
 <div id="kickBanner">
   <div id="kickMsg">🚫 YOU HAVE BEEN BANNED</div>
   <div id="kickTimer">This ban is permanent.</div>
-  <div style="font-size:.85em;opacity:.6">Contact admin if you think this was a mistake.</div>
+  <div style="font-size:.85em;opacity:.6;margin-bottom:16px">Contact the owner if you think this was a mistake.</div>
+  <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:16px;width:320px;text-align:center">
+    <div style="font-size:.9em;margin-bottom:8px;color:#ffaaaa">Submit an unban request:</div>
+    <textarea id="unbanReason" placeholder="Explain why you should be unbanned..." maxlength="300" style="width:100%;background:rgba(0,0,0,.4);border:1px solid #ff6666;border-radius:6px;color:#fff;padding:8px;font-family:inherit;font-size:.82em;resize:none;height:80px;outline:none;margin-bottom:8px"></textarea>
+    <button onclick="submitUnbanRequest()" style="background:linear-gradient(135deg,#cc4400,#882200);border:none;color:#fff;font-weight:bold;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:.9em">📨 Submit Request</button>
+    <div id="unbanRequestStatus" style="font-size:.75em;margin-top:8px;min-height:1em;color:#ffaaaa"></div>
+  </div>
 </div>
 
 <div id="ticker"><span id="tickerInner">💩 Welcome to Tom Pearl: Poop Clicker! Click Tom to begin... 💩</span></div>
@@ -1008,6 +1014,8 @@ function openAdmin(){
             <b style="color:#00ff88">achieve &lt;id|all&gt;</b> — unlock achievement<br>
             <b style="color:#00ff88">givegolden &lt;n&gt;</b> — give golden poops<br>
             <b style="color:#00ff88">clear</b> — clear output<br>
+            <b style="color:#00ff88">listrequests</b> — view unban requests<br>
+            <b style="color:#00ff88">approverequest &lt;username&gt;</b> — approve unban<br>
           </div>
         </div>`;
         document.body.appendChild(ov);
@@ -1070,6 +1078,20 @@ function adminCmd(raw){
     else if(parts[1]==='buildings')adminOut(buildingData.map(b=>b.id+' — '+b.name).join('\n'));
     else adminOut('❌ list what? Try: upgrades, achievements, buildings');
   }
+    else if(cmd==='listrequests'){
+  fbGet('/unbanRequests').then(reqs=>{
+    if(!reqs||!Object.keys(reqs).length){adminOut('No pending unban requests.');return;}
+    adminOut(Object.entries(reqs).map(([u,d])=>`${u}: "${d.reason}"`).join('\n'));
+  });
+}
+else if(cmd==='approverequest'){
+  const u=parts[1];if(!u){adminOut('❌ Usage: approverequest <username>');return;}
+  fbPatch('/kicks',{[u]:{until:0,kickedAt:0,banned:false}}).then(async()=>{
+    await fetch(FB_URL+'/unbanRequests/'+encodeURIComponent(u)+'.json',{method:'DELETE'});
+    adminOut('✅ Unbanned and request cleared: '+u);
+    renderKickList();
+  }).catch(e=>adminOut('❌ Failed: '+e));
+}
   else{adminOut('❌ Unknown command: "'+raw+'". Type help for commands.');}
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAdmin();});
@@ -1084,6 +1106,17 @@ document.addEventListener('keydown',e=>{
   secretBuffer=(secretBuffer+e.key.toLowerCase()).slice(-ADMIN_SECRET_PHRASE.length);
   if(secretBuffer===ADMIN_SECRET_PHRASE){secretBuffer='';openAdmin();}
 });
+  async function submitUnbanRequest(){
+  const reason=document.getElementById('unbanReason').value.trim();
+  const status=document.getElementById('unbanRequestStatus');
+  if(!reason){status.textContent='⚠️ Please write a reason.';return;}
+  status.textContent='Sending...';
+  try{
+    await fbPatch('/unbanRequests',{[myUsername]:{reason,ts:Date.now(),username:myUsername}});
+    status.textContent='✅ Request sent! Wait for the admin to review.';
+    document.getElementById('unbanReason').disabled=true;
+  }catch(e){status.textContent='❌ Failed to send. Try again.';}
+}
 
 /* ---- INIT ---- */
 document.getElementById('tomImg').addEventListener('click',clickTom);
