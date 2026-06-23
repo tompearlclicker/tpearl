@@ -1126,8 +1126,8 @@ async function adminCmd(raw){
       const cur=await fbGet('/leaderboard/'+encodeURIComponent(target));
       if(!cur){adminOut('❌ Player "'+target+'" not found.');return;}
       const upgrades=cur.upgrades||{};
-      if(uid==='all'){upgradeData.forEach(u=>upgrades[u.id]=true);await fbPatch('/leaderboard',{[target]:{...cur,upgrades}});lbCache[target]={...cur,upgrades};adminOut('✅ Unlocked all upgrades for '+target+'.');}
-      else{const u=upgradeData.find(x=>x.id===uid);if(!u){adminOut('❌ Unknown upgrade: '+uid);return;}upgrades[u.id]=true;await fbPatch('/leaderboard',{[target]:{...cur,upgrades}});lbCache[target]={...cur,upgrades};adminOut('✅ Unlocked '+u.name+' for '+target+'.');}
+      if(uid==='all'){upgradeData.forEach(u=>upgrades[u.id]=true);await fbPatch('/leaderboard',{[target]:{...cur,upgrades}});await fbPatch('/pendingCommands/'+encodeURIComponent(target),{['upgrade_'+Date.now()]:{type:'upgrade',value:'all'}});lbCache[target]={...cur,upgrades};adminOut('✅ Unlocked all upgrades for '+target+'. Will apply next time they load or sync.');}
+      else{const u=upgradeData.find(x=>x.id===uid);if(!u){adminOut('❌ Unknown upgrade: '+uid);return;}upgrades[u.id]=true;await fbPatch('/leaderboard',{[target]:{...cur,upgrades}});await fbPatch('/pendingCommands/'+encodeURIComponent(target),{['upgrade_'+Date.now()]:{type:'upgrade',value:uid}});lbCache[target]={...cur,upgrades};adminOut('✅ Unlocked '+u.name+' for '+target+'. Will apply next time they load or sync.');}
     }
     else if(parts[1]==='all'){let c=0;upgradeData.forEach(u=>{if(!state.upgradesBought[u.id]){state.upgradesBought[u.id]=true;if(u.type==='click')state.clickValue+=u.value;else if(u.type==='clickMult')state.clickMultiplier*=u.value;else if(u.type==='clickFromCps')state.clickFromCpsRate+=u.value;else if(u.type==='building')state.buildingMultipliers[u.target]=(state.buildingMultipliers[u.target]||1)*u.mult;else if(u.type==='globalMult')state.globalMultiplier*=u.mult;c++;}});renderAll();adminOut('✅ Unlocked '+c+' upgrades.');}
     else{const u=upgradeData.find(x=>x.id===parts[1]);if(!u){adminOut('❌ Unknown upgrade: '+parts[1]);return;}if(state.upgradesBought[u.id]){adminOut('⚠️ Already owned: '+u.name);return;}state.upgradesBought[u.id]=true;if(u.type==='click')state.clickValue+=u.value;else if(u.type==='clickMult')state.clickMultiplier*=u.value;else if(u.type==='clickFromCps')state.clickFromCpsRate+=u.value;else if(u.type==='building')state.buildingMultipliers[u.target]=(state.buildingMultipliers[u.target]||1)*u.mult;else if(u.type==='globalMult')state.globalMultiplier*=u.mult;renderAll();adminOut('✅ Unlocked: '+u.name);}
@@ -1140,15 +1140,20 @@ async function adminCmd(raw){
       const cur=await fbGet('/leaderboard/'+encodeURIComponent(target));
       if(!cur){adminOut('❌ Player "'+target+'" not found.');return;}
       const achievements=cur.achievements||{};
-      if(aid==='all'){achievementData.forEach(a=>achievements[a.id]=true);await fbPatch('/leaderboard',{[target]:{...cur,achievements}});lbCache[target]={...cur,achievements};adminOut('✅ Unlocked all achievements for '+target+'.');}
-      else{const a=achievementData.find(x=>x.id===aid);if(!a){adminOut('❌ Unknown achievement: '+aid);return;}achievements[a.id]=true;await fbPatch('/leaderboard',{[target]:{...cur,achievements}});lbCache[target]={...cur,achievements};adminOut('✅ Unlocked '+a.name+' for '+target+'.');}
+      if(aid==='all'){achievementData.forEach(a=>achievements[a.id]=true);await fbPatch('/leaderboard',{[target]:{...cur,achievements}});await fbPatch('/pendingCommands/'+encodeURIComponent(target),{['achieve_'+Date.now()]:{type:'achieve',value:'all'}});lbCache[target]={...cur,achievements};adminOut('✅ Unlocked all achievements for '+target+'. Will apply next time they load or sync.');}
+      else{const a=achievementData.find(x=>x.id===aid);if(!a){adminOut('❌ Unknown achievement: '+aid);return;}achievements[a.id]=true;await fbPatch('/leaderboard',{[target]:{...cur,achievements}});await fbPatch('/pendingCommands/'+encodeURIComponent(target),{['achieve_'+Date.now()]:{type:'achieve',value:aid}});lbCache[target]={...cur,achievements};adminOut('✅ Unlocked '+a.name+' for '+target+'. Will apply next time they load or sync.');}
     }
     else if(parts[1]==='all'){let c=0;achievementData.forEach(a=>{if(!state.achievementsUnlocked[a.id]){state.achievementsUnlocked[a.id]=true;c++;}});renderAchievements();adminOut('✅ Unlocked '+c+' achievements.');}
     else{const a=achievementData.find(x=>x.id===parts[1]);if(!a){adminOut('❌ Unknown achievement: '+parts[1]);return;}state.achievementsUnlocked[a.id]=true;renderAchievements();adminOut('✅ Unlocked: '+a.name);}
     return;
   }
   if(cmd==='building'){     if(parts[1]==='player'){       const target=parts[2];const b=buildingData.find(x=>x.id===parts[3]);const n=parseInt(parts[4]);       if(!target||!b||isNaN(n)||n<0){adminOut('❌ Usage: building player <username> <buildingId> <amount>');return;}       const cur=await fbGet('/leaderboard/'+encodeURIComponent(target));       if(!cur){adminOut('❌ Player "'+target+'" not found.');return;}       const buildings=cur.buildings||{};buildings[b.id]=n;       await fbPatch('/leaderboard',{[target]:{...cur,buildings}});       lbCache[target]={...cur,buildings};       adminOut('✅ Set '+target+'\'s '+b.name+' to '+n+'.');     }else{const b=buildingData.find(x=>x.id===parts[1]);if(!b){adminOut('❌ Unknown building: '+parts[1]);return;}const n=parseInt(parts[2]);if(isNaN(n)||n<0){adminOut('❌ Invalid amount.');return;}state.buildings[b.id]=n;renderAll();adminOut('✅ Set '+b.name+' to '+n+'.');}   }
-  else if(cmd==='prestige'){     if(parts[1]==='player'){       const target=parts[2];const n=parseInt(parts[3]);       if(!target||isNaN(n)||n<0){adminOut('❌ Usage: prestige player <username> <count>');return;}       const cur=await fbGet('/leaderboard/'+encodeURIComponent(target));       if(!cur){adminOut('❌ Player "'+target+'" not found.');return;}       await fbPatch('/leaderboard',{[target]:{...cur,prestige:n}});       lbCache[target]={...cur,prestige:n};lbApplyFilter();       adminOut('✅ Set '+target+'\'s prestige to '+n+' on the leaderboard.');     }else{const n=parseInt(parts[1]);if(isNaN(n)||n<0){adminOut('❌ Invalid count.');return;}state.prestigeCount=n;state.prestigeMultiplier=calcPrestigeMultiplierAfterN(n);updateDisplay();adminOut('✅ Set prestige to '+n+', multiplier x'+state.prestigeMultiplier.toFixed(4)+'.');}   }
+  else if(cmd==='prestige'){     if(parts[1]==='player'){       const target=parts[2];const n=parseInt(parts[3]);       if(!target||isNaN(n)||n<0){adminOut('❌ Usage: prestige player <username> <count>');return;}       const cur=await fbGet('/leaderboard/'+encodeURIComponent(target));
+      if(!cur){adminOut('❌ Player "'+target+'" not found.');return;}
+      await fbPatch('/leaderboard',{[target]:{...cur,prestige:n}});
+      await fbPatch('/pendingCommands/'+encodeURIComponent(target),{['prestige_'+Date.now()]:{type:'prestige',value:n}});
+      lbCache[target]={...cur,prestige:n};lbApplyFilter();
+      adminOut('✅ Set '+target+'\'s prestige to '+n+'. Will apply next time they load or sync.');     }else{const n=parseInt(parts[1]);if(isNaN(n)||n<0){adminOut('❌ Invalid count.');return;}state.prestigeCount=n;state.prestigeMultiplier=calcPrestigeMultiplierAfterN(n);updateDisplay();adminOut('✅ Set prestige to '+n+', multiplier x'+state.prestigeMultiplier.toFixed(4)+'.');}   }
   else if(cmd==='event'){
     const ev=parts[1];
     if(ev==='golden'){if(goldenActive){adminOut('⚠️ Already active.');return;}spawnGoldenPoop();adminOut('✅ Spawned golden poop.');}
@@ -1158,7 +1163,7 @@ async function adminCmd(raw){
     else adminOut('❌ Unknown event. Try: golden, double, jan, infinity');
   }
   else if(cmd==='reset'&&parts[1]==='multiplier'){state.prestigeMultiplier=1;updateDisplay();adminOut('✅ Prestige multiplier reset to x1.');}
-  else if(cmd==='givegolden'){const n=parseInt(parts[1]);if(isNaN(n)||n<=0){adminOut('❌ Usage: givegolden <amount>');return;}state.goldenPoopCurrency=(state.goldenPoopCurrency||0)+n;updateDisplay();renderGoldenShop();adminOut('✅ Gave '+n+' golden poops. Total: '+(state.goldenPoopCurrency||0));}
+else if(cmd==='givegolden'){if(parts[1]==='player'){const target=parts[2];const n=parseInt(parts[3]);if(!target||isNaN(n)||n<=0){adminOut('❌ Usage: givegolden player <username> <amount>');return;}const cur=await fbGet('/leaderboard/'+encodeURIComponent(target));if(!cur){adminOut('❌ Player "'+target+'" not found.');return;}await fbPatch('/pendingCommands/'+encodeURIComponent(target),{['givegolden_'+Date.now()]:{type:'givegolden',value:n}});adminOut('✅ Gave '+n+' golden poops to '+target+'. Will apply next time they load or sync.');}else{const n=parseInt(parts[1]);if(isNaN(n)||n<=0){adminOut('❌ Usage: givegolden <amount>');return;}state.goldenPoopCurrency=(state.goldenPoopCurrency||0)+n;updateDisplay();renderGoldenShop();adminOut('✅ Gave '+n+' golden poops. Total: '+(state.goldenPoopCurrency||0));}}
   else if(cmd==='announce'){const msg=parts.slice(1).join(' ');if(!msg){adminOut('❌ Usage: announce <message>');return;}fbSet('/announcement',{msg,until:Date.now()+60000});adminOut('✅ Announcement sent: "'+msg+'"');}
   else if(cmd==='ban'){   const u=parts[1];if(!u){adminOut('❌ Usage: ban <username>');return;}   fbPatch('/kicks',{[u]:{until:9999999999999,kickedAt:Date.now(),banned:true}}).then(async()=>{     await fetch(FB_URL+'/leaderboard/'+encodeURIComponent(u)+'.json',{method:'DELETE'});     delete lbCache[u];lbApplyFilter();     adminOut('🚫 Banned and removed from leaderboard: '+u);   }); }
   else if(cmd==='unban'){const u=parts[1];if(!u){adminOut('❌ Usage: unban <username>');return;}fbPatch('/kicks',{[u]:{until:0,kickedAt:0,banned:false}}).then(()=>adminOut('✅ Unbanned: '+u));}
@@ -1209,6 +1214,20 @@ document.addEventListener('keydown',e=>{
   }catch(e){status.textContent='❌ Failed to send. Try again.';}
 }
 
+  async function checkPendingCommands(){
+  const cmds=await fbGet('/pendingCommands/'+encodeURIComponent(myUsername));
+  if(!cmds)return;
+  Object.entries(cmds).forEach(([key,cmd])=>{
+    if(cmd.type==='give'){state.poops+=cmd.value;state.totalPoopsEarned+=cmd.value;updateDisplay();checkAchievements();}
+    else if(cmd.type==='givegolden'){state.goldenPoopCurrency=(state.goldenPoopCurrency||0)+cmd.value;updateDisplay();renderGoldenShop();}
+    else if(cmd.type==='prestige'){state.prestigeCount=cmd.value;state.prestigeMultiplier=calcPrestigeMultiplierAfterN(cmd.value);updateDisplay();}
+    else if(cmd.type==='achieve'){if(cmd.value==='all'){achievementData.forEach(a=>state.achievementsUnlocked[a.id]=true);}else{state.achievementsUnlocked[cmd.value]=true;}renderAchievements();}
+    else if(cmd.type==='upgrade'){if(cmd.value==='all'){upgradeData.forEach(u=>{if(!state.upgradesBought[u.id]){state.upgradesBought[u.id]=true;if(u.type==='click')state.clickValue+=u.value;else if(u.type==='clickMult')state.clickMultiplier*=u.value;else if(u.type==='clickFromCps')state.clickFromCpsRate+=u.value;else if(u.type==='building')state.buildingMultipliers[u.target]=(state.buildingMultipliers[u.target]||1)*u.mult;else if(u.type==='globalMult')state.globalMultiplier*=u.mult;}});}else{const u=upgradeData.find(x=>x.id===cmd.value);if(u&&!state.upgradesBought[u.id]){state.upgradesBought[u.id]=true;if(u.type==='click')state.clickValue+=u.value;else if(u.type==='clickMult')state.clickMultiplier*=u.value;else if(u.type==='clickFromCps')state.clickFromCpsRate+=u.value;else if(u.type==='building')state.buildingMultipliers[u.target]=(state.buildingMultipliers[u.target]||1)*u.mult;else if(u.type==='globalMult')state.globalMultiplier*=u.mult;}}renderAll();}
+    else if(cmd.type==='building'){const b=buildingData.find(x=>x.id===cmd.target);if(b){state.buildings[b.id]=cmd.value;renderAll();}}
+  });
+  saveGame(true);
+  await fetch(FB_URL+'/pendingCommands/'+encodeURIComponent(myUsername)+'.json',{method:'DELETE'});
+}
 /* ---- INIT ---- */
 document.getElementById('tomImg').addEventListener('click',clickTom);
 setupGoldenPoopHandler();
@@ -1217,6 +1236,7 @@ setupGoldenPoopHandler();
 
   loadGame();
   renderAll();
+  await checkPendingCommands();
 })();
 if(state.doubleProdUntil&&state.doubleProdUntil>Date.now()){doubleProdInterval=setInterval(refreshDoubleProdLabel,1000);refreshDoubleProdLabel();}
 scheduleGoldenPoop();
@@ -1254,7 +1274,7 @@ setInterval(async()=>{
     }
   }
 }, 10000);
-setInterval(async()=>{saveGame(true);await pushLeaderboard();const kicked=await checkIfKicked();if(kicked)document.getElementById('kickBanner').classList.add('show');const at=document.querySelector('.tab.active');if(at&&at.dataset.tab==='leaderboardTab'){lbCache=await lbGet();lbKickCache=await kickGet();lbApplyFilter();}},30000);
+setInterval(async()=>{saveGame(true);await pushLeaderboard();await checkPendingCommands();const kicked=await checkIfKicked();if(kicked)document.getElementById('kickBanner').classList.add('show');const at=document.querySelector('.tab.active');if(at&&at.dataset.tab==='leaderboardTab'){lbCache=await lbGet();lbKickCache=await kickGet();lbApplyFilter();}},30000);
 window.addEventListener('beforeunload',()=>{if(!resetInProgress)saveGame(true);});
 </script>
 </body>
