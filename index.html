@@ -716,7 +716,16 @@ async function checkIfKicked(){
   return false;
 }
 
-
+function unlockGame(){
+  window.gameLocked=false;
+  document.getElementById('tomImg').style.pointerEvents='auto';
+  document.querySelectorAll('button').forEach(b=>{b.disabled=false;});
+  const overlay=document.getElementById('gameLockOverlay');
+  if(overlay)overlay.remove();
+  document.getElementById('kickBanner').classList.remove('show');
+  document.onkeydown=null;
+}
+  
 function lockGame(message){
 
   // Stop clicking
@@ -1275,7 +1284,7 @@ setInterval(async()=>{
     }
   }
 }, 10000);
-setInterval(async()=>{saveGame(true);await pushLeaderboard();await checkPendingCommands();const kicked=await checkIfKicked();if(kicked)document.getElementById('kickBanner').classList.add('show');const at=document.querySelector('.tab.active');if(at&&at.dataset.tab==='leaderboardTab'){lbCache=await lbGet();lbKickCache=await kickGet();lbApplyFilter();}},30000);
+setInterval(async()=>{saveGame(true);await pushLeaderboard();await checkPendingCommands();const kicked=await checkIfKicked();if(kicked){document.getElementById('kickBanner').classList.add('show');}else if(window.gameLocked){unlockGame();}const at=document.querySelector('.tab.active');if(at&&at.dataset.tab==='leaderboardTab'){lbCache=await lbGet();lbKickCache=await kickGet();lbApplyFilter();}},30000);
 window.addEventListener('beforeunload',()=>{if(!resetInProgress)saveGame(true);});
 </script>
 </body>
