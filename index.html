@@ -678,9 +678,105 @@ async function applyUsernameChange(){
   const ALLOWED_CHARS = /^[a-zA-Z0-9_\-]+$/; // letters, numbers, underscores, hyphens
   const ALLOWED_CHARS_MSG = 'Letters, numbers, underscores and hyphens only.';
   const BANNED_NAMES = [
+    // --- IMPERSONATION ---
     'admin','administrator','moderator','mod','owner','dev','developer',
-    'jan','tom','tompearl','nixonwinger','staff','system','bot',
-    'fuck','shit','cunt','nigger','nigga','faggot','retard',
+    'jan','tom','tompearl','nixon','winger','nixonwinger','staff','system',
+    'bot','official','support','helper','operator','superuser','root',
+    'sysop','webmaster','hostmaster','gamemaster','gm','game master',
+
+    // --- RACIAL SLURS ---
+    'nigger','nigga','nigg','negro','negra','nig','niger','negroid',
+    'chink','chinky','gook','jap','jappo','spic','spick','wetback',
+    'beaner','greaser','kraut','fritz','hun','boche','squaw','redskin',
+    'injun','coon','sambo','pickaninny','darky','darkie','golliwog',
+    'zipperhead','raghead','towelhead','camel jockey','sand nigger',
+    'sandnigger','paki','pakis','kike','yid','heeb','hebe','jewboy',
+    'hymie','sheeny','mick','paddy','wop','dago','greaseball','guinea',
+    'polack','bohunk','frog','limey','cracker','whitey','honky','honkey',
+    'redneck','hillbilly','trailer trash','white trash','gypsy','gypo',
+    'gyppо','pikey','cholo','wetback','border hopper','fence hopper',
+    'anchor baby','half breed','halfbreed','mulatto','quadroon','octoroon',
+    'zipperhead','slant','slanteye','slope','nip','flip','monkey',
+    'ape','porch monkey','tree monkey','jungle bunny','spook','jigaboo',
+    'jiggaboo','cunt','cunts','spade','blackie','blacky','yellowskin',
+
+    // --- HOMOPHOBIC / TRANSPHOBIC ---
+    'faggot','fag','fagg','fags','fagot','dyke','dykes','homo','homie',
+    'queer','queers','tranny','trannies','shemale','she male','heshe',
+    'ladyboy','sissy','pansy','poofter','poof','batty boy','battyboy',
+    'bender','pillow biter','carpet muncher','rug muncher','bulldyke',
+    'bull dyke','sodomite','sodomizer','Nancy boy','nancyboy',
+
+    // --- SEXIST / MISOGYNISTIC ---
+    'slut','sluts','slutty','whore','whores','hoe','bitch','bitches',
+    'cunt','skank','skanky','slag','tramp','tart','floozy','strumpet',
+    'trollop','harlot','prostitute','hooker','escort','call girl',
+    'cum dumpster','cumdumpster','cock sleeve','cocksleeve','breeding hole',
+
+    // --- SEXUAL TERMS ---
+    'fuck','fucker','fucked','fucking','fucks','fuk','fuq','fck','phuck',
+    'f u c k','f.u.c.k','f_u_c_k','motherfucker','motherfuck','mofo',
+    'mf','shit','shits','shitting','shitter','shat','bullshit','horseshit',
+    'apeshit','dipshit','shitstain','sh1t','ass','asses','asshole',
+    'arsehole','arse','asshat','asswipe','jackass','dumbass','smartass',
+    'badass','fatass','lazy ass','penis','cock','cocks','dick','dicks',
+    'dickhead','dickface','pussy','pussies','vagina','vaginas','vulva',
+    'clit','clitoris','balls','ballsack','ballsac','nutsack','scrotum',
+    'taint','gooch','grundle','anus','anal','rectum','cum','cums',
+    'cumshot','jizz','jism','semen','spunk','creampie','cream pie',
+    'blowjob','blow job','handjob','hand job','rimjob','rim job',
+    'titty','titties','tits','boobs','boob','knockers','hooters',
+    'jugs','melons','bazookas','areola','nipple','nipples','erection',
+    'boner','hardon','hard on','orgasm','climax','masturbate','masturbation',
+    'wank','wanker','wanking','jerk off','jerkoff','finger bang',
+    'fingerbang','dildo','vibrator','butt plug','buttplug','fleshlight',
+    'onlyfans','only fans','xxx','porn','porno','pornography','hentai',
+    'loli','lolicon','shota','shotacon','incest','rape','rapist','raping',
+    'molest','molester','pedophile','paedophile','pedo','paedo','nonce',
+    'groomer','ephebophile',
+
+    // --- GENERAL INSULTS ---
+    'retard','retarded','ret','tard','spastic','spaz','mong','mongol',
+    'imbecile','moron','idiot','stupid','dumbass','dumbo','dolt',
+    'dimwit','halfwit','nitwit','twit','twat','twats','prick','pricks',
+    'bastard','bastards','wanker','tosser','bellend','bell end','numpty',
+    'muppet','plonker','pillock','nobhead','knob','knobhead','nobber',
+
+    // --- HATE / EXTREMISM ---
+    'nazi','nazis','nazism','naziism','hitler','heil','fuhrer','gestapo',
+    'waffen','ss','kkk','klan','klux','white power','white pride',
+    'white supremacy','white supremacist','whitepower','whitepride',
+    'neonazi','neo nazi','neo-nazi','fascist','fascism','antisemite',
+    'antisemitic','antisemitism','holocaust denier','1488','14 words',
+    'heil hitler','sieg heil','aryan','aryan race','ethnic cleansing',
+    'genocide','jihad','jihadist','jihadism','infidel','crusader',
+    'islamophobe','islamophobia','terrorist','terrorism','extremist',
+
+    // --- VIOLENCE / THREATS ---
+    'kill','killer','killing','murder','murderer','shoot','shooter',
+    'bomb','bomber','bombing','terrorist','terrorism','massacre','slaughter',
+    'torture','torturer','execute','executioner','assassin','assassination',
+    'sniper','hitman','serial killer','mass killer','school shooter',
+    'genocide','lynching','lynch','hang','hanging','stab','stabber',
+    'stabbing','slash','slasher','decapitate','decapitation','behead',
+    'beheading','dismember','mutilate','mutilation',
+
+    // --- DRUGS ---
+    'cocaine','coke','crack','heroin','meth','methamphetamine','crystal',
+    'molly','mdma','ecstasy','lsd','acid','shrooms','mushrooms','weed',
+    'cannabis','marijuana','bong','blunt','joint','spliff','dealer',
+    'drug dealer','drugdealer','pusher','narco','cartel','fentanyl',
+    'opioid','opiate','overdose','junkie','crackhead','tweaker',
+
+    // --- SELF HARM ---
+    'suicide','suicidal','kys','kill yourself','hang yourself','kms',
+    'kill myself','slit','selfharm','self harm','cutter','cutting',
+    'anorexic','anorexia','bulimia','bulimic','starve','starvation',
+
+    // --- LEETSPEAK / COMMON BYPASSES ---
+    'n1gger','n1gga','f4ggot','f4g','sh1t','a55','a55hole','4ss',
+    'b1tch','d1ck','c0ck','p3nis','pu55y','kunt','kum','jizz',
+    'fvck','fvk','phuk','sht','cnt','fck','azz','niqqer','niqqа',
   ];
   // ---- END CONFIG ----
 
