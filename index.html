@@ -1114,8 +1114,9 @@ async function adminCmd(raw){
   fetch(FB_URL+'/kicks.json',{method:'DELETE'}).then(()=>adminOut('✅ All bans lifted.')).catch(e=>adminOut('❌ Failed: '+e));
   return;
 }
-  if(cmd==='give'){
+ if(cmd==='give'){
     if(parts[1]==='all'){state.poops+=1e21;state.totalPoopsEarned+=1e21;updateDisplay();checkAchievements();adminOut('✅ Gave 1 sextillion poops.');}
+    else if(parts[1]==='player'){const target=parts[2];const raw3=parts[3];if(!target||!raw3){adminOut('❌ Usage: give player <username> <amount|all>');return;}const n=raw3==='all'?1e21:parseFloat(raw3);if(!isFinite(n)||n<=0){adminOut('❌ Invalid amount.');return;}const cur=await fbGet('/leaderboard/'+encodeURIComponent(target));if(!cur){adminOut('❌ Player "'+target+'" not found on leaderboard.');return;}const newScore=(cur.score||0)+n;await fbPatch('/leaderboard',{[target]:{...cur,score:newScore}});await fbPatch('/pendingCommands/'+encodeURIComponent(target),{['give_'+Date.now()]:{type:'give',value:n}});adminOut('✅ Gave '+formatNumber(n)+' poops to '+target+'. Will apply next time they load or sync.');lbCache[target]={...cur,score:newScore};lbApplyFilter();}
     else{const n=parseFloat(parts[1]);if(!isFinite(n)||n<=0){adminOut('❌ Invalid amount.');return;}state.poops+=n;state.totalPoopsEarned+=n;updateDisplay();checkAchievements();checkInfinityOverflow();adminOut('✅ Gave '+formatNumber(n)+' poops. Total: '+formatNumber(state.poops));}
     return;
   }
