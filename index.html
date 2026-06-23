@@ -1104,7 +1104,7 @@ function openAdmin(){
 
 
 function adminOut(msg){document.getElementById('adminOutput').innerHTML=msg;}
-function adminCmd(raw){
+async function adminCmd(raw){
   const parts=raw.trim().split(/\s+/),cmd=parts[0].toLowerCase();
   if(cmd==='help'){adminOut('give, ban, unban, unbanall, resetprogress, wipeall, announce, event, prestige, building, upgrade, achieve, givegolden, clear');return;}
   if(cmd==='clear'){adminOut('');return;}
