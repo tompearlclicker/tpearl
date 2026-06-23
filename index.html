@@ -651,7 +651,7 @@ function lockGame(message){
 
   // Stop buttons
   document.querySelectorAll('button').forEach(b=>{
-    b.disabled=true;
+    if(b.id!=='unbanSubmitBtn')b.disabled=true;
   });
 
   // Stop keyboard shortcuts
