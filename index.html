@@ -1238,6 +1238,12 @@ document.addEventListener('keydown',e=>{
   saveGame(true);
   await fetch(FB_URL+'/pendingCommands/'+encodeURIComponent(myUsername)+'.json',{method:'DELETE'});
 }
+  setInterval(async()=>{
+  if(!window.gameLocked)return;
+  const kicks=await kickGet();
+  const k=kicks[myUsername];
+  if(!k||(!k.banned&&Date.now()>=k.until)){unlockGame();loadGame();renderAll();}
+},5000);
 /* ---- INIT ---- */
 document.getElementById('tomImg').addEventListener('click',clickTom);
 setupGoldenPoopHandler();
