@@ -1059,8 +1059,28 @@ async function sha256(msg){
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 function closeAdmin(){const ov=document.getElementById('adminOverlay');if(ov)ov.remove();adminAuthed=false;}
-function openAdmin(){
-  const pwd=prompt('Access code:');
+async function openAdmin(){
+  const pwd=await new Promise(resolve=>{
+  const d=document.createElement('div');
+  d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999999;display:flex;align-items:center;justify-content:center';
+  d.innerHTML=`<div style="background:#0a0a12;border:2px solid #00ff88;border-radius:12px;padding:28px 32px;text-align:center;font-family:Courier New,monospace">
+    <div style="color:#00ff88;font-size:1.1em;font-weight:bold;margin-bottom:14px">💻 Admin Access</div>
+    <input id="adminPwdInput" type="password" placeholder="Enter access code..." style="background:rgba(0,255,136,.07);border:1px solid #00ff88;border-radius:6px;color:#00ff88;font-family:Courier New,monospace;font-size:1em;padding:8px 14px;outline:none;text-align:center;width:220px;letter-spacing:4px">
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
+      <button id="adminPwdBtn" style="background:linear-gradient(135deg,#00cc66,#006633);border:none;color:#fff;font-weight:bold;padding:8px 20px;border-radius:8px;cursor:pointer">Enter</button>
+      <button id="adminPwdCancel" style="background:none;border:1px solid #555;color:#aaa;padding:8px 16px;border-radius:8px;cursor:pointer">Cancel</button>
+    </div>
+    <div id="adminPwdErr" style="color:#ff4444;font-size:.8em;margin-top:8px;min-height:1em"></div>
+  </div>`;
+  document.body.appendChild(d);
+  const input=d.querySelector('#adminPwdInput');
+  const confirm=()=>{resolve(input.value);d.remove();};
+  const cancel=()=>{resolve(null);d.remove();};
+  d.querySelector('#adminPwdBtn').onclick=confirm;
+  d.querySelector('#adminPwdCancel').onclick=cancel;
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')confirm();if(e.key==='Escape')cancel();});
+  setTimeout(()=>input.focus(),50);
+});
   if(!pwd)return;
   sha256(pwd).then(hash=>{
     fbGet('/config/adminHash').then(stored=>{
