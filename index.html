@@ -672,15 +672,31 @@ function renderUsernameChangeUI(){
 }
 
 async function applyUsernameChange(){
+  // ---- USERNAME CONFIG ----
+  const MIN_LENGTH = 4;
+  const MAX_LENGTH = 20;
+  const ALLOWED_CHARS = /^[a-zA-Z0-9_\-]+$/; // letters, numbers, underscores, hyphens
+  const ALLOWED_CHARS_MSG = 'Letters, numbers, underscores and hyphens only.';
+  const BANNED_NAMES = [
+    'admin','administrator','moderator','mod','owner','dev','developer',
+    'jan','tom','tompearl','nixonwinger','staff','system','bot',
+    'fuck','shit','cunt','nigger','nigga','faggot','retard',
+  ];
+  // ---- END CONFIG ----
+
   const input=document.getElementById('usernameInput');
   const err=document.getElementById('usernameErr');
   if(!input)return;
   const newName=input.value.trim().replace(/\s+/g,'_');
-  if(!newName||newName.length<3){err.textContent='⚠️ At least 3 characters.';return;}
-  if(newName.length>24){err.textContent='⚠️ Max 24 characters.';return;}
-  if(!/^[a-zA-Z0-9_]+$/.test(newName)){err.textContent='⚠️ Letters, numbers, underscores only.';return;}
-  if(!confirm('Change username to "'+newName+'"? This can only be done ONCE and cannot be undone.'))return;
 
+  if(!newName||newName.length<MIN_LENGTH){err.textContent='⚠️ At least '+MIN_LENGTH+' characters.';return;}
+  if(newName.length>MAX_LENGTH){err.textContent='⚠️ Max '+MAX_LENGTH+' characters.';return;}
+  if(!ALLOWED_CHARS.test(newName)){err.textContent='⚠️ '+ALLOWED_CHARS_MSG;return;}
+  if(newName.replace(/[^a-zA-Z]/g,'').length<2){err.textContent='⚠️ Must contain at least 2 letters.';return;}
+  if(/^[_\-]|[_\-]$/.test(newName)){err.textContent='⚠️ Cannot start or end with _ or -.';return;}
+  if(/[_\-]{2,}/.test(newName)){err.textContent='⚠️ No consecutive special characters.';return;}
+  const nameLower=newName.toLowerCase().replace(/[_\-]/g,'');
+  if(BANNED_NAMES.some(b=>nameLower===b.toLowerCase()||nameLower.includes(b.toLowerCase()))){err.textContent='⚠️ That username is not allowed.';return;}
   // Remove old entry, set new one
   try{
     await fetch(FB_URL+'/leaderboard/'+encodeURIComponent(myUsername)+'.json',{method:'DELETE'});
