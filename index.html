@@ -1042,7 +1042,6 @@ async function adminAuth(){
     }
   }catch(err){e.textContent='❌ Auth error. Try again.';}
 }
-document.getElementById('adminAuthInput').addEventListener('keydown',e=>{if(e.key==='Enter')adminAuth();});
 function adminOut(msg){document.getElementById('adminOutput').innerHTML=msg;}
 function adminCmd(raw){
   const parts=raw.trim().split(/\s+/),cmd=parts[0].toLowerCase();
