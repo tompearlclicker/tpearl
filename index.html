@@ -1120,7 +1120,7 @@ async function adminCmd(raw){
   if(cmd==='wipeall'){adminWipeAll();return;}
   if(cmd==='unbanall'){
   if(!confirm('Unban ALL players?'))return;
-  fetch(FB_URL+'/kicks.json',{method:'DELETE'}).then(()=>adminOut('✅ All bans lifted.')).catch(e=>adminOut('❌ Failed: '+e));
+  fetch(FB_URL+'/kicks.json',{method:'DELETE'}).then(()=>{lbKickCache={};adminOut('✅ All bans lifted.');renderKickList();}).catch(e=>adminOut('❌ Failed: '+e));
   return;
 }
  if(cmd==='give'){
