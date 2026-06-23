@@ -603,7 +603,7 @@ if(!myUsername){myUsername=generateUsername();localStorage.setItem(USERNAME_KEY,
 
 /* ---- FIREBASE REALTIME DATABASE ---- */
 const FB_URL='https://tompearlclicker-default-rtdb.asia-southeast1.firebasedatabase.app';
-async function fbGet(path){try{const r=await fetch(FB_URL+path+'.json');if(!r.ok)return{};const d=await r.json();return d||{};}catch(e){return{};}}
+async function fbGet(path){try{const r=await fetch(FB_URL+path+'.json');if(!r.ok)return null;const d=await r.json();return d??null;}catch(e){return null;}}
 async function fbSet(path,data){try{await fetch(FB_URL+path+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});}catch(e){}}
 async function fbPatch(path,data){try{await fetch(FB_URL+path+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});}catch(e){}}
 async function lbGet(){return await fbGet('/leaderboard');}
