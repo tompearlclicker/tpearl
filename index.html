@@ -673,18 +673,16 @@ function renderUsernameChangeUI(){
 
 async function applyUsernameChange(){
   // ---- USERNAME CONFIG ----
-  const MIN_LENGTH = 4;
+  const MIN_LENGTH = 7;
   const MAX_LENGTH = 20;
   const ALLOWED_CHARS = /^[a-zA-Z0-9_\-]+$/; // letters, numbers, underscores, hyphens
   const ALLOWED_CHARS_MSG = 'Letters, numbers, underscores and hyphens only.';
   const BANNED_NAMES = [
-    // --- IMPERSONATION ---
     'admin','administrator','moderator','mod','owner','dev','developer',
     'jan','tom','tompearl','nixon','winger','nixonwinger','staff','system',
     'bot','official','support','helper','operator','superuser','root',
     'sysop','webmaster','hostmaster','gamemaster','gm','game master',
 
-  // ---- END CONFIG ----
 ];
   const input=document.getElementById('usernameInput');
   const err=document.getElementById('usernameErr');
