@@ -1305,8 +1305,21 @@ else if(cmd==='approverequest'){
     renderKickList();
   }).catch(e=>adminOut('❌ Failed: '+e));
 }
+ else if(cmd==='setmyname'){
+    const newName=parts[1];
+    if(!newName){adminOut('❌ Usage: setmyname <newname>');return;}
+    try{
+      await fetch(FB_URL+'/leaderboard/'+encodeURIComponent(myUsername)+'.json',{method:'DELETE'});
+    }catch(e){}
+    const oldName=myUsername;
+    myUsername=newName;
+    localStorage.setItem(USERNAME_KEY,myUsername);
+    localStorage.removeItem(USERNAME_CHANGED_KEY);
+    await pushLeaderboard();
+    document.getElementById('playerTag').textContent='👤 '+myUsername;
+    adminOut('✅ Your username changed from "'+oldName+'" to "'+newName+'".');
+  }
   else{adminOut('❌ Unknown command: "'+raw+'". Type help for commands.');}
-}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAdmin();});
 
 const ADMIN_SECRET_PHRASE='nixonwingerazdgpoopghop2';
