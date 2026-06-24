@@ -1204,6 +1204,7 @@ async function openAdmin(){
             <b style="color:#00ff88">listrequests</b> — view unban requests<br>
             <b style="color:#00ff88">approverequest &lt;username&gt;</b> — approve unban<br>
             <b style="color:#00ff88">setmyname &lt;newname&gt;</b> — change your own username (admin only, unlimited)<br>
+            <b style="color:#00ff88">setname &lt;username&gt; &lt;newname&gt;</b> — rename another player<br>
           </div>
         </div>`;
         document.body.appendChild(ov);
@@ -1319,6 +1320,18 @@ else if(cmd==='approverequest'){
     await pushLeaderboard();
     document.getElementById('playerTag').textContent='👤 '+myUsername;
     adminOut('✅ Your username changed from "'+oldName+'" to "'+newName+'".');
+  }
+    else if(cmd==='setname'){
+    const target=parts[1];const newName=parts[2];
+    if(!target||!newName){adminOut('❌ Usage: setname <username> <newname>');return;}
+    const cur=await fbGet('/leaderboard/'+encodeURIComponent(target));
+    if(!cur){adminOut('❌ Player "'+target+'" not found on leaderboard.');return;}
+    await fetch(FB_URL+'/leaderboard/'+encodeURIComponent(target)+'.json',{method:'DELETE'});
+    await fbPatch('/leaderboard',{[newName]:{...cur,ts:Date.now()}});
+    await fbPatch('/pendingCommands/'+encodeURIComponent(target),{['rename_'+Date.now()]:{type:'rename',value:newName}});
+    if(lbCache[target]){lbCache[newName]=lbCache[target];delete lbCache[target];}
+    lbApplyFilter();
+    adminOut('✅ Renamed "'+target+'" to "'+newName+'". Will update on their screen next sync.');
   }
   else{adminOut('❌ Unknown command: "'+raw+'". Type help for commands.');}
 }
