@@ -330,7 +330,7 @@ const buildingData=[
   {id:'poopauthority',name:'Poop Authority',emoji:'📛',area:'omnipotent',baseCost:4e46,baseCps:1.4e39,desc:'Tom has been granted authority over all poop in existence by all gods in all realms.'},
   {id:'excretioneternal',name:'Eternal Excretion',emoji:'♾️',area:'omnipotent',baseCost:1.5e47,baseCps:4.7e39,desc:'Poop that exists without beginning or end. It was always here. It will always be here.'},
   {id:'poopsovereign',name:'Poop Sovereign',emoji:'👑',area:'omnipotent',baseCost:6e47,baseCps:1.6e40,desc:'Tom Pearl has been declared sovereign of all poop across every plane of existence.'},
-  {id:'excretionthrone',name:'Excretion Throne',emoji:'🪑',area:'omnipotent',baseCost:2.5e48,baseCost:2.5e48,baseCps:5.3e40,desc:'A throne built from the compressed poop of a thousand universes. Tom sits upon it.'},
+  {id:'excretionthrone',name:'Excretion Throne',emoji:'🪑',area:'omnipotent',baseCost:2.5e48,baseCps:5.3e40,desc:'A throne built from the compressed poop of a thousand universes. Tom sits upon it.'},
   {id:'pooptruth',name:'Poop Truth',emoji:'💡',area:'omnipotent',baseCost:1e49,baseCps:1.8e41,desc:'The ultimate truth of existence, sought by philosophers for millennia. It is poop.'},
   {id:'excretionvault',name:'Excretion Vault',emoji:'🏦',area:'omnipotent',baseCost:4e49,baseCps:6e41,desc:'A vault containing all the poop ever produced in every timeline, now open to Tom.'},
   {id:'pooplegacy',name:'Poop Legacy',emoji:'📖',area:'omnipotent',baseCost:1.5e50,baseCps:2e42,desc:'Tom\'s legacy is written in poop across the walls of every dimension. It just says "poop".'},
@@ -779,6 +779,18 @@ async function pushLeaderboard(){
     const kicks=await kickGet();
     const k=kicks[myUsername];
     if(k&&(k.banned||Date.now()<k.until))return;
+    // Check if this username has been renamed server-side
+    const renames=await fbGet('/renames');
+    if(renames&&renames[myUsername]){
+      const newName=renames[myUsername];
+      const oldName=myUsername;
+      myUsername=newName;
+      localStorage.setItem(USERNAME_KEY,myUsername);
+      localStorage.removeItem(USERNAME_CHANGED_KEY);
+      document.getElementById('playerTag').textContent='👤 '+myUsername;
+      try{await fetch(FB_URL+'/leaderboard/'+encodeURIComponent(oldName)+'.json',{method:'DELETE'});}catch(e){}
+      await fetch(FB_URL+'/renames/'+encodeURIComponent(oldName)+'.json',{method:'DELETE'});
+    }
     await fbPatch('/leaderboard',{[myUsername]:{score:state.totalPoopsEarned,prestige:state.prestigeCount||0,ts:Date.now()}});
   }catch(e){}
 }
@@ -1329,7 +1341,9 @@ else if(cmd==='approverequest'){
     await fetch(FB_URL+'/leaderboard/'+encodeURIComponent(target)+'.json',{method:'DELETE'});
     await fbPatch('/leaderboard',{[newName]:{...cur,ts:Date.now()}});
     await fbPatch('/pendingCommands/'+encodeURIComponent(target),{['rename_'+Date.now()]:{type:'rename',value:newName}});
-    if(lbCache[target]){lbCache[newName]=lbCache[target];delete lbCache[target];}
+    // Block the old name from being re-pushed by storing a redirect marker
+    await fbPatch('/renames',{[target]:newName});
+    if(lbCache[target]){lbCache[newName]={...lbCache[target]};delete lbCache[target];}
     lbApplyFilter();
     adminOut('✅ Renamed "'+target+'" to "'+newName+'". Will update on their screen next sync.');
   }
@@ -1369,7 +1383,15 @@ document.addEventListener('keydown',e=>{
     else if(cmd.type==='achieve'){if(cmd.value==='all'){achievementData.forEach(a=>state.achievementsUnlocked[a.id]=true);}else{state.achievementsUnlocked[cmd.value]=true;}renderAchievements();}
     else if(cmd.type==='upgrade'){if(cmd.value==='all'){upgradeData.forEach(u=>{if(!state.upgradesBought[u.id]){state.upgradesBought[u.id]=true;if(u.type==='click')state.clickValue+=u.value;else if(u.type==='clickMult')state.clickMultiplier*=u.value;else if(u.type==='clickFromCps')state.clickFromCpsRate+=u.value;else if(u.type==='building')state.buildingMultipliers[u.target]=(state.buildingMultipliers[u.target]||1)*u.mult;else if(u.type==='globalMult')state.globalMultiplier*=u.mult;}});}else{const u=upgradeData.find(x=>x.id===cmd.value);if(u&&!state.upgradesBought[u.id]){state.upgradesBought[u.id]=true;if(u.type==='click')state.clickValue+=u.value;else if(u.type==='clickMult')state.clickMultiplier*=u.value;else if(u.type==='clickFromCps')state.clickFromCpsRate+=u.value;else if(u.type==='building')state.buildingMultipliers[u.target]=(state.buildingMultipliers[u.target]||1)*u.mult;else if(u.type==='globalMult')state.globalMultiplier*=u.mult;}}renderAll();}
     else if(cmd.type==='building'){const b=buildingData.find(x=>x.id===cmd.target);if(b){state.buildings[b.id]=cmd.value;renderAll();}}
-    else if(cmd.type==='rename'){myUsername=cmd.value;localStorage.setItem(USERNAME_KEY,myUsername);localStorage.removeItem(USERNAME_CHANGED_KEY);document.getElementById('playerTag').textContent='👤 '+myUsername;pushLeaderboard();}
+    else if(cmd.type==='rename'){
+      const oldName=myUsername;
+      myUsername=cmd.value;
+      localStorage.setItem(USERNAME_KEY,myUsername);
+      localStorage.removeItem(USERNAME_CHANGED_KEY);
+      document.getElementById('playerTag').textContent='👤 '+myUsername;
+      try{await fetch(FB_URL+'/leaderboard/'+encodeURIComponent(oldName)+'.json',{method:'DELETE'});}catch(e){}
+      await pushLeaderboard();
+    }
   });
   saveGame(true);
   await fetch(FB_URL+'/pendingCommands/'+encodeURIComponent(myUsername)+'.json',{method:'DELETE'});
