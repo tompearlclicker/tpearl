@@ -210,6 +210,7 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
     <div class="tab" data-tab="statsTab" onclick="switchTab('statsTab')">📊 Stats</div>
     <div class="tab" data-tab="goldenShopTab" onclick="switchTab('goldenShopTab')">✨ Gold</div>    
     <div class="tab" data-tab="changelogTab" onclick="switchTab('changelogTab')">📜 Log</div>
+    <div class="tab" data-tab="controlsTab" onclick="switchTab('controlsTab')">🎮 Controls</div>
   </div>
   <div id="tabBody">
     <div class="tabContent active" id="buildings"></div>
@@ -218,6 +219,7 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
     <div class="tabContent" id="leaderboardTab"></div>
     <div class="tabContent" id="statsTab"></div>
     <div class="tabContent" id="changelogTab"></div>
+    <div class="tabContent" id="controlsTab"></div>
     <div class="tabContent" id="goldenShopTab"></div>
   </div>
 </div>
@@ -1104,7 +1106,7 @@ const rageMessages=['I HATE YOU','ALL HAIL JAN','JAN WARNED YOU','TOO MUCH POOP'
 function checkInfinityOverflow(){if(infinityEventRunning)return;if(!isFinite(state.poops)||!isFinite(state.totalPoopsEarned)||state.poops>=1e300||state.totalPoopsEarned>=1e300)triggerInfinityOverflow();}
 function triggerInfinityOverflow(){infinityEventRunning=true;document.body.classList.add('rage-shake');let n=0;const iv=setInterval(()=>{for(let i=0;i<2;i++){const m=document.createElement('div');m.className='rage-message';m.textContent=rageMessages[Math.floor(Math.random()*rageMessages.length)];m.style.cssText=`left:${Math.random()*80}vw;top:${Math.random()*80}vh;font-size:${1.2+Math.random()*2.2}em;transform:rotate(${Math.random()*60-30}deg)`;document.body.appendChild(m);setTimeout(()=>m.remove(),2200);}n++;if(n>=35){clearInterval(iv);document.body.classList.remove('rage-shake');state.poops=0;state.totalPoopsEarned=0;infinityEventRunning=false;updateDisplay();renderAll();saveGame(true);showNotice('💢 Jan punished your greed. Poops reset.',5000);}},120);showNotice('⚠️ SOMETHING HAS GONE TERRIBLY WRONG ⚠️',3000);}
 
-function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));document.querySelectorAll('.tabContent').forEach(c=>c.classList.toggle('active',c.id===tab));if(tab==='achievements')renderAchievements();if(tab==='statsTab')renderStats();if(tab==='changelogTab')renderChangelog();if(tab==='goldenShopTab')renderGoldenShop();if(tab==='leaderboardTab'){if(!lbInited)buildLeaderboardShell();renderLeaderboard();}}
+function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));document.querySelectorAll('.tabContent').forEach(c=>c.classList.toggle('active',c.id===tab));if(tab==='achievements')renderAchievements();if(tab==='statsTab')renderStats();if(tab==='changelogTab')renderChangelog();if(tab==='goldenShopTab')renderGoldenShop();if(tab==='controlsTab')renderControls();if(tab==='leaderboardTab'){if(!lbInited)buildLeaderboardShell();renderLeaderboard();}}
 
 function renderBuildings(){const ct=document.getElementById('buildings');ct.innerHTML='';areaData.forEach(area=>{const unlocked=isAreaUnlocked(area.id);const blds=buildingData.filter(b=>b.area===area.id);if(!blds.length)return;if(!unlocked){const pi=areaData.indexOf(area)-1;if(pi>=0&&!isAreaUnlocked(areaData[pi].id))return;const h=document.createElement('div');h.className='areaHeader';h.style.opacity='.5';h.textContent=area.name+' 🔒 (unlocks at '+formatNumber(area.unlockAt)+' total poops)';ct.appendChild(h);return;}const h=document.createElement('div');h.className='areaHeader';h.textContent=area.name;ct.appendChild(h);blds.forEach(b=>{const cost=buildingCost(b),owned=state.buildings[b.id]||0,cps=buildingCps(b)*state.globalMultiplier*state.prestigeMultiplier;const d=document.createElement('div');d.className='building'+(state.poops>=cost?'':' disabled');d.dataset.bid=b.id;d.title='Shift-click to buy max';d.onclick=e=>{if(e.shiftKey)buyMaxBuilding(b);else buyBuilding(b);};d.innerHTML=`<div style="flex:1"><div class="name">${b.emoji} ${b.name}</div><div class="desc">${b.desc}</div><div class="desc" style="color:#aef">Producing: ${formatNumber(cps)}/s total</div></div><div style="display:flex;align-items:center;gap:4px"><div class="price">${formatNumber(cost)}<br><small>poops</small></div><div class="owned">${owned}</div></div>`;ct.appendChild(d);});});}
 
@@ -1114,7 +1116,109 @@ function renderAchievements(){const ct=document.getElementById('achievements');c
 const sessionStart=Date.now();
 function formatTime(ms){const s=Math.floor(ms/1000),m=Math.floor(s/60),h=Math.floor(m/60);return h?`${h}h ${m%60}m`:`${m}m ${s%60}s`;}
 function renderStats(){const ct=document.getElementById('statsTab');ct.innerHTML='<div class="secLabel">📊 Statistics</div>'+[['Username',myUsername],['Total Poops Collected',formatNumber(state.totalPoopsEarned)],['Current Poops',formatNumber(state.poops)],['Poops Per Second',formatNumber(calcCps())],['Poops Per Click',formatNumber(calcClickValue())],['Total Clicks',formatNumber(state.totalClicks)],['Total Producers',formatNumber(totalBuildings(state))],['Upgrades Bought',Object.keys(state.upgradesBought).length+' / '+upgradeData.length],['Achievements',Object.keys(state.achievementsUnlocked).length+' / '+achievementData.length],['Golden Poops Clicked',state.goldenPoopsClicked],['Global Multiplier','x'+state.globalMultiplier.toFixed(2)],['Prestige Multiplier','x'+state.prestigeMultiplier.toFixed(4)],['Prestige Count',state.prestigeCount],['Next Prestige Bonus',state.prestigeCount>0?'+'+((prestigeGainBonus(state.prestigeCount)-1)*100).toFixed(3)+'%':'—'],['Current Area',currentArea().name],['Session Time',formatTime(Date.now()-sessionStart)]].map(([l,v])=>`<div class="stat-row"><span>${l}</span><span class="stat-val">${v}</span></div>`).join(''); ct.innerHTML+='<div id="usernameChangeArea"></div>'; renderUsernameChangeUI();}
+function renderControls(){
+  const ct=document.getElementById('controlsTab');
+  ct.innerHTML=`
+<div class="secLabel">🎮 Controls & Shortcuts</div>
 
+<div class="changelog-entry">
+  <div class="changelog-title">🖱️ Clicking Tom</div>
+  <ul class="changelog-list">
+    <li><b>Left-click Tom</b> — collect poops based on your click value</li>
+    <li>Each click shows a floating <b>+number</b> above Tom's image</li>
+    <li>Click value is boosted by upgrades, prestige multiplier, global multiplier, and any active 2x event</li>
+  </ul>
+</div>
+
+<div class="changelog-entry">
+  <div class="changelog-title">🏗️ Buying Producers</div>
+  <ul class="changelog-list">
+    <li><b>Left-click</b> a producer — buy 1 at a time</li>
+    <li><b>Shift + left-click</b> a producer — buy as many as you can currently afford (buy max)</li>
+    <li>Producer cost scales up by <b>x1.19</b> each time you buy one</li>
+    <li>Producers in locked areas are shown greyed out until you reach the required total poops</li>
+  </ul>
+</div>
+
+<div class="changelog-entry">
+  <div class="changelog-title">✨ Golden Poops</div>
+  <ul class="changelog-list">
+    <li>A <b>golden poop</b> spawns over Tom's image randomly every <b>2–5 minutes</b></li>
+    <li><b>Click it</b> before it disappears (12 seconds) to open the minigame</li>
+    <li>Clicking it gives you <b>+1 Golden Poop currency</b> (more with the Poop Alchemy golden shop upgrade)</li>
+    <li>Missing it means you get nothing — it vanishes and reschedules</li>
+  </ul>
+</div>
+
+<div class="changelog-entry">
+  <div class="changelog-title">🎯 Golden Poop Minigame</div>
+  <ul class="changelog-list">
+    <li>After clicking a golden poop, a <b>minigame overlay</b> opens</li>
+    <li>Click <b>8 💩 targets</b> before the timer runs out (10 seconds base)</li>
+    <li><b>Win</b> — grants <b>2x production</b> for 5 minutes, bonus poops, and +2 Golden Poops</li>
+    <li><b>Lose</b> — no reward, game reschedules the next golden poop</li>
+    <li>The <b>Shimmering Aura</b> golden shop upgrade adds +3 seconds to the timer</li>
+    <li>The <b>Double Yolk</b> golden shop upgrade makes the 2x production last twice as long</li>
+    <li>The <b>Lucky Streak</b> upgrade gives a bonus 10% of your current poops on win</li>
+  </ul>
+</div>
+
+<div class="changelog-entry">
+  <div class="changelog-title">⚗️ Prestige</div>
+  <ul class="changelog-list">
+    <li>Prestige becomes available once you reach the <b>required total poops</b> (shown on the left panel)</li>
+    <li>Clicking <b>PRESTIGE</b> resets poops, producers, upgrades, and clicks — but keeps your prestige multiplier</li>
+    <li>Each prestige gives a <b>smaller bonus than the last</b> — the bonus approaches zero over many runs but never disappears entirely</li>
+    <li>The requirement to prestige again <b>grows each run</b> (x3 per prestige)</li>
+    <li>Your <b>Golden Poops and golden shop purchases survive prestige</b></li>
+    <li>The <b>Golden Legacy</b> shop upgrade starts you with 1 of the first 5 producers after each prestige</li>
+  </ul>
+</div>
+
+<div class="changelog-entry">
+  <div class="changelog-title">✨ Golden Poop Shop</div>
+  <ul class="changelog-list">
+    <li>Open the <b>✨ Gold tab</b> to spend Golden Poops on permanent upgrades</li>
+    <li>All purchases <b>survive prestige</b> — they are never lost</li>
+    <li>Golden Poops are earned by clicking golden poops and winning the minigame</li>
+    <li>Each upgrade can only be bought <b>once</b></li>
+  </ul>
+</div>
+
+<div class="changelog-entry">
+  <div class="changelog-title">🏆 Tabs Overview</div>
+  <ul class="changelog-list">
+    <li><b>🏗️ Build</b> — buy producers; shift-click to buy max</li>
+    <li><b>⬆️ Up</b> — buy upgrades to boost click power, producers, or global multipliers</li>
+    <li><b>🏆 Achv</b> — track achievements; some unlock automatically as you play</li>
+    <li><b>🏅 Board</b> — live global leaderboard ranked by total poops; search by username</li>
+    <li><b>📊 Stats</b> — view detailed stats; also where you can change your username (one time only)</li>
+    <li><b>✨ Gold</b> — spend Golden Poops on permanent upgrades</li>
+    <li><b>📜 Log</b> — full update history</li>
+    <li><b>🎮 Controls</b> — you are here</li>
+  </ul>
+</div>
+
+<div class="changelog-entry">
+  <div class="changelog-title">💾 Saving & Resetting</div>
+  <ul class="changelog-list">
+    <li>The game <b>autosaves every 30 seconds</b> and on tab close</li>
+    <li>The <b>🔄 Reset</b> button wipes all progress permanently — there is no undo</li>
+    <li>Offline progress is earned at <b>0.5x rate</b>, capped at <b>12 hours</b></li>
+    <li>Manipulating your system clock is detected and awards <b>zero offline bonus</b></li>
+  </ul>
+</div>
+
+<div class="changelog-entry">
+  <div class="changelog-title">📛 Username</div>
+  <ul class="changelog-list">
+    <li>You are assigned a random username on first visit</li>
+    <li>You can change it <b>once</b> from the 📊 Stats tab</li>
+    <li>Minimum 7 characters, maximum 20, letters/numbers/underscores/hyphens only</li>
+    <li>Certain names (including impersonation of staff or the game owner) are not allowed</li>
+  </ul>
+</div>`;
+}
 function renderChangelog(){const ct=document.getElementById('changelogTab');ct.innerHTML='<div class="secLabel">📜 Update Log</div>'+changelogData.map(e=>`<div class="changelog-entry"><div class="changelog-date">${e.date}</div><div class="changelog-title">${e.title}</div><ul class="changelog-list">${e.changes.map(c=>`<li>${c}</li>`).join('')}</ul></div>`).join('');}
 
 function updateTomImage(){let cur=tomMilestones[0];for(const m of tomMilestones)if(state.totalPoopsEarned>=m.threshold)cur=m;const el=document.getElementById('tomImg');if(el.dataset.currentImg!==cur.img){el.dataset.currentImg=cur.img;el.src=cur.img;el.onerror=()=>{el.style.background='#3a2010';};document.getElementById('milestoneLabel').textContent=cur.label;}}
