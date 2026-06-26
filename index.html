@@ -154,6 +154,22 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
 #kickBanner.show{display:flex}
 #kickMsg{font-size:2em;font-weight:bold;color:#ff4444;text-shadow:0 0 20px red;text-align:center}
 #kickTimer{font-size:1.2em;color:#ffaaaa}
+#chatTab{display:flex;flex-direction:column;height:100%;min-height:0}
+#chatMessages{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:5px;min-height:0}
+.chat-msg{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 9px;font-size:.8em;line-height:1.45;word-break:break-word}
+.chat-msg.chat-me{background:rgba(255,236,139,.1);border-color:rgba(255,236,139,.25)}
+.chat-msg.chat-system{background:rgba(255,100,100,.08);border-color:rgba(255,100,100,.2);text-align:center;font-size:.74em;opacity:.8}
+.chat-name{font-weight:bold;color:#ffec8b;margin-right:5px}
+.chat-name.chat-name-me{color:#aef}
+.chat-time{font-size:.7em;opacity:.5;margin-left:4px}
+.chat-text{opacity:.9}
+#chatInputRow{display:flex;gap:6px;padding:8px;border-top:1px solid rgba(255,255,255,.1);flex-shrink:0}
+#chatInput{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,236,139,.3);border-radius:7px;color:#fff;font-family:'Comic Sans MS','Trebuchet MS',sans-serif;font-size:.82em;padding:7px 10px;outline:none;resize:none;height:36px;line-height:1.3}
+#chatInput::placeholder{color:rgba(255,255,255,.35)}
+#chatSendBtn{background:linear-gradient(135deg,#6a3a1c,#8a5a2c);border:2px solid #ffec8b;color:#fff;border-radius:7px;padding:0 13px;cursor:pointer;font-size:.82em;font-weight:bold;flex-shrink:0}
+#chatSendBtn:hover{background:linear-gradient(135deg,#8a5a2c,#aa7a4c)}
+#chatSendBtn:disabled{opacity:.4;cursor:not-allowed}
+#chatStatus{font-size:.7em;opacity:.5;padding:2px 8px 4px;text-align:right;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -213,6 +229,7 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
     <div class="tab" data-tab="goldenShopTab" onclick="switchTab('goldenShopTab')">✨ Gold</div>    
     <div class="tab" data-tab="changelogTab" onclick="switchTab('changelogTab')">📜 Log</div>
     <div class="tab" data-tab="controlsTab" onclick="switchTab('controlsTab')">🎮 Controls</div>
+    <div class="tab" data-tab="chatTab" onclick="switchTab('chatTab')">💬 Chat</div>
   </div>
   <div id="tabBody">
     <div class="tabContent active" id="buildings"></div>
@@ -223,6 +240,15 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
     <div class="tabContent" id="changelogTab"></div>
     <div class="tabContent" id="controlsTab"></div>
     <div class="tabContent" id="goldenShopTab"></div>
+    <div class="tabContent" id="goldenShopTab"></div>
+    <div class="tabContent" id="chatTab">
+    <div id="chatMessages"></div>
+    <div id="chatStatus">connecting...</div>
+    <div id="chatInputRow">
+      <input id="chatInput" placeholder="Type a message..." maxlength="200" autocomplete="off">
+      <button id="chatSendBtn" onclick="chatSend()">Send</button>
+    </div>
+  </div>
   </div>
 </div>
 </div>
@@ -1108,7 +1134,7 @@ const rageMessages=['I HATE YOU','ALL HAIL JAN','JAN WARNED YOU','TOO MUCH POOP'
 function checkInfinityOverflow(){if(infinityEventRunning)return;if(!isFinite(state.poops)||!isFinite(state.totalPoopsEarned)||state.poops>=1e300||state.totalPoopsEarned>=1e300)triggerInfinityOverflow();}
 function triggerInfinityOverflow(){infinityEventRunning=true;document.body.classList.add('rage-shake');let n=0;const iv=setInterval(()=>{for(let i=0;i<2;i++){const m=document.createElement('div');m.className='rage-message';m.textContent=rageMessages[Math.floor(Math.random()*rageMessages.length)];m.style.cssText=`left:${Math.random()*80}vw;top:${Math.random()*80}vh;font-size:${1.2+Math.random()*2.2}em;transform:rotate(${Math.random()*60-30}deg)`;document.body.appendChild(m);setTimeout(()=>m.remove(),2200);}n++;if(n>=35){clearInterval(iv);document.body.classList.remove('rage-shake');state.poops=0;state.totalPoopsEarned=0;infinityEventRunning=false;updateDisplay();renderAll();saveGame(true);showNotice('💢 Jan punished your greed. Poops reset.',5000);}},120);showNotice('⚠️ SOMETHING HAS GONE TERRIBLY WRONG ⚠️',3000);}
 
-function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));document.querySelectorAll('.tabContent').forEach(c=>c.classList.toggle('active',c.id===tab));if(tab==='achievements')renderAchievements();if(tab==='statsTab')renderStats();if(tab==='changelogTab')renderChangelog();if(tab==='goldenShopTab')renderGoldenShop();if(tab==='controlsTab')renderControls();if(tab==='leaderboardTab'){if(!lbInited)buildLeaderboardShell();renderLeaderboard();}}
+function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));document.querySelectorAll('.tabContent').forEach(c=>c.classList.toggle('active',c.id===tab));if(tab==='achievements')renderAchievements();if(tab==='statsTab')renderStats();if(tab==='changelogTab')renderChangelog();if(tab==='goldenShopTab')renderGoldenShop();if(tab==='controlsTab')renderControls();if(tab==='leaderboardTab'){if(!lbInited)buildLeaderboardShell();renderLeaderboard();}if(tab==='chatTab')chatInit();}
 
 function renderBuildings(){const ct=document.getElementById('buildings');ct.innerHTML='';areaData.forEach(area=>{const unlocked=isAreaUnlocked(area.id);const blds=buildingData.filter(b=>b.area===area.id);if(!blds.length)return;if(!unlocked){const pi=areaData.indexOf(area)-1;if(pi>=0&&!isAreaUnlocked(areaData[pi].id))return;const h=document.createElement('div');h.className='areaHeader';h.style.opacity='.5';h.textContent=area.name+' 🔒 (unlocks at '+formatNumber(area.unlockAt)+' total poops)';ct.appendChild(h);return;}const h=document.createElement('div');h.className='areaHeader';h.textContent=area.name;ct.appendChild(h);blds.forEach(b=>{const cost=buildingCost(b),owned=state.buildings[b.id]||0,cps=buildingCps(b)*state.globalMultiplier*state.prestigeMultiplier;const d=document.createElement('div');d.className='building'+(state.poops>=cost?'':' disabled');d.dataset.bid=b.id;d.title='Shift-click to buy max';d.onclick=e=>{if(e.shiftKey)buyMaxBuilding(b);else buyBuilding(b);};d.innerHTML=`<div style="flex:1"><div class="name">${b.emoji} ${b.name}</div><div class="desc">${b.desc}</div><div class="desc" style="color:#aef">Producing: ${formatNumber(cps)}/s total</div></div><div style="display:flex;align-items:center;gap:4px"><div class="price">${formatNumber(cost)}<br><small>poops</small></div><div class="owned">${owned}</div></div>`;ct.appendChild(d);});});}
 
@@ -1320,6 +1346,8 @@ async function openAdmin(){
             <b style="color:#00ff88">approverequest &lt;username&gt;</b> — approve unban<br>
             <b style="color:#00ff88">setmyname &lt;newname&gt;</b> — change your own username (admin only, unlimited)<br>
             <b style="color:#00ff88">setname &lt;username&gt; &lt;newname&gt;</b> — rename another player<br>
+            <b style="color:#00ff88">clearchat</b> — wipe all chat messages<br>
+            <b style="color:#00ff88">deletechat &lt;key&gt;</b> — delete one message<br>
           </div>
         </div>`;
         document.body.appendChild(ov);
@@ -1400,6 +1428,20 @@ else if(cmd==='givegolden'){if(parts[1]==='player'){const target=parts[2];const 
   else if(cmd==='ban'){   const u=parts[1];if(!u){adminOut('❌ Usage: ban <username>');return;}   fbPatch('/kicks',{[u]:{until:9999999999999,kickedAt:Date.now(),banned:true}}).then(async()=>{     await fetch(FB_URL+'/leaderboard/'+encodeURIComponent(u)+'.json',{method:'DELETE'});     delete lbCache[u];lbApplyFilter();     adminOut('🚫 Banned and removed from leaderboard: '+u);   }); }
   else if(cmd==='unban'){const u=parts[1];if(!u){adminOut('❌ Usage: unban <username>');return;}fbPatch('/kicks',{[u]:{until:0,kickedAt:0,banned:false}}).then(()=>adminOut('✅ Unbanned: '+u));}
   else if(cmd==='resetprogress'){const u=parts[1];if(!u){adminOut('❌ Usage: resetprogress <username>');return;}fetch(FB_URL+'/leaderboard/'+encodeURIComponent(u)+'.json',{method:'DELETE'}).then(()=>{delete lbCache[u];lbApplyFilter();adminOut('🗑️ Removed from leaderboard: '+u);}).catch(e=>adminOut('❌ Failed: '+e));}
+  else if(cmd==='deletechat'){
+  const key=parts[1];
+  if(!key){adminOut('❌ Usage: deletechat <messageKey>');return;}
+  await fetch(FB_URL+'/chat/'+key+'.json',{method:'DELETE'});
+  adminOut('🗑️ Deleted chat message: '+key);
+}
+else if(cmd==='clearchat'){
+  if(!confirm('Delete ALL chat messages?'))return;
+  await fetch(FB_URL+'/chat.json',{method:'DELETE'});
+  chatRenderedIds.clear();
+  const box=document.getElementById('chatMessages');
+  if(box)box.innerHTML='';
+  adminOut('💥 Chat cleared.');
+}
   else if(cmd==='list'){
     if(parts[1]==='upgrades')adminOut(upgradeData.map(u=>u.id+' — '+u.name).join('\n'));
     else if(parts[1]==='achievements')adminOut(achievementData.map(a=>a.id+' — '+a.name).join('\n'));
@@ -1505,6 +1547,143 @@ document.addEventListener('keydown',e=>{
   const k=kicks[myUsername];
   if(!k||(!k.banned&&Date.now()>=k.until)){unlockGame();loadGame();renderAll();}
 },5000);
+  /* ---- GLOBAL CHAT ---- */
+const CHAT_MAX_MESSAGES=60;
+const CHAT_RATE_LIMIT_MS=2500;
+const CHAT_BANNED_WORDS=['nigger','nigga','faggot','chink','spic','kike','cunt'];
+let chatLastSent=0,chatListener=null,chatRenderedIds=new Set(),chatInitDone=false;
+
+function chatFilterText(t){
+  let s=t.trim().slice(0,200);
+  CHAT_BANNED_WORDS.forEach(w=>{const re=new RegExp(w,'gi');s=s.replace(re,'****');});
+  return s;
+}
+
+function chatTimeStr(ts){
+  const d=new Date(ts),h=d.getHours(),m=d.getMinutes();
+  return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;
+}
+
+function chatAppendMessage(id,data,prepend){
+  const box=document.getElementById('chatMessages');
+  if(!box||chatRenderedIds.has(id))return;
+  chatRenderedIds.add(id);
+  const isMe=data.username===myUsername;
+  const isSystem=data.type==='system';
+  const div=document.createElement('div');
+  div.className='chat-msg'+(isMe?' chat-me':isSystem?' chat-system':'');
+  div.dataset.msgId=id;
+  if(isSystem){
+    div.innerHTML=`<span class="chat-text">${data.text}</span><span class="chat-time">${chatTimeStr(data.ts)}</span>`;
+  }else{
+    div.innerHTML=`<span class="chat-name${isMe?' chat-name-me':''}">${data.username}</span><span class="chat-text">${data.text}</span><span class="chat-time">${chatTimeStr(data.ts)}</span>`;
+  }
+  if(prepend)box.insertBefore(div,box.firstChild);
+  else box.appendChild(div);
+}
+
+async function chatInit(){
+  if(chatInitDone)return;
+  chatInitDone=true;
+  const box=document.getElementById('chatMessages');
+  if(!box)return;
+  box.innerHTML='';
+  chatRenderedIds.clear();
+
+  // Load last 60 messages via REST (ordered by ts)
+  try{
+    const r=await fetch(FB_URL+'/chat.json?orderBy="ts"&limitToLast='+CHAT_MAX_MESSAGES);
+    const data=await r.json();
+    if(data&&typeof data==='object'){
+      const entries=Object.entries(data).sort((a,b)=>a[1].ts-b[1].ts);
+      entries.forEach(([id,msg])=>chatAppendMessage(id,msg,false));
+      box.scrollTop=box.scrollHeight;
+    }
+  }catch(e){}
+
+  // Start SSE-style long-poll via timestamp
+  chatStartPolling();
+}
+
+let chatPollInterval=null;
+function chatStartPolling(){
+  if(chatPollInterval)return;
+  chatPollInterval=setInterval(async()=>{
+    if(document.hidden)return;
+    const at=document.querySelector('.tab.active');
+    if(!at||at.dataset.tab!=='chatTab')return;
+    try{
+      const r=await fetch(FB_URL+'/chat.json?orderBy="ts"&limitToLast='+CHAT_MAX_MESSAGES);
+      const data=await r.json();
+      if(!data||typeof data!=='object')return;
+      const box=document.getElementById('chatMessages');
+      const wasBottom=box.scrollHeight-box.scrollTop-box.clientHeight<60;
+      const entries=Object.entries(data).sort((a,b)=>a[1].ts-b[1].ts);
+      let added=false;
+      entries.forEach(([id,msg])=>{if(!chatRenderedIds.has(id)){chatAppendMessage(id,msg,false);added=true;}});
+      if(added&&wasBottom)box.scrollTop=box.scrollHeight;
+      // Trim old messages in DOM to keep it snappy
+      const msgs=box.querySelectorAll('.chat-msg');
+      if(msgs.length>CHAT_MAX_MESSAGES)for(let i=0;i<msgs.length-CHAT_MAX_MESSAGES;i++)msgs[i].remove();
+    }catch(e){}
+  },3000);
+}
+
+async function chatSend(){
+  if(window.gameLocked)return;
+  const input=document.getElementById('chatInput');
+  const btn=document.getElementById('chatSendBtn');
+  const status=document.getElementById('chatStatus');
+  const raw=input.value.trim();
+  if(!raw)return;
+  const now=Date.now();
+  if(now-chatLastSent<CHAT_RATE_LIMIT_MS){
+    status.textContent='⏳ slow down a bit...';
+    setTimeout(()=>status.textContent='',1500);
+    return;
+  }
+  // Check kick status
+  const kicks=await kickGet().catch(()=>null);
+  if(kicks&&kicks[myUsername]&&(kicks[myUsername].banned||Date.now()<kicks[myUsername].until)){
+    status.textContent='🚫 you are banned from chat';
+    return;
+  }
+  const text=chatFilterText(raw);
+  if(!text)return;
+  chatLastSent=now;
+  input.value='';
+  btn.disabled=true;
+  setTimeout(()=>btn.disabled=false,CHAT_RATE_LIMIT_MS);
+  const msg={username:myUsername,text,ts:now,score:Math.floor(state.totalPoopsEarned)};
+  try{
+    await fetch(FB_URL+'/chat.json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msg)});
+    status.textContent='';
+    // Prune old messages (keep last 60)
+    pruneChat();
+  }catch(e){
+    status.textContent='❌ failed to send';
+    setTimeout(()=>status.textContent='',2000);
+  }
+}
+
+async function pruneChat(){
+  try{
+    const r=await fetch(FB_URL+'/chat.json?orderBy="ts"&limitToFirst=9999');
+    const data=await r.json();
+    if(!data)return;
+    const entries=Object.entries(data).sort((a,b)=>a[1].ts-b[1].ts);
+    if(entries.length<=CHAT_MAX_MESSAGES)return;
+    const toDelete=entries.slice(0,entries.length-CHAT_MAX_MESSAGES);
+    await Promise.all(toDelete.map(([id])=>fetch(FB_URL+'/chat/'+id+'.json',{method:'DELETE'})));
+  }catch(e){}
+}
+
+// Wire up enter key
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp=document.getElementById('chatInput');
+  if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chatSend();}});
+});
+  
 /* ---- INIT ---- */
 document.getElementById('tomImg').addEventListener('click',clickTom);
 setupGoldenPoopHandler();
