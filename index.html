@@ -196,6 +196,8 @@ body.rage-shake{animation:rageBodyShake .15s linear infinite}
   <div id="prestigeArea">
     <button id="prestigeBtn" onclick="doPrestige()">⚗️ PRESTIGE (gain x<span id="prestigeMult">?</span> bonus)</button>
     <div id="prestigeCount"></div>
+    <button id="autoPrestigeBtn" onclick="toggleAutoPrestige()" style="margin-top:5px;background:linear-gradient(135deg,#1a3a1a,#2a5a2a);border:2px solid #4a8a4a;color:#aaffaa;padding:5px 13px;border-radius:7px;cursor:pointer;font-weight:bold;font-size:.78em;transition:background .2s,border-color .2s">🔁 Auto-Prestige: OFF</button>
+    <div id="autoPrestigeLabel" style="font-size:.72em;opacity:.65;margin-top:2px;min-height:1em"></div>
   </div>
   <div id="saveBtns">
     <button class="ctrl" onclick="resetGame()">🔄 Reset</button>
@@ -1512,6 +1514,7 @@ setupGoldenPoopHandler();
   loadGame();
   renderAll();
   await checkPendingCommands();
+  if(state.autoPrestige){toggleAutoPrestige();}
 })();
 if(state.doubleProdUntil&&state.doubleProdUntil>Date.now()){doubleProdInterval=setInterval(refreshDoubleProdLabel,1000);refreshDoubleProdLabel();}
 scheduleGoldenPoop();
@@ -1533,7 +1536,36 @@ scheduleGoldenPoop();
 })();
 const newsEl=document.getElementById('tickerInner');
 setInterval(()=>{newsEl.textContent='💩 '+newsLines[Math.floor(Math.random()*newsLines.length)]+' 💩';},22000);
-setInterval(()=>{const c=calcCps()/10;if(isFinite(c)&&c>0){state.poops+=c;state.totalPoopsEarned+=c;}updateDisplay();checkAchievements();checkInfinityOverflow();},100);
+function toggleAutoPrestige(){
+  state.autoPrestige=!state.autoPrestige;
+  const btn=document.getElementById('autoPrestigeBtn');
+  const lbl=document.getElementById('autoPrestigeLabel');
+  if(state.autoPrestige){
+    btn.style.background='linear-gradient(135deg,#2a6a2a,#3a9a3a)';
+    btn.style.borderColor='#6adc6a';
+    btn.style.color='#ccffcc';
+    btn.textContent='🔁 Auto-Prestige: ON';
+    lbl.textContent='Will prestige automatically when ready.';
+  }else{
+    btn.style.background='linear-gradient(135deg,#1a3a1a,#2a5a2a)';
+    btn.style.borderColor='#4a8a4a';
+    btn.style.color='#aaffaa';
+    btn.textContent='🔁 Auto-Prestige: OFF';
+    lbl.textContent='';
+  }
+  saveGame(true);
+}
+
+setInterval(()=>{
+  const c=calcCps()/10;
+  if(isFinite(c)&&c>0){state.poops+=c;state.totalPoopsEarned+=c;}
+  updateDisplay();
+  checkAchievements();
+  checkInfinityOverflow();
+  if(state.autoPrestige&&prestigeGain()&&!window.gameLocked){
+    doPrestige();
+  }
+},100);
 setInterval(()=>{renderBuildings();renderUpgrades();const at=document.querySelector('.tab.active');if(at){if(at.dataset.tab==='statsTab'&&!document.getElementById('usernameInput'))renderStats();if(at.dataset.tab==='achievements')renderAchievements();if(at.dataset.tab==='leaderboardTab')lbApplyFilter();}},1000);
 setInterval(async()=>{
   const ann=await fbGet('/announcement');
